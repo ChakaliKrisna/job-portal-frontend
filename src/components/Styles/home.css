@@ -1,74 +1,67 @@
-/* src/components/Styles/home.css */
 :root {
-  --primary: #2563eb;
-  --primary-dark: #1d4ed8;
-  --dark-bg: #0f172a;
-  --light-bg: #f8fafc;
-  --border-color: #f1f5f9;
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --glass: rgba(255, 255, 255, 0.05);
+  /* Green Palette */
+  --primary: #10b981;        /* Emerald 500 */
+  --primary-dark: #059669;   /* Emerald 600 */
+  --primary-light: #d1fae5;  /* Mint Green 100 */
+  --bg-subtle: #f0fdf4;      /* Very Light Green wash */
+  
+  --dark-bg: #064e3b;        /* Deep Forest (for contrast) */
+  --text-main: #065f46;      /* Deep Teal-Green text */
+  --text-muted: #6b7280;
+  --border-color: #e5e7eb;
 }
 
 .home-wrapper {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  background-color: #ffffff;
   color: var(--text-main);
-  background: #ffffff;
 }
 
-/* Smooth Scrolling Sections */
-.section-container {
-  padding: 100px 5%;
-  max-width: 1300px;
-  margin: 0 auto;
+/* Scroll Progress in Green */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 4px;
+  background: linear-gradient(to right, var(--primary), #34d399);
+  z-index: 9999;
 }
 
-/* Elegant Listings Background */
+/* Elegant Section Background */
 .listings-bg {
-  background: linear-gradient(to bottom, #ffffff, var(--light-bg), #ffffff);
-  padding: 120px 0;
-  position: relative;
+  /* Sublte green gradient transition */
+  background: linear-gradient(to bottom, #ffffff, var(--bg-subtle), #ffffff);
+  padding: 100px 0;
 }
 
-.listings-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 120px; /* Distinct separation */
-}
-
-/* Modern Glassy Newsletter Section */
+/* Modern Green Newsletter Section */
 .newsletter-section {
   background-color: var(--dark-bg);
+  /* Added organic green glow shapes */
   background-image: 
-    radial-gradient(circle at 10% 20%, rgba(37, 99, 235, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(37, 99, 235, 0.1) 0%, transparent 40%);
-  padding: 100px 24px;
-  position: relative;
-  overflow: hidden;
+    radial-gradient(circle at 0% 0%, rgba(16, 185, 129, 0.2) 0%, transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(52, 211, 153, 0.1) 0%, transparent 50%);
+  padding: 80px 24px;
   margin: 40px 5%;
-  border-radius: 32px; /* Curved container look */
+  border-radius: 40px;
+  text-align: center;
+  color: #ffffff;
 }
 
 .newsletter-title {
-  font-size: 2.75rem;
-  font-weight: 850;
-  letter-spacing: -0.04em;
-  line-height: 1.1;
-  margin-bottom: 1.5rem;
+  font-size: 2.5rem;
+  font-weight: 800;
   color: #ffffff;
 }
 
 .newsletter-form {
   display: flex;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.1);
   padding: 8px;
-  border-radius: 20px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  max-width: 550px;
-  margin: 2rem auto 0;
+  border-radius: 24px;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  max-width: 500px;
+  margin: 2.5rem auto 0;
 }
 
 .newsletter-input {
@@ -77,36 +70,36 @@
   padding: 12px 20px;
   color: white;
   flex: 1;
-  font-size: 1rem;
-}
-
-.newsletter-input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
 }
 
 .newsletter-btn {
   background: var(--primary);
   color: white;
-  border: none;
-  padding: 14px 28px;
-  border-radius: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  padding: 12px 28px;
+  border-radius: 18px;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
 }
 
 .newsletter-btn:hover {
-  background: white;
+  background: #ffffff;
   color: var(--dark-bg);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
-/* New Loader Styles */
+/* Badge for "Light Green" accents */
+.badge {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  padding: 6px 16px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+/* Loader */
 .spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--border-color);
-  border-top: 3px solid var(--primary);
-  border-radius: 50%;
-  animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  border-top-color: var(--primary) !important;
 }
