@@ -1,0 +1,66 @@
+.company-carousel {
+  padding: 3rem 2rem;
+  background: #f9fafb;
+}
+
+.company-carousel h3 {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: #4f46e5; /* Indigo accent */
+}
+
+.company-card {
+  background: #ffffff;
+  padding: 2rem 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.company-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+}
+
+.company-logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  margin-bottom: 1rem;
+}
+
+.company-card h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #1f2937; /* dark gray */
+}
+
+.company-card p {
+  font-size: 0.95rem;
+  color: #6b7280; /* muted gray */
+}
+
+.explore-btn-container {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.explore-btn {
+  background: #9333ea; /* purple accent */
+  color: #ffffff;
+  border: none;
+  padding: 0.8rem 1.6rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.explore-btn:hover {
+  background: #7e22ce; /* darker purple */
+}

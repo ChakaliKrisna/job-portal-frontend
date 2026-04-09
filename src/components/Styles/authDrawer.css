@@ -1,0 +1,115 @@
+/* authDrawer.css */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  visibility: hidden;
+  transition: 0.4s;
+  z-index: 2000;
+}
+.drawer-overlay.show { opacity: 1; visibility: visible; }
+
+.auth-drawer {
+  position: fixed;
+  top: 0; right: -450px;
+  width: 400px; height: 100vh;
+  background: #ffffff;
+  z-index: 2001;
+  padding: 40px;
+  box-shadow: -10px 0 50px rgba(0,0,0,0.1);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-drawer.open { transform: translateX(-450px); }
+
+.close-btn {
+  align-self: flex-end;
+  background: #f1f5f9;
+  border: none;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.drawer-header h2 { font-size: 2rem; color: #0f172a; margin-bottom: 10px; }
+.drawer-header p { color: #64748b; margin-bottom: 40px; }
+
+.input-box {
+  display: flex;
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0 15px;
+  margin-bottom: 20px;
+  transition: 0.3s;
+}
+
+.input-box:focus-within { border-color: #10b981; background: #fff; }
+
+.input-icon { color: #94a3b8; }
+
+.input-box input {
+  width: 100%; border: none; outline: none;
+  background: transparent; padding: 15px;
+  font-family: inherit; font-weight: 500;
+}
+
+.submit-btn {
+  width: 100%;
+  background: #0f172a;
+  color: white;
+  border: none;
+  padding: 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.submit-btn:hover { background: #10b981; }
+
+.drawer-footer { margin-top: auto; text-align: center; }
+.drawer-footer span { 
+  color: #10b981; font-weight: 700; cursor: pointer; text-decoration: underline;
+}
+/* Alerts */
+.auth-alert {
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+}
+.auth-alert.success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.auth-alert.error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+/* Dropdown */
+.role-select {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 15px;
+  outline: none;
+  font-family: inherit;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+}
+
+/* Loading state */
+.submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  background: #64748b;
+}

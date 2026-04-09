@@ -1,0 +1,112 @@
+/* src/components/Styles/home.css */
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --dark-bg: #0f172a;
+  --light-bg: #f8fafc;
+  --border-color: #f1f5f9;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --glass: rgba(255, 255, 255, 0.05);
+}
+
+.home-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  color: var(--text-main);
+  background: #ffffff;
+}
+
+/* Smooth Scrolling Sections */
+.section-container {
+  padding: 100px 5%;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+/* Elegant Listings Background */
+.listings-bg {
+  background: linear-gradient(to bottom, #ffffff, var(--light-bg), #ffffff);
+  padding: 120px 0;
+  position: relative;
+}
+
+.listings-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 120px; /* Distinct separation */
+}
+
+/* Modern Glassy Newsletter Section */
+.newsletter-section {
+  background-color: var(--dark-bg);
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(37, 99, 235, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(37, 99, 235, 0.1) 0%, transparent 40%);
+  padding: 100px 24px;
+  position: relative;
+  overflow: hidden;
+  margin: 40px 5%;
+  border-radius: 32px; /* Curved container look */
+}
+
+.newsletter-title {
+  font-size: 2.75rem;
+  font-weight: 850;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  color: #ffffff;
+}
+
+.newsletter-form {
+  display: flex;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 8px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 550px;
+  margin: 2rem auto 0;
+}
+
+.newsletter-input {
+  background: transparent;
+  border: none;
+  padding: 12px 20px;
+  color: white;
+  flex: 1;
+  font-size: 1rem;
+}
+
+.newsletter-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.newsletter-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.newsletter-btn:hover {
+  background: white;
+  color: var(--dark-bg);
+  transform: translateY(-1px);
+}
+
+/* New Loader Styles */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-color);
+  border-top: 3px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}

@@ -1,0 +1,221 @@
+/* src/components/Styles/internship.css */
+
+:root {
+  --card-bg: #ffffff;
+  --accent: #2563eb;
+  --accent-soft: rgba(37, 99, 235, 0.08);
+  --text-dark: #0f172a;
+  --text-gray: #64748b;
+  --success: #10b981;
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+  --shadow-md: 0 12px 24px -8px rgba(0,0,0,0.08);
+  --shadow-lg: 0 20px 40px -12px rgba(0,0,0,0.12);
+}
+
+.internship-section {
+  padding: 40px 0;
+}
+
+/* --- Header & View All Link --- */
+.carousel-header-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 32px;
+}
+
+.carousel-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  letter-spacing: -0.02em;
+}
+
+.view-all-link {
+  display: flex;
+  align-items: center;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.95rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.view-all-link:hover {
+  transform: translateX(5px);
+  color: var(--accent-dark);
+}
+
+/* --- Premium Card Styling --- */
+.intern-card-premium {
+  background: var(--card-bg);
+  border: 1px solid #f1f5f9;
+  border-radius: 24px;
+  padding: 28px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.intern-card-premium:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--accent-soft);
+}
+
+/* Top Section: Icon & Title */
+.intern-card-main {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.intern-icon-box {
+  width: 54px;
+  height: 54px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.intern-text h4 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+
+.intern-company {
+  font-size: 0.9rem;
+  color: var(--text-gray);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Middle Section: Meta Info */
+.intern-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #f8fafc;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--text-gray);
+  font-weight: 500;
+}
+
+.meta-icon {
+  margin-right: 8px;
+  color: #94a3b8;
+}
+
+/* Dynamic Stipend Badges */
+.stipend-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  width: fit-content;
+}
+
+.stipend-tag.paid {
+  background: #ecfdf5;
+  color: var(--success);
+}
+
+.stipend-tag.unpaid {
+  background: #f1f5f9;
+  color: var(--text-gray);
+}
+
+/* Bottom Section: Apply Button */
+.intern-apply-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  background: var(--text-dark);
+  color: white;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.intern-apply-btn:hover {
+  background: var(--accent);
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.2);
+}
+
+/* --- Empty Search State --- */
+.empty-filter-state {
+  background: #f8fafc;
+  border: 2px dashed #e2e8f0;
+  border-radius: 32px;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.clear-filters-btn {
+  margin-top: 16px;
+  padding: 10px 24px;
+  border-radius: 12px;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clear-filters-btn:hover {
+  background: var(--accent);
+  color: white;
+}
+
+/* --- Swiper Customization --- */
+.internship-swiper {
+  padding: 20px 4px 60px 4px !important; /* Space for card pop-up effect */
+  overflow: visible !important;
+}
+
+.swiper-pagination-bullet {
+  background: #cbd5e1 !important;
+  opacity: 1 !important;
+}
+
+.swiper-pagination-bullet-active {
+  background: var(--text-dark) !important;
+  width: 25px !important;
+  border-radius: 10px !important;
+}
+
+@media (max-width: 768px) {
+  .carousel-header-wrapper {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+}

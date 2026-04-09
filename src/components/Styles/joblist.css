@@ -1,0 +1,287 @@
+/* joblist.css */
+
+.carousel-section {
+  padding: 80px 0;
+  background: transparent;
+}
+
+.carousel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 40px;
+}
+
+.display-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -1px;
+}
+
+.text-btn {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+/* Premium Job Card */
+.premium-job-card {
+  background: white;
+  border-radius: 24px;
+  padding: 28px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04);
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.premium-job-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px -12px rgba(37, 99, 235, 0.1);
+  border-color: #2563eb;
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.card-logo {
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+  background: #f8fafc;
+  padding: 10px;
+  border-radius: 16px;
+}
+
+.badge-type {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  background: #eff6ff;
+  color: #2563eb;
+  border-radius: 100px;
+  text-transform: uppercase;
+}
+
+.job-role {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 4px 0;
+}
+
+.job-brand {
+  color: #64748b;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.job-meta-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.meta-tag {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: #475569;
+  font-weight: 500;
+}
+
+.meta-tag svg {
+  color: #94a3b8;
+}
+
+/* Glass Button Style */
+.btn-glass-action {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #0f172a;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: auto;
+}
+
+.btn-glass-action:hover {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+/* Swiper Dots Overwrite */
+.swiper-pagination-bullet-active {
+  background: #2563eb !important;
+  width: 20px !important;
+  border-radius: 5px !important;
+}/* Container for the Vertical View */
+.jobs-master-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Fill entire screen */
+  width: 100%;
+  overflow: hidden; /* Prevent double scrollbars */
+  background: #f4f7f6;
+}
+
+/* The Side-by-Side Grid */
+.jobs-layout-grid {
+  display: flex;
+  flex: 1; 
+  overflow: hidden; /* Critical for independent scrolling */
+}
+
+/* Left Sidebar (List) */
+.jobs-vertical-list {
+  width: 380px;
+  background: white;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+}
+
+.scrollable-cards {
+  flex: 1;
+  overflow-y: auto; /* Scroll only the list */
+  padding: 15px;
+}
+
+/* Right Detail Section */
+.job-side-detail {
+  flex: 1;
+  background: #fff;
+  overflow-y: auto; /* Scroll only the description */
+  padding: 40px;
+}
+
+/* Mini Card Styling for Vertical List */
+.mini-job-card {
+  display: flex;
+  gap: 15px;
+  padding: 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  border: 1px solid transparent;
+  transition: 0.3s;
+}
+
+.mini-job-card:hover { background: #f0f7ff; }
+.mini-job-card.active { 
+  background: #eef6ff; 
+  border-color: #007bff; 
+}
+
+.mini-logo { width: 45px; height: 45px; object-fit: contain; }
+
+/* Modal Styling */
+.modal-overlay {
+  position: fixed;
+  top:0; left:0; width:100%; height:100%;
+  background: rgba(0,0,0,0.6);
+  display:flex; justify-content: center; align-items: center;
+  z-index: 1000;
+}
+.modal-content { background: white; padding: 30px; border-radius: 15px; width: 400px; }
+/* Container & Split Layout */
+.jobs-master-container {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Stops whole page scroll */
+  background: #f8f9fa;
+}
+
+.jobs-layout-grid {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Sidebar List */
+.jobs-vertical-list {
+  width: 350px;
+  background: white;
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+}
+
+.scrollable-cards {
+  flex: 1;
+  overflow-y: auto; /* List scrolls independently */
+  padding: 15px;
+}
+
+/* Detail Panel */
+.job-side-detail {
+  flex: 1;
+  background: white;
+  overflow-y: auto; /* Description scrolls independently */
+  padding: 40px;
+}
+
+/* Card Styling */
+.mini-job-card {
+  display: flex;
+  gap: 12px;
+  padding: 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  border: 1px solid transparent;
+  transition: 0.2s;
+}
+
+.mini-job-card:hover { background: #f0f7ff; }
+.mini-job-card.active { 
+  background: #eef6ff; 
+  border-color: #007bff; 
+}
+
+.mini-logo { width: 40px; height: 40px; object-fit: contain; }
+
+/* Detail Content */
+.detail-header { display: flex; gap: 20px; align-items: center; margin-bottom: 20px; }
+.detail-logo { width: 70px; height: 70px; object-fit: contain; }
+.company-blue { color: #007bff; font-weight: bold; font-size: 1.1rem; }
+
+.quick-stats-row { display: flex; gap: 15px; margin-bottom: 30px; }
+.stat-pill { background: #f1f3f5; padding: 8px 15px; border-radius: 20px; font-size: 0.9rem; color: #666; }
+
+.main-apply-btn {
+  margin-top: 30px;
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Carousel View Styles */
+.carousel-section { padding: 50px 0; }
+.premium-job-card { text-align: center; padding: 20px; border: 1px solid #ddd; border-radius: 12px; }
