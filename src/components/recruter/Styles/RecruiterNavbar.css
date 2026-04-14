@@ -1,0 +1,354 @@
+/* Import a professional font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --nav-bg: #0f172a; /* Deep Navy/Slate */
+  --active-blue: #3b82f6;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --hover-bg: #1e293b;
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+.recruiter-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--nav-bg);
+  padding: 0 2rem;
+  height: 70px;
+  font-family: 'Inter', sans-serif;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+/* Logo Styling */
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.nav-logo:hover {
+  transform: scale(1.02);
+}
+
+.logo-icon {
+  font-size: 1.8rem;
+  color: var(--active-blue);
+}
+
+.nav-logo span {
+  font-weight: 700;
+  font-size: 1.3rem;
+  letter-spacing: -0.5px;
+  color: var(--text-main);
+}
+
+.nav-logo span span {
+  color: var(--active-blue);
+  font-size: 0.9rem;
+  margin-left: 4px;
+  background: rgba(59, 130, 246, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* Navigation Links */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 100%;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: 8px 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s ease-in-out;
+}
+
+.nav-links a svg {
+  font-size: 1.1rem;
+}
+
+.nav-links a:hover {
+  color: var(--text-main);
+  background: var(--hover-bg);
+}
+
+/* Active State */
+.active-link {
+  color: var(--active-blue) !important;
+  background: rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Right Side Actions */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.icon-badge-link {
+  color: var(--text-muted);
+  transition: 0.2s;
+}
+
+.icon-badge-link:hover {
+  color: var(--active-blue);
+}
+
+.icon-badge {
+  position: relative;
+  font-size: 1.3rem;
+}
+
+.badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: #ef4444; /* Vibrant Red */
+  color: white;
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  border-radius: 20px;
+  border: 2px solid var(--nav-bg);
+  font-weight: 700;
+}
+
+/* Profile Section */
+.profile-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 14px;
+  background: var(--hover-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 50px;
+  cursor: pointer;
+  position: relative;
+  transition: 0.3s;
+}
+
+.profile-section:hover {
+  border-color: var(--active-blue);
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+}
+
+.user-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.arrow {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  transition: transform 0.3s;
+}
+
+.rotate { transform: rotate(180deg); }
+
+/* Profile Dropdown */
+.profile-dropdown {
+  position: absolute;
+  top: 55px;
+  right: 0;
+  background: #1e293b;
+  width: 220px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--glass-border);
+  padding: 8px 0;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.profile-dropdown a, .logout-btn {
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: 0.2s;
+  background: transparent;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+}
+
+.profile-dropdown a:hover, .logout-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+}
+
+.logout-btn {
+  color: #f87171 !important; /* Soft Red */
+  font-weight: 600;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--glass-border);
+  margin: 8px 0;
+}
+/* Container for the Profile Area */
+.profile-section {
+  position: relative; /* CRITICAL: This allows the dropdown to anchor to this div */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 14px;
+  background: #1e293b; /* Matches dark theme */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.profile-section:hover {
+  background: #2d3748;
+  border-color: #3b82f6;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.user-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #f8fafc;
+}
+
+.arrow {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  transition: transform 0.3s ease;
+}
+
+.rotate {
+  transform: rotate(180deg);
+}
+
+/* THE DROPDOWN MENU */
+.profile-dropdown {
+  position: absolute;
+  top: 50px; /* Distance from the top bar */
+  right: 0;
+  width: 220px;
+  background: #ffffff; /* White background for clean contrast */
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  padding: 8px 0;
+  z-index: 9999; /* Ensures it's on top of dashboard content */
+  display: flex;
+  flex-direction: column;
+  animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-header {
+  padding: 10px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-header strong {
+  font-size: 0.9rem;
+  color: #1a202c;
+}
+
+.dropdown-header span {
+  font-size: 0.75rem;
+  color: #718096;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid #edf2f7;
+  margin: 8px 0;
+}
+
+/* Dropdown Links */
+.profile-dropdown a, 
+.profile-dropdown .logout-btn {
+  padding: 12px 20px;
+  text-decoration: none;
+  color: #4a5568;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: 0.2s;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.profile-dropdown a:hover {
+  background: #f7fafc;
+  color: #3b82f6;
+}
+
+.profile-dropdown a svg {
+  font-size: 1rem;
+}
+
+/* Logout Button Specifics */
+.logout-btn {
+  color: #e53e3e !important;
+  font-weight: 600;
+}
+
+.logout-btn:hover {
+  background: #fff5f5 !important;
+}

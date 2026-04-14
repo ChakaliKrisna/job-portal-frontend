@@ -68,7 +68,7 @@
 
 .menu-item {
   text-decoration: none;
-  color: var(--text-main);
+  color:green;
   font-weight: 500;
   padding: 10px 15px;
   border-radius: 6px;

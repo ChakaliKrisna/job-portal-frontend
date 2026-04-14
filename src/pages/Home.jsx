@@ -1,7 +1,4 @@
 import React, { Suspense, lazy, useState, useEffect } from "react";
-import Navbar from "../components/Navbar";
-import Hero from "../components/Hero";
-import Footer from "../components/Footer";
 import "../components/Styles/home.css";
 
 // Lazy loading components
@@ -12,6 +9,7 @@ const CategoryGrid = lazy(() => import("../components/Category"));
 const Stats = lazy(() => import("../components/Stats"));
 const Testimonials = lazy(() => import("../components/Testimonials"));
 const About = lazy(() => import("../components/About"));
+const Hero = lazy(() => import("../components/Hero"));
 
 const SectionLoader = () => (
   <div className="section-loader" style={{ textAlign: "center", padding: "2rem" }}>
@@ -21,39 +19,40 @@ const SectionLoader = () => (
 );
 
 const Home = ({ jobs = [], internships = [] }) => {
-  // Console logs to verify data arrival in the browser
-  console.log("Home received Jobs:", jobs.length);
-  console.log("Home received Internships:", internships.length);
-
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [role, setRole] = useState(null);
 
   useEffect(() => {
-    setIsLoggedIn(!!localStorage.getItem("token"));
+    setRole(localStorage.getItem("role"));
   }, []);
 
-  // Filter trending jobs (Full Time)
+  // Filter trending jobs
   const trendingJobs = jobs.filter(j => j.type === "Full Time");
 
   return (
     <div className="home-wrapper">
-      <Navbar />
       <main className="home-main">
-        <Hero />
+        {/* If Recruiter is logged in, show a Welcome back banner instead of Hero */}
+        {role === "recruiter" ? (
+          <div style={styles.recruiterWelcome}>
+            <h1>Welcome back, Recruiter</h1>
+            <p>You are currently viewing the platform as a guest. Visit your dashboard to manage listings.</p>
+            <button onClick={() => window.location.href='/recruiter-dashboard'} style={styles.btn}>
+              Go to Recruiter Dashboard
+            </button>
+          </div>
+        ) : (
+          <Suspense fallback={<SectionLoader />}><Hero /></Suspense>
+        )}
 
         <Suspense fallback={<SectionLoader />}>
-          {/* Categories */}
           <section className="section-container">
             <CategoryGrid />
           </section>
 
-          {/* Combined Listings Section */}
           <section className="listings-bg">
             <div className="container-inner">
               <div className="listings-stack">
-                {/* 1. Job Carousel */}
                 <JobCarousel data={trendingJobs} title="Trending Jobs" />
-                
-                {/* 2. Internship Carousel - CRITICAL: Passing 'internships' prop here */}
                 <InternshipCarousel data={internships} title="Latest Internships" />
               </div>
             </div>
@@ -67,7 +66,6 @@ const Home = ({ jobs = [], internships = [] }) => {
                 <button type="submit" className="newsletter-btn">Get Alerts</button>
               </form>
             </div>
-            <div className="decorative-circle"></div>
           </section>
 
           <section className="section-container">
@@ -86,9 +84,29 @@ const Home = ({ jobs = [], internships = [] }) => {
           </section>
         </Suspense>
       </main>
-      <Footer />
     </div>
   );
+};
+
+const styles = {
+  recruiterWelcome: {
+    padding: "4rem 2rem",
+    textAlign: "center",
+    backgroundColor: "#2c3e50",
+    color: "white",
+    borderRadius: "10px",
+    margin: "20px"
+  },
+  btn: {
+    padding: "10px 20px",
+    backgroundColor: "#3498db",
+    color: "white",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    marginTop: "15px",
+    fontWeight: "bold"
+  }
 };
 
 export default Home;

@@ -1,18 +1,24 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { FaMapMarkerAlt, FaWallet, FaRegClock, FaCheckCircle, FaTimes, FaCloudUploadAlt, FaBriefcase } from "react-icons/fa";
-import "../components/Styles/jobDetails.css"; // Ensure you add the CSS below
+import React, { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { FaMapMarkerAlt, FaWallet, FaRegClock, FaArrowLeft, FaCheckCircle, FaTimes, FaCloudUploadAlt } from "react-icons/fa";
+import "../components/Styles/jobDetails.css";
 
-export default function JobsPage({ jobs }) {
+export default function JobDetails({ jobs }) {
+  const { id } = useParams();
   const navigate = useNavigate();
   
-  // State for the "Side View" selection
-  const [selectedJob, setSelectedJob] = useState(jobs[0]);
-  
-  // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [appliedJobs, setAppliedJobs] = useState([]); // Track which IDs are applied
+  const [applied, setApplied] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const job = jobs.find((j) => j.id.toString() === id);
+
+  if (!job) return (
+    <div className="error-container">
+      <h2>Job Not Found</h2>
+      <button onClick={() => navigate("/jobs")} className="back-link">Back to all jobs</button>
+    </div>
+  );
 
   const handleOpenModal = () => {
     const token = localStorage.getItem("token");
@@ -29,118 +35,104 @@ export default function JobsPage({ jobs }) {
     setTimeout(() => {
       setIsSubmitting(false);
       setIsModalOpen(false);
-      setAppliedJobs([...appliedJobs, selectedJob.id]);
+      setApplied(true);
     }, 1500);
   };
 
   return (
-    <div className="jobs-master-container">
-      {/* 1. APPLY MODAL */}
+    <div className="job-details-page">
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h3>Apply for {selectedJob.company}</h3>
-              <button onClick={() => setIsModalOpen(false)} className="close-btn"><FaTimes /></button>
+              <h3>Apply for {job.company}</h3>
+              <button onClick={() => setIsModalOpen(false)} className="close-btn">
+                <FaTimes />
+              </button>
             </div>
+
             <form onSubmit={submitApplication} className="modal-form">
               <div className="form-group">
                 <label>Contact Number</label>
                 <input required type="tel" placeholder="+91 00000-00000" />
               </div>
+
               <div className="form-group">
                 <label>Resume / CV</label>
                 <div className="upload-zone">
                   <FaCloudUploadAlt className="upload-icon" />
-                  <p>Click to upload Resume</p>
-                  <input type="file" className="file-input" accept=".pdf,.doc" required />
+                  <p className="upload-text">Click to upload or drag and drop</p>
+                  <p className="upload-hint">PDF, DOC (Max 5MB)</p>
+                  <input type="file" className="file-input" accept=".pdf,.doc,.docx" />
                 </div>
               </div>
-              <button type="submit" disabled={isSubmitting} className="btn-confirm-apply">
-                {isSubmitting ? "Submitting..." : "Confirm Application"}
+
+              <button type="submit" disabled={isSubmitting} className="btn-primary large">
+                {isSubmitting ? <span className="spinner"></span> : "Confirm Application"}
               </button>
             </form>
           </div>
         </div>
       )}
 
-      {/* 2. MAIN LAYOUT */}
-      <div className="jobs-layout-grid">
-        
-        {/* LEFT COLUMN: VERTICAL LIST */}
-        <aside className="jobs-vertical-list">
-          <div className="list-header">
-            <h3>Available Jobs ({jobs.length})</h3>
-          </div>
-          <div className="scrollable-cards">
-            {jobs.map((job) => (
-              <div 
-                key={job.id} 
-                className={`mini-job-card ${selectedJob?.id === job.id ? "active" : ""}`}
-                onClick={() => setSelectedJob(job)}
-              >
-                <img src={job.logo} alt="logo" className="mini-logo" />
-                <div className="mini-info">
-                  <h4>{job.title}</h4>
-                  <p>{job.company}</p>
-                  <div className="mini-meta">
-                    <span><FaMapMarkerAlt /> {job.location}</span>
-                  </div>
-                </div>
+      <nav className="job-nav">
+        <div className="container">
+          <button onClick={() => navigate(-1)} className="btn-back">
+            <FaArrowLeft /> Back to Listings
+          </button>
+        </div>
+      </nav>
+
+      <main className="container job-grid">
+        <div className="job-main-content">
+          <section className="bento-card main-info">
+            <div className="job-header">
+              <div className="title-area">
+                <h1>{job.title}</h1>
+                <p className="company-name">{job.company}</p>
               </div>
-            ))}
+              <img src={job.logo} alt="logo" className="company-logo" />
+            </div>
+
+            <div className="meta-stats">
+               <div className="stat-item">
+                 <span className="stat-label">Location</span>
+                 <span className="stat-value"><FaMapMarkerAlt /> {job.location}</span>
+               </div>
+               <div className="stat-item">
+                 <span className="stat-label">Salary</span>
+                 <span className="stat-value"><FaWallet /> {job.salary}</span>
+               </div>
+               <div className="stat-item">
+                 <span className="stat-label">Posted</span>
+                 <span className="stat-value"><FaRegClock /> {job.posted}</span>
+               </div>
+            </div>
+
+            <div className="job-description">
+              <h3>About the Role</h3>
+              <p>{job.description}</p>
+            </div>
+          </section>
+        </div>
+
+        <aside className="job-sidebar">
+          <div className="bento-card sticky-sidebar">
+            <h3>Application Summary</h3>
+            {!applied ? (
+              <button onClick={handleOpenModal} className="btn-primary full-width">
+                Apply Now
+              </button>
+            ) : (
+              <div className="success-badge">
+                <FaCheckCircle />
+                <span>Application Sent!</span>
+              </div>
+            )}
+            <p className="secure-footer">Verified by Hunter Secure</p>
           </div>
         </aside>
-
-        {/* RIGHT COLUMN: SIDE VIEW DESCRIPTION */}
-        <main className="job-side-detail">
-          {selectedJob ? (
-            <div className="detail-wrapper">
-              <div className="detail-header-main">
-                <div className="header-info">
-                  <img src={selectedJob.logo} alt="logo" />
-                  <div>
-                    <h1>{selectedJob.title}</h1>
-                    <p className="company-text">{selectedJob.company}</p>
-                  </div>
-                </div>
-                
-                <div className="action-area">
-                  {appliedJobs.includes(selectedJob.id) ? (
-                    <div className="success-badge-inline">
-                      <FaCheckCircle /> Applied
-                    </div>
-                  ) : (
-                    <button onClick={handleOpenModal} className="btn-apply-primary">
-                      Apply Now
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <div className="quick-stats">
-                <div className="q-stat"><FaWallet /> <span>{selectedJob.salary}</span></div>
-                <div className="q-stat"><FaBriefcase /> <span>{selectedJob.type}</span></div>
-                <div className="q-stat"><FaRegClock /> <span>{selectedJob.posted}</span></div>
-              </div>
-
-              <div className="description-scroll">
-                <h3>About the job</h3>
-                <p>{selectedJob.description || "No description provided for this role."}</p>
-                
-                <h3>Key Responsibilities</h3>
-                <ul>
-                  <li>Collaborate with the engineering team to build scalable products.</li>
-                  <li>Maintain high standards of code quality and documentation.</li>
-                  <li>Identify and resolve performance bottlenecks.</li>
-                </ul>
-              </div>
-            </div>
-          ) : (
-            <div className="empty-state">Select a job to view details</div>
-          )}
-        </main>
-      </div>
+      </main>
     </div>
   );
 }

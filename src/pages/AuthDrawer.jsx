@@ -1,23 +1,32 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FaTimes, FaEnvelope, FaLock, FaUser, FaArrowRight, FaBriefcase } from "react-icons/fa";
-import "../components/Styles/authDrawer.css";
+import { FaTimes, FaEnvelope, FaLock, FaUser, FaBriefcase, FaBuilding } from "react-icons/fa";
+import "./Styles/authDrawer.css";
 
 const AuthDrawer = ({ isOpen, onClose, initialMode }) => {
   const [isLogin, setIsLogin] = useState(initialMode === "login");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
-  
-  const [formData, setFormData] = useState({ 
-    email: "", 
-    password: "", 
-    name: "", 
-    role: "STUDENT" 
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    name: "",
+    role: "STUDENT",
+    companyName: "",
   });
 
   useEffect(() => {
     setIsLogin(initialMode === "login");
     setMessage({ type: "", text: "" });
+    // Reset form when opening/switching
+    setFormData({
+      email: "",
+      password: "",
+      name: "",
+      role: "STUDENT",
+      companyName: "",
+    });
   }, [initialMode, isOpen]);
 
   const handleChange = (e) => {
@@ -29,47 +38,42 @@ const AuthDrawer = ({ isOpen, onClose, initialMode }) => {
     setLoading(true);
     setMessage({ type: "", text: "" });
 
-    // Ensure no trailing slashes or typos in these URLs
-    const url = isLogin 
-      ? "http://localhost:8080/auth/login" 
+    const url = isLogin
+      ? "http://localhost:8080/auth/login"
       : "http://localhost:8080/auth/register";
-    
-    try {
-      // Spring Boot expects a JSON object that matches your DTO/Entity
-      const res = await axios.post(url, formData, {
-        headers: { "Content-Type": "application/json" }
-      });
 
-      console.log("Success Response:", res.data);
+    try {
+      const res = await axios.post(url, formData);
 
       if (isLogin) {
-        // Handle different possible backend response structures
-        const token = res.data.token || res.data.accessToken || res.data.jwt;
-        const name = res.data.name || res.data.username || "Hunter";
+        const { token, accessToken, jwt, role, name, username } = res.data;
+        const authToken = token || accessToken || jwt;
+        const userRole = role || "STUDENT";
+        const displayName = name || username || "User";
 
-        // Inside AuthDrawer's handleSubmit success block:
-if (res.data.token) {
-  localStorage.setItem("token", res.data.token);
-  localStorage.setItem("userName", res.data.name || "Alex");
-  localStorage.setItem("userRole", res.data.role || "STUDENT"); // Save role!
-          setMessage({ type: "success", text: "Login successful!" });
-          
+        if (authToken) {
+          localStorage.setItem("token", authToken);
+          localStorage.setItem("userName", displayName);
+          localStorage.setItem("role", userRole.toLowerCase());
+
+          setMessage({ type: "success", text: "Login successful! Redirecting..." });
+
           setTimeout(() => {
-            window.location.reload(); 
-          }, 500);
-        } else {
-          setMessage({ type: "error", text: "Backend didn't return a token." });
+            window.location.href = userRole.toLowerCase().includes("recruiter") 
+              ? "/recruiter-dashboard" 
+              : "/";
+          }, 1200);
         }
       } else {
-        setMessage({ type: "success", text: "Registered! Switching to login..." });
-        setTimeout(() => setIsLogin(true), 1500);
+        setMessage({ type: "success", text: "Account created! You can now sign in." });
+        setTimeout(() => {
+          setIsLogin(true);
+          setMessage({ type: "", text: "" });
+        }, 2500);
       }
     } catch (err) {
-      // This helps you see the REAL error in the console
-      console.error("Full Error Object:", err);
-      
-      const errorMsg = err.response?.data?.message || err.response?.data || "Server connection failed.";
-      setMessage({ type: "error", text: typeof errorMsg === 'string' ? errorMsg : "Check Backend Console" });
+      const errorMsg = err.response?.data?.message || "Something went wrong. Please try again.";
+      setMessage({ type: "error", text: errorMsg });
     } finally {
       setLoading(false);
     }
@@ -79,48 +83,110 @@ if (res.data.token) {
     <>
       <div className={`drawer-overlay ${isOpen ? "show" : ""}`} onClick={onClose}></div>
       <div className={`auth-drawer ${isOpen ? "open" : ""}`}>
-        <button className="close-btn" onClick={onClose}><FaTimes /></button>
-        
+        <button className="close-btn" onClick={onClose} aria-label="Close">
+          <FaTimes />
+        </button>
+
         <div className="drawer-header">
           <h2>{isLogin ? "Welcome Back" : "Join Hunter"}</h2>
-          <p>{isLogin ? "Sign in to your account." : "Start your journey today."}</p>
+          <p>{isLogin ? "Sign in to your account" : "Create an account to get started"}</p>
         </div>
 
         {message.text && (
-          <div className={`auth-alert ${message.type}`}>{message.text}</div>
+          <div className={`auth-alert ${message.type}`}>
+            {message.text}
+          </div>
         )}
 
         <form onSubmit={handleSubmit} className="auth-form">
           {!isLogin && (
             <>
-              <div className="input-box">
-                <FaUser className="input-icon" />
-                <input name="name" placeholder="Full Name" onChange={handleChange} required />
+              <div className="input-group">
+                <div className="input-box">
+                  <FaUser className="input-icon" />
+                  <input
+                    name="name"
+                    type="text"
+                    placeholder="Full Name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    minLength="2"
+                  />
+                </div>
               </div>
-              <div className="input-box">
-                <FaBriefcase className="input-icon" />
-                <select name="role" onChange={handleChange} className="role-select">
-                  <option value="STUDENT">STUDENT</option>
-                  <option value="RECRUITER">RECRUITER</option>
-                </select>
+
+              <div className="input-group">
+                <div className="input-box">
+                  <FaBriefcase className="input-icon" />
+                  <select name="role" onChange={handleChange} value={formData.role} className="role-select">
+                    <option value="STUDENT">I am a Student / Seeker</option>
+                    <option value="RECRUITER">I am a Recruiter</option>
+                  </select>
+                </div>
               </div>
+
+              {formData.role === "RECRUITER" && (
+                <div className="input-group animated-field">
+                  <div className="input-box">
+                    <FaBuilding className="input-icon" />
+                    <input
+                      name="companyName"
+                      type="text"
+                      placeholder="Company Name"
+                      value={formData.companyName}
+                      onChange={handleChange}
+                      required
+                      minLength="2"
+                    />
+                  </div>
+                </div>
+              )}
             </>
           )}
-          
-          <div className="input-box">
-            <FaEnvelope className="input-icon" />
-            <input name="email" type="email" placeholder="Email" onChange={handleChange} required />
+
+          <div className="input-group">
+            <div className="input-box">
+              <FaEnvelope className="input-icon" />
+              <input
+                name="email"
+                type="email"
+                placeholder="Email Address"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
           </div>
 
-          <div className="input-box">
-            <FaLock className="input-icon" />
-            <input name="password" type="password" placeholder="Password" onChange={handleChange} required />
+          <div className="input-group">
+            <div className="input-box">
+              <FaLock className="input-icon" />
+              <input
+                name="password"
+                type="password"
+                placeholder="Password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                minLength="6"
+              />
+            </div>
           </div>
 
           <button type="submit" className="submit-btn" disabled={loading}>
-            {loading ? "Please wait..." : (isLogin ? "Sign In" : "Create Account")}
+            {loading ? <span className="loader"></span> : (isLogin ? "Sign In" : "Create Account")}
           </button>
         </form>
+
+        <div className="drawer-footer">
+          <p>
+            {isLogin ? "Don't have an account?" : "Already have an account?"}
+            <button className="toggle-auth" onClick={() => setIsLogin(!isLogin)}>
+              {isLogin ? "Register Now" : "Login here"}
+            </button>
+          </p>
+        </div>
       </div>
     </>
   );
