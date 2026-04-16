@@ -1,78 +1,118 @@
 import React, { useState, useEffect } from "react";
-import { 
-  FaMapMarkerAlt, FaWallet, FaRegClock, FaCheckCircle, 
-  FaTimes, FaCloudUploadAlt, FaShieldAlt 
+import axios from "axios";
+import {
+  FaMapMarkerAlt,
+  FaWallet,
+  FaRegClock,
+  FaCheckCircle,
+  FaTimes,
+  FaCloudUploadAlt,
+  FaShieldAlt,
 } from "react-icons/fa";
-import "./Styles/joblist.css";
-import "../components/Styles/jobDetails.css"; // Reuse your existing detail styles
 
-const jobs = [
-  { id: 1, title: "Frontend Developer", company: "Google", location: "Hyderabad", salary: "₹12-18 LPA", type: "Full Time", posted: "2 days ago", logo: "https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_Reference_icon.png", description: "Join Google's UI team to build next-gen interfaces using React and TypeScript. You will work on global scale products." },
-  { id: 2, title: "Backend Engineer", company: "Amazon", location: "Bangalore", salary: "₹15-25 LPA", type: "Remote", posted: "Just now", logo: "https://upload.wikimedia.org/wikipedia/commons/d/de/Amazon_icon.png", description: "Scale massive distributed systems and optimize AWS cloud infrastructure. High focus on low-latency systems." },
-  { id: 3, title: "Java Full Stack Intern", company: "Tsar IT", location: "Remote", salary: "₹15k-25k/mo", type: "Internship", posted: "1 day ago", logo: "https://cdn-icons-png.flaticon.com/512/5968/5968282.png", description: "Learn Spring Boot and Angular while working on real-world client projects. Mentorship provided." },
-  { id: 4, title: "Software Engineer", company: "Microsoft", location: "Delhi", salary: "₹20-30 LPA", type: "Full Time", posted: "5 hours ago", logo: "https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg", description: "Develop core Windows features and integrate AI capabilities into the ecosystem." },
-];
+import "./Styles/joblist.css";
+import "./Styles/jobDetails.css";
+
+const JOB_API = "http://localhost:8080/job-portal/jobs";
+const APPLY_API = "http://localhost:8080/job-portal/applications";
 
 const JobBoard = () => {
-  const [selectedJob, setSelectedJob] = useState(jobs[0]);
+  const [jobs, setJobs] = useState([]);
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [appliedJobs, setAppliedJobs] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [appliedJobs, setAppliedJobs] = useState([]); // Track which jobs are applied
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Check if current selected job is already applied
-  const hasApplied = appliedJobs.includes(selectedJob.id);
+  const token = localStorage.getItem("token");
 
+  // ✅ FETCH JOBS
+  useEffect(() => {
+    fetchJobs();
+  }, []);
+
+  const fetchJobs = async () => {
+    try {
+      const res = await axios.get(`${JOB_API}?page=0&size=10`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const jobList = res.data.content;
+
+      setJobs(jobList);
+      if (jobList.length > 0) {
+        setSelectedJob(jobList[0]);
+      }
+    } catch (err) {
+      console.error("Error fetching jobs:", err);
+    }
+  };
+
+  // ✅ APPLY CLICK
   const handleOpenModal = () => {
-    const token = localStorage.getItem("token");
     if (!token) {
-      alert("Please login first to apply!");
+      alert("Please login first!");
       return;
     }
     setIsModalOpen(true);
   };
 
-  const submitApplication = (e) => {
+  // ✅ APPLY API
+  const submitApplication = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate API Call
-    setTimeout(() => {
-      setIsSubmitting(false);
+
+    try {
+      await axios.post(
+        `${APPLY_API}/${selectedJob.publicId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setAppliedJobs((prev) => [...prev, selectedJob.publicId]);
       setIsModalOpen(false);
-      setAppliedJobs([...appliedJobs, selectedJob.id]);
-    }, 1500);
+    } catch (err) {
+      console.error("Application failed:", err);
+      alert("Failed to apply");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  const hasApplied = appliedJobs.includes(selectedJob?.publicId);
 
   return (
     <section className="job-board-section">
-      {/* 1. APPLICATION MODAL */}
+
+      {/* ✅ MODAL */}
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h3>Apply for {selectedJob.company}</h3>
-              <button onClick={() => setIsModalOpen(false)} className="close-btn">
+              <h3>Apply for {selectedJob?.title}</h3>
+              <button onClick={() => setIsModalOpen(false)}>
                 <FaTimes />
               </button>
             </div>
 
-            <form onSubmit={submitApplication} className="modal-form">
+            <form onSubmit={submitApplication}>
               <div className="form-group">
-                <label>Contact Number</label>
-                <input required type="tel" placeholder="+91 00000-00000" />
+                <label>Phone</label>
+                <input type="tel" required />
               </div>
 
               <div className="form-group">
-                <label>Resume / CV</label>
-                <div className="upload-zone">
-                  <FaCloudUploadAlt className="upload-icon" />
-                  <p className="upload-text">Click to upload or drag and drop</p>
-                  <input type="file" className="file-input" accept=".pdf,.doc,.docx" />
-                </div>
+                <label>Resume</label>
+                <input type="file" />
               </div>
 
-              <button type="submit" disabled={isSubmitting} className="btn-primary large">
-                {isSubmitting ? "Submitting..." : "Confirm Application"}
+              <button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Submitting..." : "Apply"}
               </button>
             </form>
           </div>
@@ -80,82 +120,72 @@ const JobBoard = () => {
       )}
 
       <div className="job-board-container">
-        {/* 2. LEFT SIDEBAR (List) */}
+
+        {/* ✅ LEFT SIDE (JOB LIST) */}
         <div className="job-list-sidebar">
-          <div className="sidebar-header">
-            <h2 className="list-title">Trending Jobs</h2>
-          </div>
-          <div className="scroll-area">
-            {jobs.map((job) => (
-              <div 
-                key={job.id} 
-                className={`mini-job-card ${selectedJob.id === job.id ? "active" : ""}`}
-                onClick={() => setSelectedJob(job)}
-              >
-                <img src={job.logo} alt={job.company} className="mini-logo" />
-                <div className="mini-info">
-                  <h4>{job.title}</h4>
-                  <p className={appliedJobs.includes(job.id) ? "status-applied" : ""}>
-                    {job.company} {appliedJobs.includes(job.id) && "• Applied"}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <h2>Jobs</h2>
+
+          {jobs.map((job) => (
+            <div
+              key={job.publicId}
+              className={`mini-job-card ${
+                selectedJob?.publicId === job.publicId ? "active" : ""
+              }`}
+              onClick={() => setSelectedJob(job)}
+            >
+              <h4>{job.title}</h4>
+              <p>
+                {job.company}
+                {appliedJobs.includes(job.publicId) && " • Applied"}
+              </p>
+            </div>
+          ))}
         </div>
 
-        {/* 3. RIGHT CONTENT (Details) */}
-        <div className="job-details-view">
-          <div className="job-main-content">
+        {/* ✅ RIGHT SIDE (DETAIL VIEW) */}
+        {selectedJob && (
+          <div className="job-details-view">
             <div className="job-header">
-              <div className="title-area">
-                <h1>{selectedJob.title}</h1>
-                <p className="company-name-large">{selectedJob.company}</p>
-              </div>
-              <img src={selectedJob.logo} alt="logo" className="company-logo-large" />
+              <h1>{selectedJob.title}</h1>
+              <p>{selectedJob.company}</p>
             </div>
 
             <div className="meta-stats">
-               <div className="stat-item">
-                 <span className="stat-label">Location</span>
-                 <span className="stat-value"><FaMapMarkerAlt /> {selectedJob.location}</span>
-               </div>
-               <div className="stat-item">
-                 <span className="stat-label">Salary</span>
-                 <span className="stat-value"><FaWallet /> {selectedJob.salary}</span>
-               </div>
-               <div className="stat-item">
-                 <span className="stat-label">Posted</span>
-                 <span className="stat-value"><FaRegClock /> {selectedJob.posted}</span>
-               </div>
+              <p>
+                <FaMapMarkerAlt /> {selectedJob.location}
+              </p>
+              <p>
+                <FaWallet /> ₹{selectedJob.salary}
+              </p>
+              <p>
+                <FaRegClock /> {selectedJob.workMode}
+              </p>
             </div>
 
             <div className="job-description-body">
-              <h3>About the Role</h3>
+              <h3>Description</h3>
               <p>{selectedJob.description}</p>
-              
-              <h3>Key Requirements</h3>
-              <ul>
-                <li>Relevant experience in {selectedJob.title}.</li>
-                <li>Strong portfolio or GitHub profile.</li>
-                <li>Ability to work in {selectedJob.location}.</li>
-              </ul>
+
+              <h3>Skills</h3>
+              <p>{selectedJob.skillsRequired}</p>
             </div>
 
             <div className="sticky-action-bar">
               {!hasApplied ? (
-                <button onClick={handleOpenModal} className="btn-primary apply-main-btn">
+                <button onClick={handleOpenModal} className="btn-primary">
                   Apply Now
                 </button>
               ) : (
                 <div className="success-badge-large">
-                  <FaCheckCircle /> Application Sent Successfully
+                  <FaCheckCircle /> Applied
                 </div>
               )}
-              <p className="secure-text"><FaShieldAlt /> Secure Application via Hunter</p>
+              <p>
+                <FaShieldAlt /> Secure Application
+              </p>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );
