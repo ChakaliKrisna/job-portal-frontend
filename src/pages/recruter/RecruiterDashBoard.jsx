@@ -1,127 +1,127 @@
 import React from 'react';
 import RecruiterNavbar from "../../components/recruter/RecruterNavbar";
 import { 
-  FaBriefcase, 
-  FaUserTie, 
-  FaCalendarCheck, 
-  FaCheckCircle, 
-  FaTimesCircle, 
-  FaChartLine 
+  FaBriefcase, FaUserTie, FaCalendarCheck, 
+  FaCheckCircle, FaTimesCircle, FaChartLine, FaArrowUp, FaEllipsisV 
 } from "react-icons/fa";
-import "../../components/Styles/home.css"; 
+import "../Styles/rectuterdashboard.css"; 
 
 const RecruiterDashboard = () => {
-  // Mock data for the dashboard (Later this will come from your Spring Boot API)
   const stats = [
-    { id: 1, label: "Total Jobs", value: "24", icon: <FaBriefcase />, color: "#3b82f6" },
-    { id: 2, label: "Active Jobs", value: "12", icon: <FaCheckCircle />, color: "#10b981" },
-    { id: 3, label: "Total Applications", value: "1,248", icon: <FaUserTie />, color: "#6366f1" },
-    { id: 4, label: "Shortlisted", value: "85", icon: <FaCalendarCheck />, color: "#f59e0b" },
-    { id: 5, label: "Hired", value: "14", icon: <FaCheckCircle />, color: "#8b5cf6" },
-    { id: 6, label: "Rejected", value: "312", icon: <FaTimesCircle />, color: "#ef4444" },
+    { id: 1, label: "Total Jobs", value: "24", icon: <FaBriefcase />, color: "#6366f1", trend: "+2 this month" },
+    { id: 2, label: "Active Jobs", value: "12", icon: <FaCheckCircle />, color: "#10b981", trend: "Stable" },
+    { id: 3, label: "Applications", value: "1,248", icon: <FaUserTie />, color: "#3b82f6", trend: "+15% vs last week" },
+    { id: 4, label: "Shortlisted", value: "85", icon: <FaCalendarCheck />, color: "#f59e0b", trend: "Pending review" },
   ];
 
   return (
-    <div className="home-wrapper">
-      {/* <RecruiterNavbar /> */}
+    <div className="rd-layout">
+      <RecruiterNavbar />
       
-      <main className="section-container" style={{ padding: '2rem' }}>
-        <header className="section-header" style={{ marginBottom: '30px' }}>
-          <span className="badge">Employer Console</span>
-          <h1 className="title-modern">Recruitment Overview</h1>
-          <p style={{ color: '#94a3b8' }}>Welcome back! Here's what's happening with your job postings today.</p>
-        </header>
+      {/* MAIN CONTENT AREA - This is offset by the Navbar CSS */}
+      <main className="rd-main-content">
+        
+        {/* WELCOME BANNER */}
+        <div className="rd-welcome-banner">
+          <div className="banner-text">
+            <span className="rd-badge">Hunter Pro Dashboard</span>
+            <h1>Welcome back, Recruitment Manager!</h1>
+            <p>You have <strong>12 new applications</strong> and <strong>3 interviews</strong> scheduled for today.</p>
+            <button className="rd-primary-btn">View Schedule</button>
+          </div>
+          <div className="banner-visual">
+             <FaChartLine className="floating-icon" />
+          </div>
+        </div>
 
-        {/* 1. Stats Grid - High Impact Numbers */}
-        <div className="stats-grid" style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-          gap: '20px' 
-        }}>
+        {/* STATS SECTION */}
+        <div className="rd-stats-grid">
           {stats.map((stat) => (
-            <div key={stat.id} className="stat-card-green" style={{ 
-              borderLeft: `5px solid ${stat.color}`,
-              padding: '20px',
-              background: '#ffffff',
-              borderRadius: '12px',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '10px'
-            }}>
-              <div style={{ color: stat.color, fontSize: '1.5rem' }}>{stat.icon}</div>
-              <h3 style={{ fontSize: '1.8rem', margin: 0, color: '#1e293b' }}>{stat.value}</h3>
-              <p style={{ margin: 0, color: '#64748b', fontWeight: '500' }}>{stat.label}</p>
+            <div key={stat.id} className="rd-stat-card glass">
+              <div className="stat-icon-circle" style={{ backgroundColor: `${stat.color}15`, color: stat.color }}>
+                {stat.icon}
+              </div>
+              <div className="stat-info">
+                <h3>{stat.value}</h3>
+                <p>{stat.label}</p>
+                <small className="stat-trend"><FaArrowUp /> {stat.trend}</small>
+              </div>
             </div>
           ))}
         </div>
 
-        {/* 2. Main Content Area (Charts & Recent Activity) */}
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: '2fr 1fr', 
-          gap: '30px', 
-          marginTop: '40px' 
-        }}>
-          
-          {/* Left Side: Hiring Funnel / Activity */}
-          <section className="activity-card" style={{ 
-            background: '#fff', 
-            padding: '25px', 
-            borderRadius: '15px',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h2 style={{ fontSize: '1.25rem', color: '#1e293b' }}>Recent Applicants</h2>
-              <button style={{ color: '#3b82f6', background: 'none', border: 'none', cursor: 'pointer' }}>View All</button>
+        <div className="rd-content-split">
+          {/* LEFT: RECENT ACTIVITY TABLE */}
+          <section className="rd-card glass activity-table">
+            <div className="card-header">
+              <h2>Recent Candidates</h2>
+              <button className="text-link">View All Applications</button>
             </div>
             
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ textAlign: 'left', borderBottom: '1px solid #e2e8f0', color: '#64748b' }}>
-                  <th style={{ padding: '12px 0' }}>Candidate</th>
-                  <th>Job Role</th>
-                  <th>Status</th>
-                  <th>Applied</th>
-                </tr>
-              </thead>
-              <tbody style={{ color: '#334155' }}>
-                <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                  <td style={{ padding: '15px 0' }}>Rahul Sharma</td>
-                  <td>Java Developer</td>
-                  <td><span style={{ color: '#f59e0b', background: '#fef3c7', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem' }}>Pending</span></td>
-                  <td>2 hours ago</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                  <td style={{ padding: '15px 0' }}>Anjali Gupta</td>
-                  <td>React UI Engineer</td>
-                  <td><span style={{ color: '#10b981', background: '#d1fae5', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem' }}>Shortlisted</span></td>
-                  <td>Yesterday</td>
-                </tr>
-              </tbody>
-            </table>
-          </section>
-
-          {/* Right Side: Quick Analytics */}
-          <section style={{ 
-            background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', 
-            padding: '25px', 
-            borderRadius: '15px', 
-            color: 'white' 
-          }}>
-            <h2 style={{ fontSize: '1.25rem', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <FaChartLine /> Performance
-            </h2>
-            <div style={{ textAlign: 'center', padding: '20px 0' }}>
-              <p style={{ color: '#94a3b8' }}>Job reach is up by 15% this week.</p>
-              {/* Placeholder for actual Chart.js / Recharts component */}
-              <div style={{ height: '150px', border: '1px dashed #334155', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '20px' }}>
-                Chart Visual Coming Soon
-              </div>
+            <div className="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Candidate</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Applied</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div className="candidate-cell">
+                        <div className="c-avatar">RS</div>
+                        <span>Rahul Sharma</span>
+                      </div>
+                    </td>
+                    <td>Java Developer</td>
+                    <td><span className="status-pill pending">In Review</span></td>
+                    <td>2 hours ago</td>
+                    <td><FaEllipsisV className="row-action" /></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div className="candidate-cell">
+                        <div className="c-avatar" style={{background: '#10b981'}}>AG</div>
+                        <span>Anjali Gupta</span>
+                      </div>
+                    </td>
+                    <td>React UI Engineer</td>
+                    <td><span className="status-pill success">Shortlisted</span></td>
+                    <td>Yesterday</td>
+                    <td><FaEllipsisV className="row-action" /></td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </section>
 
+          {/* RIGHT: ANALYTICS PREVIEW */}
+          <aside className="rd-card dark-card analytics-preview">
+             <div className="card-header">
+                <h2>Talent Pool Growth</h2>
+             </div>
+             <div className="growth-metric">
+                <div className="metric-circle">
+                   <span className="metric-value">84%</span>
+                   <span className="metric-label">Efficiency</span>
+                </div>
+                <p>Your hiring speed is <strong>12% faster</strong> than last month.</p>
+             </div>
+             <div className="mini-chart-placeholder">
+                <div className="bar" style={{height: '40%'}}></div>
+                <div className="bar" style={{height: '70%'}}></div>
+                <div className="bar active" style={{height: '90%'}}></div>
+                <div className="bar" style={{height: '60%'}}></div>
+                <div className="bar" style={{height: '80%'}}></div>
+             </div>
+             <button className="rd-outline-btn">Deep Analytics</button>
+          </aside>
         </div>
+
       </main>
     </div>
   );

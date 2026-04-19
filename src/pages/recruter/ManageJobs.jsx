@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import axios from "axios";
-import RecruiterNavbar from "../../components/recruter/RecruterNavbar";
 import {
   FaPlus, FaEdit, FaTrash, FaSearch, FaChevronLeft, FaChevronRight,
   FaGlobe, FaBriefcase, FaMapMarkerAlt, FaSortAmountDown,
   FaMoneyBillWave, FaCheckCircle, FaChartLine, FaClock, 
-  FaUserGraduate, FaCalendarAlt, FaBuilding, FaUserTie, FaExclamationCircle, FaLock
+  FaUserGraduate, FaCalendarAlt, FaBuilding, FaUserTie, FaExclamationCircle, FaLock, FaLayerGroup
 } from "react-icons/fa";
 import "../Styles/ManageJobs.css";
+
 
 export default function ManageJobs() {
   const [jobs, setJobs] = useState([]);
@@ -26,13 +26,13 @@ export default function ManageJobs() {
     workMode: "ALL",
     experienceLevel: "ALL", 
     viewMode: "MY_JOBS",
+    category: "ALL",  
     sortBy: "postedDate,desc",
     minSalary: 0
   });
 
   const API_BASE_URL = "http://localhost:8080/job-portal/jobs";
 
-  // IMPROVED: Case-insensitive Ownership Check
   const isOwner = useCallback((job) => {
     if (!job || !job.recruiter || !currentUserEmail) return false;
     return job.recruiter.email?.toLowerCase().trim() === currentUserEmail.toLowerCase().trim();
@@ -52,11 +52,11 @@ export default function ManageJobs() {
         sort: filters.sortBy 
       };
 
-      // Only apply search filters if we are NOT in my-jobs, OR if your backend supports search on my-jobs
       if (filters.keyword.trim()) params.keyword = filters.keyword.trim();
       if (filters.location.trim()) params.location = filters.location.trim();
       if (filters.jobType !== "ALL") params.jobType = filters.jobType;
       if (filters.workMode !== "ALL") params.workMode = filters.workMode;
+      if (filters.category !== "ALL") params.category = filters.category;
       if (filters.experienceLevel !== "ALL") params.experienceLevel = filters.experienceLevel;
       if (filters.minSalary > 0) params.minSalary = filters.minSalary;
 
@@ -70,7 +70,6 @@ export default function ManageJobs() {
       setJobs(content);
       setTotalPages(res.data.totalPages || 1);
 
-      // Auto-select first job if none selected or if current selection is lost
       if (content.length > 0) {
         const stillExists = content.find(j => j.publicId === selectedJob?.publicId);
         if (!stillExists) setSelectedJob(content[0]);
@@ -89,14 +88,9 @@ export default function ManageJobs() {
     return () => clearTimeout(handler);
   }, [fetchJobs]);
 
-  // OPTIMIZED: Processed list for display
   const processedJobs = useMemo(() => {
-    return [...jobs].sort((a, b) => {
-      if (filters.sortBy === "salary,desc") return b.salary - a.salary;
-      if (filters.sortBy === "title,asc") return a.title.localeCompare(b.title);
-      return new Date(b.postedDate) - new Date(a.postedDate);
-    });
-  }, [jobs, filters.sortBy]);
+    return [...jobs]; // Sorting is mostly handled by backend params.sort
+  }, [jobs]);
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -111,6 +105,7 @@ export default function ManageJobs() {
       workMode: "ALL",
       experienceLevel: "ALL",
       minSalary: 0,
+      category: "ALL",
       viewMode: "MY_JOBS",
       sortBy: "postedDate,desc"
     });
@@ -119,8 +114,6 @@ export default function ManageJobs() {
 
   return (
     <div className="mj-container">
-      {/* <RecruiterNavbar /> */}
-      
       <header className="mj-header">
         <div className="mj-header-info">
           <h1>Recruiter Command Center</h1>
@@ -134,60 +127,86 @@ export default function ManageJobs() {
       </header>
 
       <main className="mj-grid">
+        {/* Sidebar with all filters */}
         <aside className="mj-sidebar">
-          <section className="mj-filter-group">
-            <label className="mj-label"><FaGlobe /> Database Scope</label>
-            <div className="mj-toggle-group">
-              <button 
-                className={filters.viewMode === "MY_JOBS" ? "active" : ""} 
-                onClick={() => handleFilterChange("viewMode", "MY_JOBS")}
+          <div className="mj-sidebar-scroll">
+            <section className="mj-filter-group">
+              <label className="mj-label"><FaGlobe /> Database Scope</label>
+              <div className="mj-toggle-group">
+                <button 
+                  className={filters.viewMode === "MY_JOBS" ? "active" : ""} 
+                  onClick={() => handleFilterChange("viewMode", "MY_JOBS")}
+                >
+                  My Jobs
+                </button>
+                <button 
+                  className={filters.viewMode === "ALL_JOBS" ? "active" : ""} 
+                  onClick={() => handleFilterChange("viewMode", "ALL_JOBS")}
+                >
+                  Global Feed
+                </button>
+              </div>
+            </section>
+
+            {/* CATEGORY FILTER - Now outside of other tags */}
+            <section className="mj-filter-group">
+              <label className="mj-label"><FaLayerGroup /> Category</label>
+              <select 
+                className="mj-select" 
+                value={filters.category} 
+                onChange={(e) => handleFilterChange("category", e.target.value)}
               >
-                My Jobs
-              </button>
-              <button 
-                className={filters.viewMode === "ALL_JOBS" ? "active" : ""} 
-                onClick={() => handleFilterChange("viewMode", "ALL_JOBS")}
-              >
-                Global Feed
-              </button>
-            </div>
-          </section>
+                <option value="ALL">All Categories</option>
+                <option value="SOFTWARE_DEVELOPMENT">Software Development</option>
+                <option value="DATA_SCIENCE">Data Science</option>
+                <option value="DEVOPS">DevOps</option>
+                <option value="CYBER_SECURITY">Cyber Security</option>
+                <option value="AI_ML">AI / ML</option>
+                <option value="WEB_DEVELOPMENT">Web Development</option>
+                <option value="MOBILE_DEVELOPMENT">Mobile Development</option>
+                <option value="TESTING">Testing</option>
+                <option value="UI_UX">UI / UX</option>
+                <option value="MANAGEMENT">Management</option>
+              </select>
+            </section>
 
-          <section className="mj-filter-group">
-            <label className="mj-label"><FaBriefcase /> Job Type</label>
-            <select className="mj-select" value={filters.jobType} onChange={(e) => handleFilterChange("jobType", e.target.value)}>
-              <option value="ALL">All Types</option>
-              <option value="FULL_TIME">Full Time</option>
-              <option value="PART_TIME">Part Time</option>
-              <option value="INTERNSHIP">Internship</option>
-            </select>
-          </section>
+            <section className="mj-filter-group">
+              <label className="mj-label"><FaBriefcase /> Job Type</label>
+              <select className="mj-select" value={filters.jobType} onChange={(e) => handleFilterChange("jobType", e.target.value)}>
+                <option value="ALL">All Types</option>
+                <option value="FULL_TIME">Full Time</option>
+                <option value="PART_TIME">Part Time</option>
+                <option value="INTERNSHIP">Internship</option>
+              </select>
+            </section>
 
-          <section className="mj-filter-group">
-            <label className="mj-label"><FaUserGraduate /> Experience</label>
-            <select className="mj-select" value={filters.experienceLevel} onChange={(e) => handleFilterChange("experienceLevel", e.target.value)}>
-              <option value="ALL">All Levels</option>
-              <option value="FRESHER">Fresher</option>
-              <option value="INTERMEDIATE">Intermediate</option>
-              <option value="SENIOR">Senior</option>
-            </select>
-          </section>
+            <section className="mj-filter-group">
+              <label className="mj-label"><FaUserGraduate /> Experience</label>
+              <select className="mj-select" value={filters.experienceLevel} onChange={(e) => handleFilterChange("experienceLevel", e.target.value)}>
+                <option value="ALL">All Levels</option>
+                <option value="FRESHER">Fresher</option>
+                <option value="INTERMEDIATE">Intermediate</option>
+                <option value="SENIOR">Senior</option>
+              </select>
+            </section>
 
-          <section className="mj-filter-group">
-            <label className="mj-label"><FaMoneyBillWave /> Min Salary: ₹{Number(filters.minSalary).toLocaleString()}</label>
-            <input type="range" min="0" max="2500000" step="50000" value={filters.minSalary} onChange={(e) => handleFilterChange("minSalary", e.target.value)} className="mj-range" />
-          </section>
-          
-          <section className="mj-filter-group">
-             <label className="mj-label"><FaSortAmountDown /> Sort By</label>
-             <select className="mj-select" value={filters.sortBy} onChange={(e) => handleFilterChange("sortBy", e.target.value)}>
-                <option value="postedDate,desc">Latest First</option>
-                <option value="salary,desc">Highest Salary</option>
-                <option value="title,asc">Title (A-Z)</option>
-             </select>
-          </section>
+            <section className="mj-filter-group">
+              <label className="mj-label"><FaMoneyBillWave /> Min Salary: ₹{Number(filters.minSalary).toLocaleString()}</label>
+              <input type="range" min="0" max="2500000" step="50000" value={filters.minSalary} onChange={(e) => handleFilterChange("minSalary", e.target.value)} className="mj-range" />
+            </section>
+            
+            <section className="mj-filter-group">
+               <label className="mj-label"><FaSortAmountDown /> Sort By</label>
+               <select className="mj-select" value={filters.sortBy} onChange={(e) => handleFilterChange("sortBy", e.target.value)}>
+                  <option value="postedDate,desc">Latest First</option>
+                  <option value="salary,desc">Highest Salary</option>
+                  <option value="title,asc">Title (A-Z)</option>
+               </select>
+            </section>
+          </div>
         </aside>
 
+        {/* Central List Area */}
         <section className="mj-list-area">
           <div className="mj-search-cluster">
             <div className="mj-input-wrapper">
@@ -215,7 +234,7 @@ export default function ManageJobs() {
                       {job.title} 
                       {isOwner(job) && <FaCheckCircle className="owner-icon" title="Your Listing"/>}
                     </h4>
-                    <p>{job.company === "N/A" || !job.company ? "Direct Hire" : job.company} • {job.location}</p>
+                    <p>{!job.company || job.company === "N/A" ? "Direct Hire" : job.company} • {job.location}</p>
                   </div>
                   <div className="mj-item-side">
                     <div className="mj-item-salary">₹{(job.salary/100000).toFixed(1)}LPA</div>
@@ -233,6 +252,7 @@ export default function ManageJobs() {
           </footer>
         </section>
 
+        {/* Detailed Pane */}
         <section className="mj-detail-pane">
           {selectedJob ? (
             <div className="mj-detail-scroll fade-in">
@@ -242,7 +262,7 @@ export default function ManageJobs() {
                    <div className="mj-main-titles">
                       <span className="mj-category-tag">{selectedJob.jobType?.replace('_', ' ') || "N/A"}</span>
                       <h2>{selectedJob.title}</h2>
-                      <h4>{selectedJob.company === "N/A" || !selectedJob.company ? "Company Confidential" : selectedJob.company}</h4>
+                      <h4>{!selectedJob.company || selectedJob.company === "N/A" ? "Company Confidential" : selectedJob.company}</h4>
                    </div>
                 </div>
                 
@@ -296,7 +316,7 @@ export default function ManageJobs() {
               <div className="mj-section">
                 <h5>Job Description</h5>
                 <p className="mj-description-text">
-                    {selectedJob.description || `We are looking for a ${selectedJob.title} in ${selectedJob.location}. Required skills include ${selectedJob.skillsRequired}.`}
+                    {selectedJob.description || `We are looking for a ${selectedJob.title} in ${selectedJob.location}.`}
                 </p>
               </div>
             </div>

@@ -113,3 +113,159 @@
   cursor: not-allowed;
   background: #64748b;
 }
+/* authDrawer.css */
+
+.drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(6, 78, 59, 0.4); /* Deep green tinted overlay */
+  backdrop-filter: blur(8px);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.4s ease;
+}
+
+.drawer-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.auth-drawer {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 100%;
+  max-width: 450px;
+  height: 100%;
+  background: #ffffff;
+  z-index: 1000;
+  padding: 3rem 2rem;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+  transition: right 0.5s cubic-bezier(0.82, 0.085, 0.395, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-drawer.open {
+  right: 0;
+}
+
+.close-btn {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: #f1f5f9;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #64748b;
+  transition: 0.3s;
+}
+
+.close-btn:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.drawer-header h2 {
+  font-size: 2rem;
+  color: #064e3b; /* Deep Forest Green */
+  margin-bottom: 0.5rem;
+}
+
+.drawer-header p {
+  color: #64748b;
+  margin-bottom: 2rem;
+}
+
+/* Form Styles */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.input-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 1rem;
+  color: #10b981; /* Emerald Green */
+}
+
+.input-box input, .role-select {
+  width: 100%;
+  padding: 0.8rem 1rem 0.8rem 3rem;
+  border: 2px solid #f1f5f9;
+  border-radius: 12px;
+  font-size: 1rem;
+  outline: none;
+  transition: 0.3s;
+}
+
+.input-box input:focus {
+  border-color: #10b981;
+  background: #f0fdf4;
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, #10b981, #064e3b);
+  color: white;
+  padding: 1rem;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.4);
+}
+
+.auth-alert {
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.auth-alert.success { background: #d1fae5; color: #065f46; border: 1px solid #10b981; }
+.auth-alert.error { background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+
+.toggle-auth {
+  background: none;
+  border: none;
+  color: #10b981;
+  font-weight: 700;
+  cursor: pointer;
+  margin-left: 5px;
+  text-decoration: underline;
+}
+
+/* Animation for Recruiter field */
+.animated-field {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

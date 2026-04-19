@@ -6,13 +6,14 @@ import {
 } from "react-icons/fa";
 import "./Styles/categorygrid.css";
 
+// Updated with exact Backend ENUM values
 const categories = [
-  { name: "IT & Software", slug: "it", icon: <FaLaptopCode />, count: "450+" },
-  { name: "Marketing", slug: "marketing", icon: <FaBullhorn />, count: "120+" },
-  { name: "UI/UX Design", slug: "design", icon: <FaPalette />, count: "85+" },
-  { name: "Finance", slug: "finance", icon: <FaChartLine />, count: "210+" },
-  { name: "Human Resource", slug: "hr", icon: <FaUsers />, count: "45+" },
-  { name: "Sales", slug: "sales", icon: <FaHandshake />, count: "150+" },
+  { name: "Software Engineering", value: "SOFTWARE_ENGINEERING", icon: <FaLaptopCode />, count: "450+" },
+  { name: "Marketing", value: "MARKETING", icon: <FaBullhorn />, count: "120+" },
+  { name: "UI/UX Design", value: "UI_UX_DESIGN", icon: <FaPalette />, count: "85+" },
+  { name: "Finance", value: "FINANCE", icon: <FaChartLine />, count: "210+" },
+  { name: "Human Resources", value: "HUMAN_RESOURCES", icon: <FaUsers />, count: "45+" },
+  { name: "Sales", value: "SALES", icon: <FaHandshake />, count: "150+" },
 ];
 
 const CategoryGrid = () => {
@@ -28,9 +29,10 @@ const CategoryGrid = () => {
       <div className="category-grid-container">
         {categories.map((cat) => (
           <div
-            key={cat.slug}
+            key={cat.value}
             className="category-card-premium"
-            onClick={() => navigate(`/category/${cat.slug}`)}
+            // FIX: Navigate to /jobs with query parameter
+            onClick={() => navigate(`/jobs?category=${cat.value}`)}
           >
             <div className="cat-icon-wrapper">{cat.icon}</div>
             <div className="cat-info">

@@ -1,112 +1,108 @@
 import React, { Suspense, lazy, useState, useEffect } from "react";
+import { FaArrowRight, FaBriefcase, FaRocket, FaBell } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import "../components/Styles/home.css";
 
 // Lazy loading components
-const JobCarousel = lazy(() => import("../components/JobList"));
+const JobPortal = lazy(() => import("../components/JobList"));
 const InternshipCarousel = lazy(() => import("../components/Internship"));
 const CompanyCarousel = lazy(() => import("../components/CompanySection"));
 const CategoryGrid = lazy(() => import("../components/Category"));
 const Stats = lazy(() => import("../components/Stats"));
-const Testimonials = lazy(() => import("../components/Testimonials"));
-const About = lazy(() => import("../components/About"));
 const Hero = lazy(() => import("../components/Hero"));
 
 const SectionLoader = () => (
-  <div className="section-loader" style={{ textAlign: "center", padding: "2rem" }}>
+  <div className="section-loader">
     <div className="spinner"></div>
-    <p>Updating opportunities...</p>
+    <p>Loading Opportunities...</p>
   </div>
 );
 
-const Home = ({ jobs = [], internships = [] }) => {
+const Home = ({ internships = [] }) => {
   const [role, setRole] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setRole(localStorage.getItem("role"));
   }, []);
 
-  // Filter trending jobs
-  const trendingJobs = jobs.filter(j => j.type === "Full Time");
-
   return (
     <div className="home-wrapper">
       <main className="home-main">
-        {/* If Recruiter is logged in, show a Welcome back banner instead of Hero */}
+        {/* HERO SECTION */}
         {role === "recruiter" ? (
-          <div style={styles.recruiterWelcome}>
-            <h1>Welcome back, Recruiter</h1>
-            <p>You are currently viewing the platform as a guest. Visit your dashboard to manage listings.</p>
-            <button onClick={() => window.location.href='/recruiter-dashboard'} style={styles.btn}>
-              Go to Recruiter Dashboard
-            </button>
-          </div>
+          <section className="recruiter-hero">
+            <div className="recruiter-hero-content">
+              <h1>Welcome back, <span className="text-gradient">Recruiter</span></h1>
+              <p>Find the best talent for your organization today.</p>
+              <button className="dashboard-btn" onClick={() => navigate('/recruiter-dashboard')}>
+                Go to Dashboard <FaArrowRight />
+              </button>
+            </div>
+          </section>
         ) : (
           <Suspense fallback={<SectionLoader />}><Hero /></Suspense>
         )}
 
-        <Suspense fallback={<SectionLoader />}>
-          <section className="section-container">
+        {/* CATEGORY EXPLORER */}
+        <section className="home-section">
+          <div className="section-title-area">
+            <h2>Explore by <span className="text-gradient">Category</span></h2>
+            <p>Find jobs tailored to your specific skillset</p>
+          </div>
+          <Suspense fallback={<SectionLoader />}>
             <CategoryGrid />
-          </section>
+          </Suspense>
+        </section>
 
-          <section className="listings-bg">
-            <div className="container-inner">
-              <div className="listings-stack">
-                <JobCarousel data={trendingJobs} title="Trending Jobs" />
-                <InternshipCarousel data={internships} title="Latest Internships" />
-              </div>
-            </div>
-          </section>
+        {/* TRENDING JOBS - PASSING PROPS TO SHOW ONLY 6 JOBS */}
+        <section className="trending-jobs-bg">
+          <div className="home-section">
+            <Suspense fallback={<SectionLoader />}>
+              <JobPortal isHomePage={true} />
+            </Suspense>
+          </div>
+        </section>
 
-          <section className="newsletter-section">
-            <div className="newsletter-content">
-              <h2 className="newsletter-title">Stay Ahead of the Curve</h2>
-              <form className="newsletter-form" onSubmit={(e) => e.preventDefault()}>
-                <input type="email" placeholder="Enter email..." className="newsletter-input" />
-                <button type="submit" className="newsletter-btn">Get Alerts</button>
-              </form>
-            </div>
-          </section>
+        {/* INTERNSHIPS SECTION */}
+        <section className="home-section">
+          <div className="section-title-area">
+            <h2>Latest <span className="text-gradient">Internships</span></h2>
+            <p>Launch your career with hands-on experience</p>
+          </div>
+          <Suspense fallback={<SectionLoader />}>
+            <InternshipCarousel data={internships} />
+          </Suspense>
+        </section>
 
-          <section className="section-container">
+        {/* STATS & COMPANIES */}
+        <section className="stats-company-section">
+          <Suspense fallback={<SectionLoader />}>
             <Stats />
-            <div className="company-carousel-wrapper">
-              <CompanyCarousel title="Featured Recruiters" />
+            <div className="featured-companies-box">
+              <h3>Partnered with Top Companies</h3>
+              <CompanyCarousel />
             </div>
-          </section>
+          </Suspense>
+        </section>
 
-          <section className="testimonials-bg">
-            <Testimonials />
-          </section>
-
-          <section className="section-container">
-            <About />
-          </section>
-        </Suspense>
+        {/* NEWSLETTER - MODERN GRADIENT DESIGN */}
+        <section className="modern-newsletter">
+          <div className="newsletter-inner">
+            <div className="news-text">
+              <FaBell className="bell-icon" />
+              <h3>Don't miss out on new openings</h3>
+              <p>Get instant alerts when jobs matching your profile are posted.</p>
+            </div>
+            <form className="news-form" onSubmit={(e) => e.preventDefault()}>
+              <input type="email" placeholder="Enter your email address" />
+              <button type="submit">Notify Me</button>
+            </form>
+          </div>
+        </section>
       </main>
     </div>
   );
-};
-
-const styles = {
-  recruiterWelcome: {
-    padding: "4rem 2rem",
-    textAlign: "center",
-    backgroundColor: "#2c3e50",
-    color: "white",
-    borderRadius: "10px",
-    margin: "20px"
-  },
-  btn: {
-    padding: "10px 20px",
-    backgroundColor: "#3498db",
-    color: "white",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-    marginTop: "15px",
-    fontWeight: "bold"
-  }
 };
 
 export default Home;

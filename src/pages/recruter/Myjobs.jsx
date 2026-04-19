@@ -5,7 +5,7 @@ import {
   FaPlus, FaEdit, FaTrash, FaSearch, FaChevronLeft, FaChevronRight,
   FaMapMarkerAlt, FaClock, FaUserGraduate, FaCalendarAlt, FaBuilding, 
   FaEye, FaPowerOff, FaUserTie, FaUsers, FaMoneyBillWave, FaSignal,
-  FaMagic, FaLightbulb, FaInfoCircle
+  FaMagic, FaLightbulb, FaInfoCircle,FaLayerGroup
 } from "react-icons/fa";
 import "../Styles/Myjobs.css"; 
 
@@ -87,9 +87,19 @@ export default function MyJobs() {
   }, [fetchJobs]);
 
   const handleFormChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
+  const { name, value } = e.target;
+  
+  // AI Feature: Auto-suggest skills based on Title
+  if (name === "title" && skillMapping[value]) {
+    setFormData(prev => ({
+      ...prev,
+      title: value,
+      skillsRequired: skillMapping[value]
+    }));
+  } else {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  }
+};
   const generateDescription = () => {
     if (!formData.title || !formData.skillsRequired) {
       alert("Please enter a Job Title and some Skills first!");
@@ -110,6 +120,33 @@ export default function MyJobs() {
     });
     setIsModalOpen(true);
   };
+  const skillMapping = {
+  "Java Developer": "Java 17, Spring Boot, Microservices, JPA, Hibernate, MySQL, Docker",
+  "Full Stack Developer": "Java, Spring Boot, React.js, MySQL, REST API, AWS, Tailwind CSS",
+  "Frontend Developer": "React.js, TypeScript, Next.js, Redux Toolkit, Framer Motion",
+  "Python Developer": "Python, Django, Flask, PostgreSQL, Celery, Redis",
+  "UI/UX Designer": "Figma, Adobe XD, Responsive Design, Prototyping, User Research"
+};
+const CATEGORY_OPTIONS = [
+  { value: "SOFTWARE_DEVELOPMENT", label: "Software Development" },
+  { value: "DATA_SCIENCE", label: "Data Science" },
+  { value: "DEVOPS", label: "DevOps" },
+  { value: "CYBER_SECURITY", label: "Cyber Security" },
+  { value: "QA_TESTING", label: "QA & Testing" },
+  { value: "UI_UX", label: "UI/UX Design" },
+  { value: "MANAGEMENT", label: "Management" },
+  { value: "OPERATIONS", label: "Operations" },
+  { value: "BUSINESS_ANALYST", label: "Business Analyst" },
+  { value: "FINANCE", label: "Finance" },
+  { value: "ACCOUNTING", label: "Accounting" },
+  { value: "MARKETING", label: "Marketing" },
+  { value: "SALES", label: "Sales" },
+  { value: "DIGITAL_MARKETING", label: "Digital Marketing" },
+  { value: "HUMAN_RESOURCES", label: "Human Resources" },
+  { value: "CUSTOMER_SUPPORT", label: "Customer Support" },
+  { value: "ENGINEERING", label: "Engineering" },
+  { value: "EDUCATION", label: "Education" },
+  { value: "HEALTHCARE", label: "Healthcare" }];
 
   const validateAndSubmit = async (e) => {
     e.preventDefault();
@@ -327,35 +364,69 @@ export default function MyJobs() {
       </main>
 
       {/* MODAL REMAINS THE SAME */}
-      {isModalOpen && (
+{isModalOpen && (
   <div className="mj-modal-overlay">
     <div className="mj-smart-modal animated-zoom-in">
       <form className="mj-modal-form" onSubmit={validateAndSubmit}>
+        {/* Sticky Header */}
         <div className="modal-header-pro">
           <div className="header-title-group">
             <div className="icon-badge"><FaPlus /></div>
             <div>
-              <h3>{formData.publicId ? "Edit Job Listing" : "Create New Listing"}</h3>
-              <p>Fill in the details to find your next great hire.</p>
+              <h3>{formData.publicId ? "Update Opportunity" : "Launch New Role"}</h3>
+              <p>Post your requirements to the talent pool.</p>
             </div>
           </div>
           <button type="button" className="close-x" onClick={() => setIsModalOpen(false)}>&times;</button>
         </div>
 
         <div className="form-grid-scroll">
+          {/* Section 1: Core Details */}
           <div className="form-section-label">General Information</div>
           <div className="form-grid">
             <div className="input-group full-width">
               <label>Job Title <FaLightbulb className="hint-icon" /></label>
               <div className="input-with-icon">
-                 <FaUserTie className="field-icon" />
-                 <input name="title" list="job-titles" placeholder="e.g. Senior Java Developer" value={formData.title} onChange={handleFormChange} required />
+                <FaUserTie className="field-icon" />
+                <input name="title" list="job-titles" placeholder="Select or type role..." value={formData.title} onChange={handleFormChange} required />
               </div>
               <datalist id="job-titles">
-                {commonRoles.map(role => <option key={role} value={role} />)}
+                {Object.keys(skillMapping).map(role => <option key={role} value={role} />)}
               </datalist>
             </div>
 
+<div className="input-group">
+  <label>Category</label>
+  <div className="input-with-icon">
+    <FaLayerGroup className="field-icon" />
+    <select 
+      name="category" 
+      value={formData.category} 
+      onChange={handleFormChange} 
+      required
+    >
+      <option value="" disabled>Select a category</option>
+      {CATEGORY_OPTIONS.map(opt => (
+        <option key={opt.value} value={opt.value}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
+  </div>
+</div>
+
+            <div className="input-group">
+              <label>Annual Salary (LPA)</label>
+              <div className="input-with-icon">
+                <FaMoneyBillWave className="field-icon" />
+                <input name="salary" type="number" placeholder="e.g. 12" value={formData.salary} onChange={handleFormChange} required />
+              </div>
+            </div>
+          </div>
+
+          {/* Section 2: Logistics & Deadlines */}
+          <div className="form-section-label">Configuration & Logistics</div>
+          <div className="form-grid">
             <div className="input-group">
               <label>Location</label>
               <div className="input-with-icon">
@@ -365,72 +436,73 @@ export default function MyJobs() {
             </div>
 
             <div className="input-group">
-              <label>Annual Salary (₹)</label>
+              <label>Application Deadline</label>
               <div className="input-with-icon">
-                <FaMoneyBillWave className="field-icon" />
-                <input name="salary" type="number" placeholder="LPA" value={formData.salary} onChange={handleFormChange} required />
+                <FaCalendarAlt className="field-icon" />
+                <input name="closedDate" type="date" value={formData.closedDate} onChange={handleFormChange} required />
               </div>
             </div>
-          </div>
 
-          <div className="form-section-label">Work Configuration</div>
-          <div className="form-grid">
             <div className="input-group">
               <label>Work Mode</label>
               <select name="workMode" value={formData.workMode} onChange={handleFormChange}>
-                <option value="ONSITE">Onsite</option>
                 <option value="REMOTE">Remote</option>
+                <option value="ONSITE">Onsite</option>
                 <option value="HYBRID">Hybrid</option>
               </select>
             </div>
 
             <div className="input-group">
-              <label>Experience Level</label>
-              <select name="experienceLevel" value={formData.experienceLevel} onChange={handleFormChange}>
-                <option value="FRESHER">Fresher</option>
-                <option value="INTERMEDIATE">Intermediate</option>
-                <option value="SENIOR">Senior</option>
-              </select>
+              <label>Openings</label>
+              <div className="input-with-icon">
+                <FaUsers className="field-icon" />
+                <input name="openings" type="number" value={formData.openings} onChange={handleFormChange} />
+              </div>
             </div>
           </div>
 
+          {/* Section 3: Requirements */}
           <div className="form-section-label">Detailed Requirements</div>
           <div className="input-group full-width">
-            <label>Skills Required</label>
-            <input name="skillsRequired" placeholder="Java, Spring Boot, React..." value={formData.skillsRequired} onChange={handleFormChange} required />
+            <label>Skills Required (Auto-suggested)</label>
+            <input name="skillsRequired" className="skills-input-highlight" placeholder="Java, Spring Boot..." value={formData.skillsRequired} onChange={handleFormChange} required />
           </div>
 
           <div className="input-group full-width">
             <div className="label-flex">
               <label>Job Description</label>
-              <button type="button" className={`ai-gen-btn-pro ${isGenerating ? 'loading' : ''}`} onClick={generateDescription} disabled={isGenerating}>
-                {isGenerating ? <div className="spinner"></div> : <><FaMagic /> Write with AI</>}
+              <button type="button" className="ai-gen-btn-pro" onClick={generateDescription}>
+                <FaMagic /> Smart Draft
               </button>
             </div>
-            <textarea name="description" rows="6" placeholder="Describe the role and responsibilities..." value={formData.description} onChange={handleFormChange} required />
+            <textarea name="description" rows="5" value={formData.description} onChange={handleFormChange} required />
           </div>
         </div>
 
+        {/* Footer Actions */}
         <div className="modal-actions-pro">
           <button type="button" className="btn-cancel" onClick={() => setIsModalOpen(false)}>Discard</button>
           <button type="submit" className="btn-submit-pro">
-            {formData.publicId ? "Save Changes" : "Publish Job"}
+            {formData.publicId ? "Update Listing" : "Publish Listing"}
           </button>
         </div>
       </form>
 
       <aside className="mj-form-guide">
-        <div className="guide-card">
-          <h4><FaInfoCircle /> Pro Tips</h4>
-          <ul>
-            <li><strong>Keywords:</strong> Use specific technologies in the title.</li>
-            <li><strong>Salary:</strong> Listings with transparent pay get 30% more applicants.</li>
-            <li><strong>AI Tool:</strong> Let AI draft your description to save time!</li>
-          </ul>
+        <div className="guide-content">
+          <h4>Smart Tools</h4>
+          <div className="tip-box">
+            <FaLightbulb color="#fbbf24" />
+            <p><strong>Auto-Skills:</strong> Selecting a role automatically drafts the top required skills.</p>
+          </div>
+          <div className="tip-box">
+            <FaMagic color="#10b981" />
+            <p><strong>AI Writer:</strong> Use Smart Draft to generate a professional JD based on your title.</p>
+          </div>
         </div>
       </aside>
     </div>
   </div>
-)}   </div>
+)}  </div>
   );
 }

@@ -2,7 +2,7 @@
 // Add 'Navigate' to this list
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
-import JobList from "./components/JobList";
+import JobPortal from "./components/JobList";
 import CompanySection from "./components/CompanySection";
 import InternshipsPage from "./components/Internship";
 import About from "./components/About";
@@ -19,6 +19,7 @@ import Myjobs from "./pages/recruter/Myjobs";
 
 function App() {
   const role = localStorage.getItem("role");
+  const isAuthenticated = !!localStorage.getItem("token");
 
   const mockJobs = [
     { 
@@ -121,17 +122,21 @@ function App() {
 
         {/* Standard Routes */}
         <Route path="/internships" element={<InternshipsPage data={MOCK_INTERNSHIPS} />} />
-        <Route path="/jobs" element={<JobList data={mockJobs} />} />
+        {/* <Route path="/jobs" element={<JobList data={mockJobs} />} /> */}
         <Route path="/job/:id" element={<JobDetails jobs={mockJobs} />} />
         <Route path="/internship/:id" element={<JobDetails jobs={MOCK_INTERNSHIPS} />} />
         <Route path="/companies" element={<CompanySection />} />
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        // This will show the Full Vertical Split-View
+<Route path="/jobs" element={<JobPortal viewType="board" />} />
 
         {/* Seeker Routes */}
         <Route path="/dashboard" element={<UserDashboard />} />
         <Route path="/profile" element={<UserDashboard />} />
+        {/* Protected Route */}
+     
         <Route path="/applications" element={<MyApplications />} />
       </Routes>
     </>
