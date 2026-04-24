@@ -1,0 +1,360 @@
+/* --- Root Variables for Theme Consistency --- */
+:root {
+  --primary-emerald: #10b981;
+  --primary-indigo: #6366f1;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.apply-page-wrapper {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+  font-family: 'Inter', sans-serif;
+  color: var(--text-main);
+}
+
+/* --- 1. HERO SECTION (GLASS PREMIUM) --- */
+.job-hero-section.glass-premium {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 30px;
+}
+
+.hero-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.company-branding {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.company-logo-large {
+  width: 70px;
+  height: 70px;
+  background: var(--primary-indigo);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 800;
+  border-radius: 18px;
+  box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+}
+
+.hero-text h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.company-meta {
+  color: var(--text-muted);
+  display: flex;
+  gap: 15px;
+}
+
+.closed-tag {
+  background: #fee2e2;
+  color: #ef4444;
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 20px;
+  vertical-align: middle;
+}
+
+/* --- 2. TAB NAVIGATION --- */
+.tab-navigation {
+  display: flex;
+  gap: 10px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 20px;
+}
+
+.tab-navigation button {
+  padding: 10px 24px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.tab-navigation button.active {
+  background: var(--primary-indigo);
+  color: white;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+/* --- 3. MAIN GRID LAYOUT --- */
+.apply-main-grid {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr;
+  gap: 30px;
+  align-items: start;
+}
+
+/* --- 4. FORM & CONTENT AREA --- */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: var(--shadow-sm);
+}
+
+.description-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.rich-text {
+  line-height: 1.7;
+  color: #475569;
+}
+
+.recruiter-box {
+  margin-top: 30px;
+  padding: 20px;
+  background: #f1f5f9;
+  border-radius: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.recruiter-info {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.recruiter-icon {
+  font-size: 2.5rem;
+  color: #94a3b8;
+}
+
+/* --- 5. INPUTS & FORM UI --- */
+.modern-input, .modern-textarea {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1.5px solid #e2e8f0;
+  margin-top: 8px;
+  transition: 0.3s;
+}
+
+.modern-input:focus, .modern-textarea:focus {
+  border-color: var(--primary-emerald);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+  outline: none;
+}
+
+.resume-selector-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin: 15px 0;
+}
+
+.resume-card {
+  border: 2px solid #e2e8f0;
+  padding: 20px;
+  border-radius: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.resume-card.active {
+  border-color: var(--primary-emerald);
+  background: #f0fdf4;
+  color: var(--primary-emerald);
+}
+
+/* --- 6. SIDEBAR INTELLIGENCE --- */
+.intel-card {
+  margin-bottom: 20px;
+}
+
+.intel-card header {
+  font-weight: 700;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.score-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.circular-progress {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 1s ease-in-out;
+}
+
+.inner-white {
+  width: 90px;
+  height: 90px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.skill-tag.missing {
+  display: inline-block;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  padding: 6px 12px;
+  border-radius: 20px;
+  margin: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: 0.2s;
+}
+
+.skill-tag.missing:hover {
+  background: var(--primary-emerald);
+  color: white;
+  border-color: var(--primary-emerald);
+}
+
+/* --- 7. BUTTONS --- */
+.btn-primary-apply {
+  width: 100%;
+  padding: 16px;
+  background: var(--primary-emerald);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+  transition: 0.3s;
+}
+
+.btn-primary-apply:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.btn-primary-apply:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* --- 8. ANIMATIONS --- */
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- 9. MODALS --- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirmation-modal {
+  background: white;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 24px;
+  padding: 30px;
+  box-shadow: var(--shadow-lg);
+}
+
+.summary-item {
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+.apply-page-wrapper {
+  width: 100%;
+  min-height: 100vh; /* Ensures it fills the screen height */
+  max-width: 1400px; /* Increased from 1200px to occupy more window */
+  margin: 0 auto;
+  padding: 40px 20px;
+  
+  /* If your navbar is fixed, add padding-top so the content isn't hidden under it */
+  padding-top: 80px; 
+}
+
+/* Ensure the Overlay (Modal) doesn't cover the Navbar if you want the Nav accessible */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  /* If navbar is z-index 1000, set this to 999 to show nav above modal */
+  /* Or set to 2000 if you WANT the modal to cover everything */
+  z-index: 2000; 
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.apply-page-wrapper {
+  width: 100%;
+  min-height: 100vh; /* Ensures it fills the screen height */
+  max-width: 1400px; /* Increased from 1200px to occupy more window */
+  margin: 0 auto;
+  padding: 40px 20px;
+  
+  /* If your navbar is fixed, add padding-top so the content isn't hidden under it */
+  padding-top: 80px; 
+}
+
+/* Ensure the Overlay (Modal) doesn't cover the Navbar if you want the Nav accessible */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  /* If navbar is z-index 1000, set this to 999 to show nav above modal */
+  /* Or set to 2000 if you WANT the modal to cover everything */
+  z-index: 2000; 
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

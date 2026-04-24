@@ -16,6 +16,7 @@ import RecruiterDashboard from "./pages/recruter/RecruiterDashBoard"
 import RecruiterNavbar from "./components/recruter/RecruterNavbar";
 import ManageJobs from "./pages/recruter/ManageJobs";
 import Myjobs from "./pages/recruter/Myjobs";
+import ApplyJob  from "./components/ApplyJob";
 
 function App() {
   const role = localStorage.getItem("role");
@@ -136,7 +137,7 @@ function App() {
         <Route path="/dashboard" element={<UserDashboard />} />
         <Route path="/profile" element={<UserDashboard />} />
         {/* Protected Route */}
-     
+     <Route path="/apply/:jobId" element={<ApplyJob />} />
         <Route path="/applications" element={<MyApplications />} />
       </Routes>
     </>

@@ -88,16 +88,17 @@ export default function MyJobs() {
 
   const handleFormChange = (e) => {
   const { name, value } = e.target;
-  
-  // AI Feature: Auto-suggest skills based on Title
-  if (name === "title" && skillMapping[value]) {
-    setFormData(prev => ({
-      ...prev,
-      title: value,
-      skillsRequired: skillMapping[value]
-    }));
+
+  if (name === "skillsRequired") {
+    setFormData({
+      ...formData,
+      skillsRequired: value.split(",").map(s => s.trim())
+    });
   } else {
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData({
+      ...formData,
+      [name]: value
+    });
   }
 };
   const generateDescription = () => {
@@ -324,9 +325,11 @@ const CATEGORY_OPTIONS = [
           <section className="detail-info-block">
             <h4><FaMagic /> Required Competencies</h4>
             <div className="mj-skills-tag-cloud">
-              {selectedJob.skillsRequired?.split(',').map((s, idx) => (
-                <span key={idx} className="skill-tag-modern">{s.trim()}</span>
-              ))}
+              {selectedJob?.skillsRequired?.map((s, idx) => (
+  <span key={idx} className="skill-tag-modern">
+    {s?.trim()}
+  </span>
+))}
             </div>
           </section>
 
@@ -465,7 +468,12 @@ const CATEGORY_OPTIONS = [
           <div className="form-section-label">Detailed Requirements</div>
           <div className="input-group full-width">
             <label>Skills Required (Auto-suggested)</label>
-            <input name="skillsRequired" className="skills-input-highlight" placeholder="Java, Spring Boot..." value={formData.skillsRequired} onChange={handleFormChange} required />
+            <input
+  name="skillsRequired"
+  placeholder="Java, React, Spring Boot"
+  value={formData.skillsRequired}
+  onChange={handleFormChange}
+/>
           </div>
 
           <div className="input-group full-width">

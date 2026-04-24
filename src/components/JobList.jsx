@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import AuthDrawer from "../pages/AuthDrawer";
 import { 
   FaMapMarkerAlt, FaWallet, FaSearch, FaFilter, FaBriefcase, FaGraduationCap, 
@@ -26,6 +27,7 @@ const JobPortal = ({ isHomePage = false }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [totalPages, setTotalPages] = useState(0);
+  const [searchParams] = useSearchParams(); 
   
 
   const [filters, setFilters] = useState({
@@ -57,13 +59,26 @@ const JobPortal = ({ isHomePage = false }) => {
         headers: token ? { Authorization: `Bearer ${token}` } : {} 
       });
 
-      const content = res.data?.content || [];
+      // const res = await axios.get(`${API_BASE}/jobs`, {
+      //   params: cleanParams,
+      //   headers: token ? { Authorization: `Bearer ${token}` } : {} 
+      // });
+
+     const content = res.data?.content || [];
       setJobs(content);
       setTotalPages(res.data?.totalPages || 0);
 
-      // Only auto-select for the Split-View (Portal)
+      // --- LOGIC FOR SPECIFIC JOB REDIRECT ---
+      const jobIdFromUrl = searchParams.get("id");
+      
       if (content.length > 0 && !isHomePage) {
-        setSelectedJob(content[0]);
+        if (jobIdFromUrl) {
+          // Find the job that matches the ID in the URL
+          const targetedJob = content.find(j => j.publicId === jobIdFromUrl);
+          setSelectedJob(targetedJob || content[0]);
+        } else {
+          setSelectedJob(content[0]);
+        }
       } else if (isHomePage) {
         setSelectedJob(null);
       }
@@ -72,7 +87,7 @@ const JobPortal = ({ isHomePage = false }) => {
     } finally {
       setLoading(false);
     }
-  }, [filters, token, isHomePage]);
+  }, [filters, token, isHomePage, searchParams]); // Add searchParams to dependency
 
   const fetchSavedStatus = useCallback(async () => {
     if (!token) return;
@@ -190,7 +205,10 @@ const JobPortal = ({ isHomePage = false }) => {
             <EmptyState />
           ) : (
             jobs.map(job => (
-              <div key={job.publicId} className="modern-job-card" onClick={() => navigate(`/jobs?id=${job.publicId}`)}>
+              <div key={job.publicId} className="modern-job-card" onClick={() => {
+  setSelectedJob(job);
+  navigate(`/jobs?id=${job.publicId}`, { replace: true });
+}}>
                 <div className="card-badge">{job.jobType?.replace('_', ' ')}</div>
                 <div className="card-body">
                   <div className="company-logo-sm">{job.company?.charAt(0)}</div>
@@ -489,12 +507,31 @@ const JobPortal = ({ isHomePage = false }) => {
         </div>
       </div>
 
-      <div className="action-bar">
-        <button className="apply-now-btn">Apply Now <FaArrowRight /></button>
-        <button className="save-large-btn" onClick={(e) => toggleSave(e, selectedJob.publicId)}>
-          {savedJobIds.has(selectedJob.publicId) ? <FaBookmark color="#10b981" /> : <FaRegBookmark />}
-        </button>
-      </div>
+     <div className="action-bar">
+ <div className="action-bar">
+  <button 
+    className="apply-now-btn" 
+    onClick={() => {
+      if (!token) {
+        // If not logged in, show login drawer and set mode
+        setAuthMode("login");
+        setAuthDrawerOpen(true);
+      } else {
+        // If logged in, proceed to application
+        navigate(`/apply/${selectedJob.publicId}`);
+      }
+    }}
+  >
+    Apply Now <FaArrowRight />
+  </button>
+  
+  {/* Rest of your buttons... */}
+</div>
+  
+  <button className="save-large-btn" onClick={(e) => toggleSave(e, selectedJob.publicId)}>
+    {savedJobIds.has(selectedJob.publicId) ? <FaBookmark color="#10b981" /> : <FaRegBookmark />}
+  </button>
+</div>
 
       <div className="details-scroll-area">
         {/* Statistics Grid */}
@@ -521,7 +558,7 @@ const JobPortal = ({ isHomePage = false }) => {
         <div className="details-body">
           <h3 className="section-title">Required Skills</h3>
           <div className="skills-container">
-            {selectedJob.skillsRequired?.split(',').map(skill => (
+            {selectedJob.skillsRequired.map(skill => (
               <span key={skill} className="skill-pill">{skill.trim()}</span>
             ))}
           </div>
@@ -547,6 +584,11 @@ const JobPortal = ({ isHomePage = false }) => {
     <div className="empty-details">Select a job to view all details</div>
   )}
 </div>
+<AuthDrawer 
+        isOpen={isAuthDrawerOpen} 
+        onClose={() => setAuthDrawerOpen(false)} 
+        initialMode={authMode} 
+      />
           </div>
         </main>
       </div>

@@ -12,6 +12,7 @@ import "../Styles/ManageJobs.css";
 export default function ManageJobs() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [selectedJob, setSelectedJob] = useState(null);
@@ -37,53 +38,47 @@ export default function ManageJobs() {
     if (!job || !job.recruiter || !currentUserEmail) return false;
     return job.recruiter.email?.toLowerCase().trim() === currentUserEmail.toLowerCase().trim();
   }, [currentUserEmail]);
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      setFilters(prev => ({ ...prev, keyword: searchTerm }));
+      setCurrentPage(0);
+    }, 500); // Wait 500ms after user stops typing
 
-  const fetchJobs = useCallback(async () => {
-    if (abortControllerRef.current) abortControllerRef.current.abort();
-    abortControllerRef.current = new AbortController();
-
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+const fetchJobs = useCallback(async () => {
     setLoading(true);
     try {
       const endpoint = filters.viewMode === "MY_JOBS" ? `${API_BASE_URL}/my-jobs` : API_BASE_URL;
-
-      const params = {
-        page: currentPage,
-        size: 10,
-        sort: filters.sortBy 
-      };
-
-      if (filters.keyword.trim()) params.keyword = filters.keyword.trim();
-      if (filters.location.trim()) params.location = filters.location.trim();
-      if (filters.jobType !== "ALL") params.jobType = filters.jobType;
-      if (filters.workMode !== "ALL") params.workMode = filters.workMode;
-      if (filters.category !== "ALL") params.category = filters.category;
-      if (filters.experienceLevel !== "ALL") params.experienceLevel = filters.experienceLevel;
-      if (filters.minSalary > 0) params.minSalary = filters.minSalary;
+      
+      // Construct params object dynamically
+      const params = new URLSearchParams();
+      params.append("page", currentPage);
+      params.append("size", 10);
+      params.append("sort", filters.sortBy);
+      
+      if (filters.keyword) params.append("keyword", filters.keyword);
+      if (filters.location) params.append("location", filters.location);
+      if (filters.jobType !== "ALL") params.append("jobType", filters.jobType);
+      if (filters.workMode !== "ALL") params.append("workMode", filters.workMode);
+      if (filters.category !== "ALL") params.append("category", filters.category);
+      if (filters.experienceLevel !== "ALL") params.append("experienceLevel", filters.experienceLevel);
+      if (filters.minSalary > 0) params.append("minSalary", filters.minSalary / 100000); // Backend expects LAKHS?
 
       const res = await axios.get(endpoint, {
         params,
-        signal: abortControllerRef.current.signal,
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
       
-      const content = res.data.content || [];
-      setJobs(content);
+      setJobs(res.data.content || []);
       setTotalPages(res.data.totalPages || 1);
-
-      if (content.length > 0) {
-        const stillExists = content.find(j => j.publicId === selectedJob?.publicId);
-        if (!stillExists) setSelectedJob(content[0]);
-      } else {
-        setSelectedJob(null);
-      }
     } catch (err) {
-      if (!axios.isCancel(err)) console.error("Fetch failed:", err);
+      console.error("Fetch failed:", err);
     } finally {
       setLoading(false);
     }
-  }, [currentPage, filters, selectedJob]);
-
-  useEffect(() => {
+  }, [currentPage, filters]);
+    useEffect(() => {
     const handler = setTimeout(() => fetchJobs(), 300);
     return () => clearTimeout(handler);
   }, [fetchJobs]);
@@ -296,9 +291,9 @@ export default function ManageJobs() {
               <div className="mj-section">
                 <h5>Required Skills</h5>
                 <div className="mj-pill-box">
-                  {selectedJob.skillsRequired ? selectedJob.skillsRequired.split(',').map((s, idx) => (
-                    <span key={idx} className="mj-skill-pill">{s.trim()}</span>
-                  )) : <span className="mj-text-light">No skills listed</span>}
+                 {selectedJob?.skillsRequired?.map((skill, i) => (
+  <span key={i}>{skill}</span>
+)) }: <span className="mj-text-light">No skills listed</span>
                 </div>
               </div>
 
