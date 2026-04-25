@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { 
   FaCheckCircle, FaCloudUploadAlt, FaExclamationTriangle, FaFilePdf, 
   FaBriefcase, FaMapMarkerAlt, FaWallet, FaChartPie, FaShieldAlt, 
-  FaEye, FaInfoCircle, FaUserTie, FaBuilding, FaKeyboard, FaTimes, FaLock,FaUserCheck
+  FaEye, FaInfoCircle, FaUserTie, FaBuilding, FaKeyboard, FaTimes, FaLock, FaUserCheck, FaEdit,FaArrowLeft
 } from "react-icons/fa";
 import axios from "axios";
 import "../components/Styles/applyjob.css";
@@ -29,15 +29,20 @@ const ApplyJob = () => {
   const [resumeFile, setResumeFile] = useState(null);
   const [useExistingResume, setUseExistingResume] = useState(true);
   const [coverLetter, setCoverLetter] = useState("");
+
+  // NEW: Override States
+  const [useProfileData, setUseProfileData] = useState(true);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   
   // --- UI Logic States ---
   const [showConfirm, setShowConfirm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [isDirty, setIsDirty] = useState(false); // For Navigation Guard
+  const [isDirty, setIsDirty] = useState(false);
 
-  // 11. Navigation Guard: Warn user if they try to close/refresh while filling form
+  // Navigation Guard: Prevents accidental tab close
   useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (isDirty && !success) {
@@ -49,6 +54,7 @@ const ApplyJob = () => {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty, success]);
 
+  // Initial Data Fetch
   useEffect(() => {
     if (!token) return navigate("/login");
 
@@ -63,14 +69,25 @@ const ApplyJob = () => {
           axios.get(`${API_BASE}/job-portal/applications/check/${jobId}`, { headers })
         ]);
 
-        setProfile(profRes.data);
+      const profileData = profRes.data;
+setProfile(profileData);
+
+// FIX: Convert the List<String> from backend into a string for the input field
+if (profileData?.skills && Array.isArray(profileData.skills)) {
+    setExtraSkills(profileData.skills.join(", ")); 
+} else if (profileData?.skills) {
+    setExtraSkills(profileData.skills); // fallback if it's already a string
+}
+        // Pre-fill override fields from profile so user doesn't type from scratch
+        setName(profRes.data?.name || "");
+        setEmail(profRes.data?.email || "");
+        
         setMissingSkills(missRes.data || []);
         setJobDetails(jobRes.data);
         setCompletion(compRes.data);
         setAlreadyApplied(applyCheck.data);
       } catch (err) {
-        // 8. API Failure Handling
-        alert("Failed to load job details. The job might no longer exist.");
+        alert("Failed to load job details.");
         navigate("/jobs");
       } finally {
         setLoading(false);
@@ -79,7 +96,7 @@ const ApplyJob = () => {
     fetchAllData();
   }, [jobId, token, navigate]);
 
-  // Live Match Score Logic
+  // Live Match Score Calculation
   useEffect(() => {
     if (!token || loading || alreadyApplied) return;
     const fetchScore = async () => {
@@ -95,7 +112,6 @@ const ApplyJob = () => {
     return () => clearTimeout(timeoutId);
   }, [extraSkills, jobId, token, loading, alreadyApplied]);
 
-  // 6. Prevent Duplicate Skill Add (Fixed logic)
   const handleAddSkill = (skill) => {
     setExtraSkills(prev => {
       const existing = prev ? prev.split(",").map(s => s.trim().toLowerCase()) : [];
@@ -105,28 +121,27 @@ const ApplyJob = () => {
     });
   };
 
-  // 5. File Validation (Security + UX)
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    if (file.type !== "application/pdf") {
-      return alert("Only PDF files are allowed.");
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      return alert("File size must be less than 5MB.");
-    }
+    if (file.type !== "application/pdf") return alert("Only PDF files are allowed.");
+    if (file.size > 5 * 1024 * 1024) return alert("File size must be less than 5MB.");
     setResumeFile(file);
     setIsDirty(true);
   };
 
   const validateApplication = () => {
-    // 2. Job Status Check
     if (jobDetails?.status !== "OPEN") {
       alert("This position is no longer accepting applications.");
       return false;
     }
-    // 3. Resume Requirement Check
+
+    // Validation for Override Mode
+    if (!useProfileData) {
+      if (!name.trim()) { alert("Please enter your name."); return false; }
+      if (!email.trim() || !email.includes("@")) { alert("Please enter a valid email."); return false; }
+    }
+
     if (useExistingResume && !profile?.resumeUrl) {
       alert("You don't have a profile resume. Please upload a new one.");
       return false;
@@ -135,7 +150,6 @@ const ApplyJob = () => {
       alert("Please select a resume file to upload.");
       return false;
     }
-    // 4. Cover Letter Validation
     if (coverLetter.trim().length < 20) {
       alert("Please provide a more detailed cover letter (min 20 characters).");
       return false;
@@ -148,7 +162,6 @@ const ApplyJob = () => {
     try {
       let finalResumeUrl = profile?.resumeUrl;
       
-      // Upload new resume if selected
       if (!useExistingResume && resumeFile) {
         const formData = new FormData();
         formData.append("file", resumeFile);
@@ -161,14 +174,16 @@ const ApplyJob = () => {
       await axios.post(`${API_BASE}/job-portal/applications/${jobId}`, {
         resumeUrl: finalResumeUrl,
         extraSkills: extraSkills ? extraSkills.split(",").map(s => s.trim()) : [],
-        coverLetter: coverLetter.trim()
+        coverLetter: coverLetter.trim(),
+        override: !useProfileData,
+        name: name,
+        email: email
       }, { headers: { Authorization: `Bearer ${token}` } });
 
       setSuccess(true);
       setIsDirty(false);
     } catch (err) {
-      // 1. Meaningful Backend Feedback
-      const errorMsg = err.response?.data?.message || "Application failed due to a network error.";
+      const errorMsg = err.response?.data?.message || "Application failed.";
       alert(errorMsg);
     } finally {
       setSubmitting(false);
@@ -176,14 +191,19 @@ const ApplyJob = () => {
     }
   };
 
-  // 12. Empty State Handling
   if (!loading && !jobDetails) return <div className="error-state">Job not found.</div>;
   if (loading) return <div className="modern-loader-container"><div className="loader-circle"></div></div>;
 
   const isJobClosed = jobDetails?.status !== "OPEN";
 
   return (
+    
     <div className="apply-page-wrapper">
+      {/* 1. Back Button */}
+    <button className="btn-back" onClick={() => navigate(-1)}>
+      <FaArrowLeft /> Back to Jobs
+    </button>
+      {/* Hero Header */}
       <div className="job-hero-section glass-premium animate-fade-in">
         <div className="hero-main">
           <div className="company-branding">
@@ -222,7 +242,6 @@ const ApplyJob = () => {
                   <div>
                     <p className="label">Posted By</p>
                     <p className="name">{jobDetails?.recruiter?.name || "Hiring Manager"}</p>
-                    {/* 9. Recruiter Privacy Control */}
                     {alreadyApplied ? (
                         <p className="email-reveal animate-fade-in">{jobDetails?.recruiter?.email}</p>
                     ) : (
@@ -242,6 +261,59 @@ const ApplyJob = () => {
           ) : (
             <div className="apply-form-box glass-premium animate-slide-up">
               <form className="modern-form-ui" onSubmit={(e) => e.preventDefault()}>
+                
+                {/* Application Identity Toggle */}
+                <div className="form-group">
+                  <label><FaEdit /> Application Identity</label>
+                  <div className="toggle-box-premium">
+                    <button 
+                      type="button"
+                      className={useProfileData ? "active" : ""} 
+                      onClick={() => setUseProfileData(true)}
+                    >
+                      Use Profile Info
+                    </button>
+                    <button 
+                      type="button"
+                      className={!useProfileData ? "active" : ""} 
+                      onClick={() => setUseProfileData(false)}
+                    >
+                      Override Details
+                    </button>
+                  </div>
+                  <small className="help-text">
+                    {useProfileData 
+                      ? `Applying as stored: ${profile?.name || "Loading..."}`
+                      : "Provide a different name or email for this specific application."}
+                  </small>
+                </div>
+
+                {/* Conditional Override Inputs */}
+                {!useProfileData && (
+                  <div className="override-fields animate-fade-in">
+                    <div className="form-group">
+                      <label>Full Name</label>
+                      <input
+                        type="text"
+                        className="modern-input"
+                        value={name}
+                        onChange={(e) => { setName(e.target.value); setIsDirty(true); }}
+                        placeholder="Enter your full name"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Email Address</label>
+                      <input
+                        type="email"
+                        className="modern-input"
+                        value={email}
+                        onChange={(e) => { setEmail(e.target.value); setIsDirty(true); }}
+                        placeholder="Enter your email"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <div className="form-group">
                   <label><FaKeyboard /> Add Relevant Skills</label>
                   <input 
@@ -251,7 +323,6 @@ const ApplyJob = () => {
                     value={extraSkills}
                     onChange={(e) => { setExtraSkills(e.target.value); setIsDirty(true); }}
                   />
-                  <small>Increase your Match Score by adding skills missing from your profile.</small>
                 </div>
 
                 <div className="form-group">
@@ -287,7 +358,6 @@ const ApplyJob = () => {
                   )}
                 </div>
 
-                {/* 7. Loading State for Submit Button */}
                 <button 
                   type="button" 
                   className="btn-primary-apply" 
@@ -320,48 +390,33 @@ const ApplyJob = () => {
               ))}
             </div>
           </div>
+
+          <div className={`intel-card glass completion-card ${completion < 100 ? 'border-warning' : 'border-success'}`}>
+            <div className="completion-header">
+              <span><FaUserCheck /> Profile Integrity</span>
+              <span className="completion-percent">{completion}%</span>
+            </div>
+            <div className="progress-bar-container">
+              <div 
+                className="progress-bar-fill" 
+                style={{ width: `${completion}%`, backgroundColor: completion < 70 ? '#f59e0b' : '#10b981' }}
+              ></div>
+              <div className="intel-card glass">
+  <header><FaShieldAlt /> Your Profile Skills</header>
+  <div className="skills-tags">
+    {profile?.skills?.map((skill, index) => (
+      <span key={index} className="skill-tag existing">
+        {skill}
+      </span>
+    ))}
+  </div>
+</div>
+            </div>
+          </div>
         </aside>
       </div>
-      {/* 1. PROFILE COMPLETION SECTION */}
-  <div className={`intel-card glass completion-card ${completion < 100 ? 'border-warning' : 'border-success'}`}>
-    <div className="completion-header">
-      <span><FaUserCheck /> Profile Integrity</span>
-      <span className="completion-percent">{completion}%</span>
-    </div>
-    <div className="progress-bar-container">
-      <div 
-        className="progress-bar-fill" 
-        style={{ width: `${completion}%`, backgroundColor: completion < 70 ? '#f59e0b' : '#10b981' }}
-      ></div>
-    </div>
-    {completion < 100 && (
-      <p className="completion-hint">
-        Complete your profile to unlock a higher <strong>Match Score</strong> accuracy.
-        <button className="btn-text-small" onClick={() => navigate("/profile")}>Update Now</button>
-      </p>
-    )}
-  </div>
 
-  <div className="intel-card glass match-intelligence">
-    <header><FaChartPie /> Application Strength</header>
-    {/* ... (Existing circular progress code) */}
-    
-    {/* 2. SMART TIPS (NEW FEATURE) */}
-    <div className="smart-tips-box">
-      <p className="tip-title">Smart Tip:</p>
-      <div className="tip-content">
-        {matchScore < 50 ? (
-          <p><FaInfoCircle /> Add more relevant keywords to your cover letter and skills to get noticed by the ATS.</p>
-        ) : matchScore < 80 ? (
-          <p><FaCheckCircle /> You have a strong match! Mentioning a specific project in your cover letter could seal the deal.</p>
-        ) : (
-          <p><FaShieldAlt /> Elite Match! Your profile is in the top tier for this role. Submit with confidence.</p>
-        )}
-      </div>
-    </div>
-  </div>
-
-      {/* 10. Missing: Apply Confirmation Summary (UX Upgrade) */}
+      {/* Confirmation Modal */}
       {showConfirm && (
         <div className="modal-overlay animate-fade-in">
            <div className="confirmation-modal glass-premium animate-bounce-in">
@@ -370,11 +425,11 @@ const ApplyJob = () => {
                 <button className="close-btn" onClick={() => setShowConfirm(false)}><FaTimes /></button>
              </div>
              <div className="summary-content">
+                <div className="summary-item"><strong>Applying as:</strong> {useProfileData ? profile?.name : name}</div>
+                <div className="summary-item"><strong>Email:</strong> {useProfileData ? profile?.email : email}</div>
                 <div className="summary-item"><strong>Job:</strong> {jobDetails?.title}</div>
-                <div className="summary-item"><strong>Company:</strong> {jobDetails?.companyName}</div>
                 <div className="summary-item"><strong>Resume:</strong> {useExistingResume ? "Profile Resume" : resumeFile?.name}</div>
                 <div className="summary-item"><strong>Match Score:</strong> {matchScore}%</div>
-                <div className="summary-item"><strong>Added Skills:</strong> {extraSkills || "None"}</div>
              </div>
              <div className="modal-footer">
                 <button className="btn-text" onClick={() => setShowConfirm(false)}>Back to Edit</button>
@@ -386,6 +441,7 @@ const ApplyJob = () => {
         </div>
       )}
 
+      {/* Success Overlay */}
       {success && (
         <div className="full-screen-overlay animate-fade-in">
           <div className="success-anim-box">

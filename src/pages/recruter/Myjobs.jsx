@@ -5,7 +5,7 @@ import {
   FaPlus, FaEdit, FaTrash, FaSearch, FaChevronLeft, FaChevronRight,
   FaMapMarkerAlt, FaClock, FaUserGraduate, FaCalendarAlt, FaBuilding, 
   FaEye, FaPowerOff, FaUserTie, FaUsers, FaMoneyBillWave, FaSignal,
-  FaMagic, FaLightbulb, FaInfoCircle,FaLayerGroup
+  FaMagic, FaLightbulb, FaInfoCircle,FaLayerGroup,FaBriefcase,FaGraduationCap,FaLaptopHouse,FaCode
 } from "react-icons/fa";
 import "../Styles/Myjobs.css"; 
 
@@ -86,20 +86,29 @@ export default function MyJobs() {
     return () => clearTimeout(delay);
   }, [fetchJobs]);
 
-  const handleFormChange = (e) => {
+ const handleFormChange = (e) => {
   const { name, value } = e.target;
 
-  if (name === "skillsRequired") {
-    setFormData({
-      ...formData,
-      skillsRequired: value.split(",").map(s => s.trim())
-    });
-  } else {
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-  }
+  // 1. Update the field being typed in normally
+  setFormData((prev) => {
+    const updatedData = { ...prev, [name]: value };
+
+    // 2. AUTO-SKILLS LOGIC: Check if the user is changing the "title"
+    if (name === "title") {
+      // Look up skills for the selected title (e.g., "Frontend Developer")
+      const suggestedSkills = skillMapping[value]; 
+      
+      if (suggestedSkills) {
+        // If match found, update the skillsRequired field automatically
+        // We keep it as a string here so the user can edit it
+        updatedData.skillsRequired = Array.isArray(suggestedSkills) 
+          ? suggestedSkills.join(", ") 
+          : suggestedSkills;
+      }
+    }
+
+    return updatedData;
+  });
 };
   const generateDescription = () => {
     if (!formData.title || !formData.skillsRequired) {
@@ -148,21 +157,103 @@ const CATEGORY_OPTIONS = [
   { value: "ENGINEERING", label: "Engineering" },
   { value: "EDUCATION", label: "Education" },
   { value: "HEALTHCARE", label: "Healthcare" }];
+const today = new Date().toISOString().split("T")[0];
 
-  const validateAndSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      if (formData.publicId) {
-        await axios.put(`${API}/${formData.publicId}`, formData, { headers: { Authorization: `Bearer ${token}` } });
-      } else {
-        await axios.post(API, formData, { headers: { Authorization: `Bearer ${token}` } });
-      }
+const validateAndSubmit = async (e) => {
+  e.preventDefault();
+
+  // 🔴 VALIDATION SECTION
+  if (!formData.title?.trim()) {
+    return alert("Job title is required");
+  }
+
+  if (!formData.category) {
+    return alert("Please select a category");
+  }
+
+  if (!formData.salary || formData.salary <= 0) {
+    return alert("Enter a valid salary");
+  }
+
+  if (!formData.location?.trim()) {
+    return alert("Location is required");
+  }
+
+  if (!formData.closingDate) {
+    return alert("Please select a closing date");
+  }
+
+  if (formData.closingDate < today) {
+    return alert("Closing date cannot be in the past");
+  }
+
+  if (!formData.description?.trim()) {
+    return alert("Job description is required");
+  }
+
+  if (!formData.jobType) {
+    return alert("Please select job type");
+  }
+
+  // 🟡 SKILLS CONVERSION (String → Array)
+  const skillsArray =
+    typeof formData.skillsRequired === "string"
+      ? formData.skillsRequired
+          .split(",")
+          .map((s) => s.trim())
+          .filter((s) => s !== "")
+      : formData.skillsRequired || [];
+
+  // 🔵 FINAL DATA OBJECT
+  const dataToSubmit = {
+    ...formData,
+    skillsRequired: skillsArray,
+
+    // ✅ FIX: Convert to LocalDateTime
+    closingDate: formData.closingDate
+      ? formData.closingDate + "T23:59:59"
+      : null,
+  };
+
+  try {
+    let response;
+
+    if (formData.publicId) {
+      // ✏️ UPDATE
+      response = await axios.put(
+        `${API}/${formData.publicId}`,
+        dataToSubmit,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+    } else {
+      // 🆕 CREATE
+      response = await axios.post(`${API}`, dataToSubmit, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    }
+
+    // ✅ SUCCESS HANDLING
+    if (response.status === 200 || response.status === 201) {
       setIsModalOpen(false);
       fetchJobs();
-    } catch (err) {
-      alert("Error saving job.");
+      alert(
+        formData.publicId
+          ? "Job updated successfully!"
+          : "Job published successfully!"
+      );
     }
-  };
+  } catch (err) {
+    console.error("Submission Error Details:", err.response?.data);
+
+    alert(
+      err.response?.data?.message ||
+        "Something went wrong. Check console."
+    );
+  }
+};
+
 
   const handleToggleStatus = async (id) => {
     try {
@@ -371,6 +462,7 @@ const CATEGORY_OPTIONS = [
   <div className="mj-modal-overlay">
     <div className="mj-smart-modal animated-zoom-in">
       <form className="mj-modal-form" onSubmit={validateAndSubmit}>
+        
         {/* Sticky Header */}
         <div className="modal-header-pro">
           <div className="header-title-group">
@@ -384,39 +476,39 @@ const CATEGORY_OPTIONS = [
         </div>
 
         <div className="form-grid-scroll">
-          {/* Section 1: Core Details */}
+          {/* Section 1: General Information */}
           <div className="form-section-label">General Information</div>
           <div className="form-grid">
             <div className="input-group full-width">
               <label>Job Title <FaLightbulb className="hint-icon" /></label>
               <div className="input-with-icon">
                 <FaUserTie className="field-icon" />
-                <input name="title" list="job-titles" placeholder="Select or type role..." value={formData.title} onChange={handleFormChange} required />
+                <input 
+                  name="title" 
+                  list="job-titles" 
+                  placeholder="Select or type role..." 
+                  value={formData.title} 
+                  onChange={handleFormChange} 
+                  required 
+                />
               </div>
               <datalist id="job-titles">
                 {Object.keys(skillMapping).map(role => <option key={role} value={role} />)}
               </datalist>
             </div>
 
-<div className="input-group">
-  <label>Category</label>
-  <div className="input-with-icon">
-    <FaLayerGroup className="field-icon" />
-    <select 
-      name="category" 
-      value={formData.category} 
-      onChange={handleFormChange} 
-      required
-    >
-      <option value="" disabled>Select a category</option>
-      {CATEGORY_OPTIONS.map(opt => (
-        <option key={opt.value} value={opt.value}>
-          {opt.label}
-        </option>
-      ))}
-    </select>
-  </div>
-</div>
+            <div className="input-group">
+              <label>Category</label>
+              <div className="input-with-icon">
+                <FaLayerGroup className="field-icon" />
+                <select name="category" value={formData.category} onChange={handleFormChange} required>
+                  <option value="" disabled>Select a category</option>
+                  {CATEGORY_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
             <div className="input-group">
               <label>Annual Salary (LPA)</label>
@@ -427,9 +519,48 @@ const CATEGORY_OPTIONS = [
             </div>
           </div>
 
-          {/* Section 2: Logistics & Deadlines */}
+          {/* Section 2: Logistics & Deadlines (ENHANCED) */}
           <div className="form-section-label">Configuration & Logistics</div>
           <div className="form-grid">
+            <div className="input-group">
+              <label>Job Type</label>
+              <div className="input-with-icon">
+                <FaBriefcase className="field-icon" />
+                <select name="jobType" value={formData.jobType} onChange={handleFormChange} required>
+                  <option value="">Select Type</option>
+                  <option value="FULL_TIME">Full Time</option>
+                  <option value="PART_TIME">Part Time</option>
+                  <option value="INTERNSHIP">Internship</option>
+                  <option value="CONTRACT">Contract</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="input-group">
+              <label>Experience Level</label>
+              <div className="input-with-icon">
+                <FaGraduationCap className="field-icon" />
+                <select name="experienceLevel" value={formData.experienceLevel} onChange={handleFormChange} required>
+                  <option value="ALL">All Levels</option>
+              <option value="FRESHER">Fresher</option>
+              <option value="INTERMEDIATE">Intermediate</option>
+              <option value="SENIOR">Senior</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="input-group">
+              <label>Work Mode</label>
+              <div className="input-with-icon">
+                <FaLaptopHouse className="field-icon" />
+                <select name="workMode" value={formData.workMode} onChange={handleFormChange}>
+                  <option value="REMOTE">Remote</option>
+                  <option value="ONSITE">Onsite</option>
+                  <option value="HYBRID">Hybrid</option>
+                </select>
+              </div>
+            </div>
+
             <div className="input-group">
               <label>Location</label>
               <div className="input-with-icon">
@@ -442,17 +573,15 @@ const CATEGORY_OPTIONS = [
               <label>Application Deadline</label>
               <div className="input-with-icon">
                 <FaCalendarAlt className="field-icon" />
-                <input name="closedDate" type="date" value={formData.closedDate} onChange={handleFormChange} required />
+                <input 
+  name="closingDate"   // ✅ CORRECT
+  type="date" 
+  min={today} 
+  value={formData.closingDate} 
+  onChange={handleFormChange} 
+  required 
+/>
               </div>
-            </div>
-
-            <div className="input-group">
-              <label>Work Mode</label>
-              <select name="workMode" value={formData.workMode} onChange={handleFormChange}>
-                <option value="REMOTE">Remote</option>
-                <option value="ONSITE">Onsite</option>
-                <option value="HYBRID">Hybrid</option>
-              </select>
             </div>
 
             <div className="input-group">
@@ -467,15 +596,20 @@ const CATEGORY_OPTIONS = [
           {/* Section 3: Requirements */}
           <div className="form-section-label">Detailed Requirements</div>
           <div className="input-group full-width">
-            <label>Skills Required (Auto-suggested)</label>
-            <input
-  name="skillsRequired"
-  placeholder="Java, React, Spring Boot"
-  value={formData.skillsRequired}
-  onChange={handleFormChange}
-/>
-          </div>
-
+  <label>Skills Required (Separate by comma)</label>
+  <div className="input-with-icon">
+    <FaCode className="field-icon" />
+    <input
+      name="skillsRequired"
+      placeholder="e.g. Java, React, Spring Boot"
+      // Show as string: converts ["A", "B"] to "A, B" or just shows "A, "
+      value={Array.isArray(formData.skillsRequired) 
+        ? formData.skillsRequired.join(", ") 
+        : formData.skillsRequired}
+      onChange={handleFormChange}
+    />
+  </div>
+</div>
           <div className="input-group full-width">
             <div className="label-flex">
               <label>Job Description</label>
@@ -496,6 +630,7 @@ const CATEGORY_OPTIONS = [
         </div>
       </form>
 
+      {/* Guide Sidebar */}
       <aside className="mj-form-guide">
         <div className="guide-content">
           <h4>Smart Tools</h4>

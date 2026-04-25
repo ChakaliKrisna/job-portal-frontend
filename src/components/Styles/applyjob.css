@@ -1,31 +1,81 @@
-/* --- Root Variables for Theme Consistency --- */
 :root {
-  --primary-emerald: #10b981;
-  --primary-indigo: #6366f1;
-  --glass-bg: rgba(255, 255, 255, 0.7);
+  --primary-green: #10b981; /* Emerald */
+  --primary-dark: #065f46;  /* Forest */
+  --primary-light: #d1fae5;
+  --secondary-slate: #64748b;
+  --bg-subtle: #f8fafc;
+  --white: #ffffff;
+  --glass-bg: rgba(255, 255, 255, 0.85);
   --glass-border: rgba(255, 255, 255, 0.4);
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+body {
+  background-color: var(--bg-subtle);
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(161, 64%, 90%, 1) 0, transparent 50%), 
+    radial-gradient(at 50% 0%, hsla(180, 50%, 95%, 1) 0, transparent 50%);
+  min-height: 100vh;
+}
+
+/* Global Page Wrapper */
 .apply-page-wrapper {
-  max-width: 1200px;
-  margin: 40px auto;
-  padding: 0 20px;
-  font-family: 'Inter', sans-serif;
-  color: var(--text-main);
+  max-width: 1250px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
-/* --- 1. HERO SECTION (GLASS PREMIUM) --- */
-.job-hero-section.glass-premium {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+/* Back Navigation */
+.back-nav {
+  margin-bottom: 20px;
+}
+
+.btn-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: var(--secondary-slate);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: var(--transition);
+}
+
+.btn-back:hover {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+}
+
+/* Glass Premium Cards */
+.glass-premium {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border);
-  border-radius: 24px;
-  padding: 32px;
   box-shadow: var(--shadow-lg);
+  border-radius: 24px;
+}
+
+.glass {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Hero Header */
+.job-hero-section {
+  padding: 32px;
   margin-bottom: 30px;
+  position: relative;
+  overflow: hidden;
 }
 
 .hero-main {
@@ -44,179 +94,173 @@
 .company-logo-large {
   width: 70px;
   height: 70px;
-  background: var(--primary-indigo);
+  background: linear-gradient(135deg, var(--primary-green), var(--primary-dark));
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 18px;
   font-size: 2rem;
   font-weight: 800;
-  border-radius: 18px;
-  box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
 }
 
 .hero-text h1 {
-  font-size: 1.75rem;
+  font-size: 2.2rem;
   font-weight: 800;
-  margin-bottom: 8px;
-}
-
-.company-meta {
-  color: var(--text-muted);
-  display: flex;
-  gap: 15px;
+  margin: 0;
+  color: #0f172a;
+  letter-spacing: -0.02em;
 }
 
 .closed-tag {
+  font-size: 0.9rem;
   background: #fee2e2;
-  color: #ef4444;
-  font-size: 0.75rem;
-  padding: 4px 10px;
+  color: #b91c1c;
+  padding: 4px 12px;
   border-radius: 20px;
   vertical-align: middle;
+  margin-left: 10px;
 }
 
-/* --- 2. TAB NAVIGATION --- */
+.company-meta {
+  margin-top: 8px;
+  color: var(--secondary-slate);
+  display: flex;
+  gap: 15px;
+  font-weight: 500;
+}
+
+.hero-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.salary-badge {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+/* Tab Navigation */
 .tab-navigation {
   display: flex;
   gap: 10px;
-  border-top: 1px solid #e2e8f0;
-  padding-top: 20px;
+  margin-top: 20px;
 }
 
 .tab-navigation button {
-  padding: 10px 24px;
-  border-radius: 12px;
+  padding: 12px 24px;
   border: none;
   background: transparent;
-  font-weight: 600;
-  color: var(--text-muted);
+  font-weight: 700;
+  color: var(--secondary-slate);
   cursor: pointer;
-  transition: all 0.3s;
+  border-radius: 12px;
+  transition: var(--transition);
 }
 
 .tab-navigation button.active {
-  background: var(--primary-indigo);
+  background: var(--primary-green);
   color: white;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
 }
 
-/* --- 3. MAIN GRID LAYOUT --- */
+/* Grid Layout */
 .apply-main-grid {
   display: grid;
-  grid-template-columns: 1.8fr 1fr;
+  grid-template-columns: 1fr 380px;
   gap: 30px;
-  align-items: start;
 }
 
-/* --- 4. FORM & CONTENT AREA --- */
-.glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
-  border-radius: 20px;
-  padding: 28px;
-  box-shadow: var(--shadow-sm);
-}
-
-.description-card h3 {
+/* Form Styling */
+.modern-form-ui {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 16px;
+  flex-direction: column;
+  gap: 24px;
 }
 
-.rich-text {
-  line-height: 1.7;
-  color: #475569;
-}
-
-.recruiter-box {
-  margin-top: 30px;
-  padding: 20px;
-  background: #f1f5f9;
-  border-radius: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.recruiter-info {
-  display: flex;
-  gap: 15px;
-  align-items: center;
-}
-
-.recruiter-icon {
-  font-size: 2.5rem;
-  color: #94a3b8;
-}
-
-/* --- 5. INPUTS & FORM UI --- */
-.modern-input, .modern-textarea {
-  width: 100%;
-  padding: 14px;
-  border-radius: 12px;
-  border: 1.5px solid #e2e8f0;
-  margin-top: 8px;
-  transition: 0.3s;
-}
-
-.modern-input:focus, .modern-textarea:focus {
-  border-color: var(--primary-emerald);
-  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
-  outline: none;
-}
-
-.resume-selector-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-  margin: 15px 0;
-}
-
-.resume-card {
-  border: 2px solid #e2e8f0;
-  padding: 20px;
-  border-radius: 16px;
-  text-align: center;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.resume-card.active {
-  border-color: var(--primary-emerald);
-  background: #f0fdf4;
-  color: var(--primary-emerald);
-}
-
-/* --- 6. SIDEBAR INTELLIGENCE --- */
-.intel-card {
-  margin-bottom: 20px;
-}
-
-.intel-card header {
-  font-weight: 700;
-  margin-bottom: 15px;
+.form-group label {
   display: flex;
   align-items: center;
   gap: 8px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #334155;
 }
 
-.score-container {
+.modern-input, .modern-textarea {
+  width: 100%;
+  padding: 14px 18px;
+  border: 2px solid #f1f5f9;
+  border-radius: 14px;
+  background: #f8fafc;
+  font-size: 1rem;
+  transition: var(--transition);
+}
+
+.modern-input:focus, .modern-textarea:focus {
+  border-color: var(--primary-green);
+  background: white;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
+/* Toggle Box */
+.toggle-box-premium {
   display: flex;
-  justify-content: center;
-  padding: 20px 0;
+  background: #f1f5f9;
+  padding: 6px;
+  border-radius: 14px;
+  gap: 6px;
+}
+
+.toggle-box-premium button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.toggle-box-premium button.active {
+  background: white;
+  color: var(--primary-green);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Sidebar Styling */
+.sidebar-area {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.intel-card header {
+  font-weight: 800;
+  font-size: 1rem;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #1e293b;
 }
 
 .circular-progress {
-  width: 120px;
-  height: 120px;
+  width: 110px;
+  height: 110px;
   border-radius: 50%;
+  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 1s ease-in-out;
 }
 
 .inner-white {
@@ -227,134 +271,501 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 800;
 }
 
-.skill-tag.missing {
-  display: inline-block;
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  padding: 6px 12px;
-  border-radius: 20px;
-  margin: 4px;
-  cursor: pointer;
+/* Progress Bar */
+.progress-bar-container {
+  height: 10px;
+  background: #e2e8f0;
+  border-radius: 10px;
+  margin: 15px 0;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  transition: width 1s ease-in-out;
+}
+
+/* Skills Tags */
+.skill-tag {
+  padding: 6px 14px;
+  border-radius: 10px;
   font-size: 0.85rem;
-  transition: 0.2s;
+  font-weight: 600;
+  margin: 4px;
+  display: inline-block;
+}
+
+.skill-tag.existing {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+}
+
+.skill-tag.missing {
+  border: 2px dashed #cbd5e1;
+  color: var(--secondary-slate);
+  cursor: pointer;
 }
 
 .skill-tag.missing:hover {
-  background: var(--primary-emerald);
-  color: white;
-  border-color: var(--primary-emerald);
+  border-color: var(--primary-green);
+  color: var(--primary-green);
 }
 
-/* --- 7. BUTTONS --- */
+/* Main Buttons */
 .btn-primary-apply {
-  width: 100%;
-  padding: 16px;
-  background: var(--primary-emerald);
+  background: linear-gradient(135deg, var(--primary-green), var(--primary-dark));
   color: white;
+  padding: 18px;
   border: none;
-  border-radius: 14px;
-  font-weight: 700;
-  font-size: 1rem;
+  border-radius: 16px;
+  font-size: 1.1rem;
+  font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
-  transition: 0.3s;
+  transition: var(--transition);
+  margin-top: 10px;
 }
 
-.btn-primary-apply:hover:not(:disabled) {
+.btn-primary-apply:hover {
   transform: translateY(-2px);
-  filter: brightness(1.1);
+  box-shadow: 0 12px 24px rgba(16, 185, 129, 0.3);
 }
 
 .btn-primary-apply:disabled {
   background: #cbd5e1;
   cursor: not-allowed;
-  box-shadow: none;
+  transform: none;
 }
 
-/* --- 8. ANIMATIONS --- */
-.animate-slide-up {
-  animation: slideUp 0.5s ease-out;
+/* Animation Classes */
+.animate-fade-in { animation: fadeIn 0.6s ease forwards; }
+.animate-slide-up { animation: slideUp 0.6s ease-out forwards; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* --- 9. MODALS --- */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(8px);
-  z-index: 2000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Responsive */
+@media (max-width: 1024px) {
+  .apply-main-grid {
+    grid-template-columns: 1fr;
+  }
+  .sidebar-area {
+    order: -1;
+  }
+}
+/* applyjob.css */
+:root {
+  --emerald-600: #059669;
+  --emerald-700: #047857;
+  --emerald-50: #ecfdf5;
+  --slate-700: #334155;
 }
 
-.confirmation-modal {
+/* SCOPED WRAPPER - This prevents leaking to other pages */
+.apply-page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  font-family: 'Inter', sans-serif;
+  color: var(--slate-700);
+}
+
+/* Better Navigation */
+.apply-page-container .btn-back {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #64748b;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.apply-page-container .btn-back:hover {
+  color: var(--emerald-600);
+}
+
+/* Modern Green Hero Section */
+.apply-page-container .job-hero-section {
   background: white;
-  width: 90%;
-  max-width: 500px;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+.apply-page-container .company-logo-large {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.apply-page-container .salary-badge {
+  background: var(--emerald-50);
+  color: var(--emerald-700);
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+/* Tab Styling */
+.apply-page-container .tab-navigation {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 1rem;
+}
+
+.apply-page-container .tab-navigation button {
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.apply-page-container .tab-navigation button.active {
+  background: var(--emerald-600);
+  color: white;
+}
+
+/* Sidebar & Form Cards */
+.apply-page-container .intel-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.apply-page-container .intel-card header {
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 1rem;
+  color: #1e293b;
+}
+
+/* Emerald Progress Bar */
+.apply-page-container .progress-bar-fill {
+  background: var(--emerald-600) !important;
+  border-radius: 10px;
+}
+
+/* Primary Submit Button */
+.apply-page-container .btn-primary-apply {
+  width: 100%;
+  padding: 1rem;
+  background: var(--emerald-600);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.apply-page-container .btn-primary-apply:hover {
+  background: var(--emerald-700);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);
+}
+
+/* Scoped Tags */
+.apply-page-container .skill-tag.existing {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+/* applyjob.css */
+
+/* 1. Reset for the full-page feel */
+.apply-page-container {
+  min-height: 100vh; /* Takes full height of the screen */
+  width: 100%;       /* Takes full width */
+  margin: 0;
+  padding: 20px 40px;
+  background-color: #f0fdf4; /* Very light emerald green background */
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+/* 2. Responsive Grid that expands */
+.apply-page-container .apply-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px; /* Main content expands, sidebar stays fixed */
+  gap: 30px;
+  max-width: 1400px; /* Optional: prevents it from getting TOO wide on ultra-wide monitors */
+  margin: 0 auto;    /* Centers the wide layout */
+}
+
+/* 3. Make the Hero Section fill the width */
+.apply-page-container .job-hero-section {
+  max-width: 1400px;
+  margin: 0 auto 30px auto;
+  background: white;
   border-radius: 24px;
-  padding: 30px;
-  box-shadow: var(--shadow-lg);
+  padding: 40px;
+  border: 1px solid #d1fae5;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
 }
 
-.summary-item {
-  padding: 12px 0;
-  border-bottom: 1px solid #f1f5f9;
-}
-.apply-page-wrapper {
+/* 4. Emerald Green Button Styling */
+.apply-page-container .btn-primary-apply {
+  background: #10b981;
+  color: white;
+  padding: 18px;
+  border-radius: 12px;
+  font-weight: 800;
+  border: none;
   width: 100%;
-  min-height: 100vh; /* Ensures it fills the screen height */
-  max-width: 1400px; /* Increased from 1200px to occupy more window */
-  margin: 0 auto;
-  padding: 40px 20px;
-  
-  /* If your navbar is fixed, add padding-top so the content isn't hidden under it */
-  padding-top: 80px; 
+  cursor: pointer;
+  transition: 0.3s ease;
 }
 
-/* Ensure the Overlay (Modal) doesn't cover the Navbar if you want the Nav accessible */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  /* If navbar is z-index 1000, set this to 999 to show nav above modal */
-  /* Or set to 2000 if you WANT the modal to cover everything */
-  z-index: 2000; 
-  background: rgba(15, 23, 42, 0.7);
-  backdrop-filter: blur(8px);
+.apply-page-container .btn-primary-apply:hover {
+  background: #059669;
+  box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+}
+/* Scope everything under .apply-full-viewport to prevent bleeding */
+.apply-full-viewport {
+  --primary: #10b981;
+  --primary-dark: #059669;
+  --primary-light: #ecfdf5;
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-700: #334155;
+  --slate-900: #0f172a;
+
+  background-color: var(--slate-50);
+  min-height: 100vh;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Header/Back Button Area */
+.apply-full-viewport .top-nav-bar {
+  padding: 1.5rem 4rem;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.apply-full-viewport .btn-back {
+  background: white;
+  border: 1px solid var(--slate-200);
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  color: var(--slate-700);
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.apply-full-viewport .btn-back:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+}
+
+/* Hero Section */
+.apply-full-viewport .job-hero-section {
+  background: white;
+  margin: 0 4rem 2rem 4rem;
+  padding: 2.5rem;
+  border-radius: 24px;
+  border: 1px solid var(--slate-200);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04);
+}
+
+.apply-full-viewport .company-logo-large {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-.apply-page-wrapper {
-  width: 100%;
-  min-height: 100vh; /* Ensures it fills the screen height */
-  max-width: 1400px; /* Increased from 1200px to occupy more window */
-  margin: 0 auto;
-  padding: 40px 20px;
-  
-  /* If your navbar is fixed, add padding-top so the content isn't hidden under it */
-  padding-top: 80px; 
+  border-radius: 16px;
+  font-size: 1.8rem;
+  font-weight: 800;
 }
 
-/* Ensure the Overlay (Modal) doesn't cover the Navbar if you want the Nav accessible */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  /* If navbar is z-index 1000, set this to 999 to show nav above modal */
-  /* Or set to 2000 if you WANT the modal to cover everything */
-  z-index: 2000; 
-  background: rgba(15, 23, 42, 0.7);
-  backdrop-filter: blur(8px);
+.apply-full-viewport .salary-badge {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  padding: 0.6rem 1.2rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+/* Layout Grid */
+.apply-full-viewport .apply-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 2.5rem;
+  padding: 0 4rem 4rem 4rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Forms and Cards */
+.apply-full-viewport .glass-premium, 
+.apply-full-viewport .intel-card {
+  background: white;
+  border: 1px solid var(--slate-200);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+}
+
+/* Tab Navigation */
+.apply-full-viewport .tab-navigation {
+  display: flex;
+  gap: 12px;
+  margin-top: 2rem;
+  border-top: 1px solid var(--slate-100);
+  padding-top: 1.5rem;
+}
+
+.apply-full-viewport .tab-navigation button {
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--slate-100);
+  color: var(--slate-700);
+  transition: 0.3s;
+}
+
+.apply-full-viewport .tab-navigation button.active {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+/* Input Styles */
+.apply-full-viewport .modern-input, 
+.apply-full-viewport .modern-textarea {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid var(--slate-100);
+  border-radius: 14px;
+  background: var(--slate-50);
+  font-size: 1rem;
+  margin-top: 8px;
+  transition: 0.2s;
+}
+
+.apply-full-viewport .modern-input:focus {
+  border-color: var(--primary);
+  background: white;
+  outline: none;
+}
+
+/* Submit Button */
+.apply-full-viewport .btn-primary-apply {
+  width: 100%;
+  padding: 1.2rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.apply-full-viewport .btn-primary-apply:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+/* Sidebar Intelligence */
+.apply-full-viewport .circular-progress {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin: 1.5rem auto;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: 0.5s ease-in-out;
+}
+
+.apply-full-viewport .inner-white {
+  width: 95px;
+  height: 95px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.4rem;
+}
+
+.apply-full-viewport .progress-bar-container {
+  height: 12px;
+  background: var(--slate-100);
+  border-radius: 20px;
+  overflow: hidden;
+  margin: 1rem 0;
+}
+
+.apply-full-viewport .progress-bar-fill {
+  height: 100%;
+  background: var(--primary) !important;
+  transition: width 1s ease;
+}
+
+/* Responsive Fix */
+@media (max-width: 1100px) {
+  .apply-full-viewport .apply-main-grid {
+    grid-template-columns: 1fr;
+    padding: 2rem;
+  }
+  .apply-full-viewport .job-hero-section {
+    margin: 1rem 2rem;
+  }
 }
