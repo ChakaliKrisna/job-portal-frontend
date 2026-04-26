@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { 
-  FaCheckCircle, FaCloudUploadAlt, FaExclamationTriangle, FaFilePdf, 
-  FaBriefcase, FaMapMarkerAlt, FaWallet, FaChartPie, FaShieldAlt, 
-  FaEye, FaInfoCircle, FaUserTie, FaBuilding, FaKeyboard, FaTimes, FaLock, FaUserCheck, FaEdit,FaArrowLeft
+  FaCheckCircle, FaCloudUploadAlt, FaFilePdf, FaBriefcase, FaMapMarkerAlt, 
+  FaWallet, FaChartPie, FaShieldAlt, FaInfoCircle, FaBuilding, 
+  FaKeyboard, FaTimes, FaUserCheck, FaEdit, FaArrowLeft, FaClock, FaGlobe, FaSpinner
 } from "react-icons/fa";
 import axios from "axios";
 import "../components/Styles/applyjob.css";
@@ -22,37 +22,23 @@ const ApplyJob = () => {
   const [completion, setCompletion] = useState(0);
   const [alreadyApplied, setAlreadyApplied] = useState(false);
   const [matchScore, setMatchScore] = useState(0);
-
+const [isDirty, setIsDirty] = useState(false);
   // --- Form States ---
-  const [activeTab, setActiveTab] = useState("details");
   const [extraSkills, setExtraSkills] = useState("");
   const [resumeFile, setResumeFile] = useState(null);
   const [useExistingResume, setUseExistingResume] = useState(true);
   const [coverLetter, setCoverLetter] = useState("");
-
-  // NEW: Override States
+  const [availability, setAvailability] = useState("Immediate");
+  const [workPreference, setWorkPreference] = useState("Remote");
   const [useProfileData, setUseProfileData] = useState(true);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   
-  // --- UI Logic States ---
+  // --- UI States ---
   const [showConfirm, setShowConfirm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [isDirty, setIsDirty] = useState(false);
-
-  // Navigation Guard: Prevents accidental tab close
-  useEffect(() => {
-    const handleBeforeUnload = (e) => {
-      if (isDirty && !success) {
-        e.preventDefault();
-        e.returnValue = "";
-      }
-    };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [isDirty, success]);
 
   // Initial Data Fetch
   useEffect(() => {
@@ -69,25 +55,14 @@ const ApplyJob = () => {
           axios.get(`${API_BASE}/job-portal/applications/check/${jobId}`, { headers })
         ]);
 
-      const profileData = profRes.data;
-setProfile(profileData);
-
-// FIX: Convert the List<String> from backend into a string for the input field
-if (profileData?.skills && Array.isArray(profileData.skills)) {
-    setExtraSkills(profileData.skills.join(", ")); 
-} else if (profileData?.skills) {
-    setExtraSkills(profileData.skills); // fallback if it's already a string
-}
-        // Pre-fill override fields from profile so user doesn't type from scratch
+        setProfile(profRes.data);
         setName(profRes.data?.name || "");
         setEmail(profRes.data?.email || "");
-        
         setMissingSkills(missRes.data || []);
         setJobDetails(jobRes.data);
         setCompletion(compRes.data);
         setAlreadyApplied(applyCheck.data);
       } catch (err) {
-        alert("Failed to load job details.");
         navigate("/jobs");
       } finally {
         setLoading(false);
@@ -96,72 +71,58 @@ if (profileData?.skills && Array.isArray(profileData.skills)) {
     fetchAllData();
   }, [jobId, token, navigate]);
 
-  // Live Match Score Calculation
+  // Debounced Match Score with AbortController (Fix 6)
   useEffect(() => {
     if (!token || loading || alreadyApplied) return;
+    const controller = new AbortController();
+
     const fetchScore = async () => {
       try {
         const res = await axios.get(`${API_BASE}/job-portal/applications/jobs/${jobId}/match-score`, {
           headers: { Authorization: `Bearer ${token}` },
-          params: { extraSkills: extraSkills || "" }
+          params: { extraSkills: extraSkills || "" },
+          signal: controller.signal
         });
         setMatchScore(res.data);
-      } catch (err) { console.error(err); }
+      } catch (err) { if (!axios.isCancel(err)) console.error(err); }
     };
+
     const timeoutId = setTimeout(fetchScore, 600);
-    return () => clearTimeout(timeoutId);
+    return () => {
+      clearTimeout(timeoutId);
+      controller.abort();
+    };
   }, [extraSkills, jobId, token, loading, alreadyApplied]);
 
-  const handleAddSkill = (skill) => {
-    setExtraSkills(prev => {
-      const existing = prev ? prev.split(",").map(s => s.trim().toLowerCase()) : [];
-      if (existing.includes(skill.toLowerCase())) return prev;
-      setIsDirty(true);
-      return prev ? `${prev}, ${skill}` : skill;
-    });
+  // Form Validation (Fix 1 & 5)
+  const validateForm = () => {
+    if (coverLetter.trim().length < 20) {
+      alert("Cover letter must be at least 20 characters.");
+      return false;
+    }
+    if (!useExistingResume && !resumeFile) {
+      alert("Please upload a new resume PDF.");
+      return false;
+    }
+    if (!useProfileData) {
+      if (!name.trim()) { alert("Please enter your name."); return false; }
+      if (!email.includes("@")) { alert("Please enter a valid email."); return false; }
+    }
+    return true;
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.type !== "application/pdf") return alert("Only PDF files are allowed.");
-    if (file.size > 5 * 1024 * 1024) return alert("File size must be less than 5MB.");
+    if (file.type !== "application/pdf") return alert("Only PDF allowed");
+    if (file.size > 5 * 1024 * 1024) return alert("Max size 5MB");
     setResumeFile(file);
-    setIsDirty(true);
-  };
-
-  const validateApplication = () => {
-    if (jobDetails?.status !== "OPEN") {
-      alert("This position is no longer accepting applications.");
-      return false;
-    }
-
-    // Validation for Override Mode
-    if (!useProfileData) {
-      if (!name.trim()) { alert("Please enter your name."); return false; }
-      if (!email.trim() || !email.includes("@")) { alert("Please enter a valid email."); return false; }
-    }
-
-    if (useExistingResume && !profile?.resumeUrl) {
-      alert("You don't have a profile resume. Please upload a new one.");
-      return false;
-    }
-    if (!useExistingResume && !resumeFile) {
-      alert("Please select a resume file to upload.");
-      return false;
-    }
-    if (coverLetter.trim().length < 20) {
-      alert("Please provide a more detailed cover letter (min 20 characters).");
-      return false;
-    }
-    return true;
   };
 
   const handleFinalSubmit = async () => {
     setSubmitting(true);
     try {
       let finalResumeUrl = profile?.resumeUrl;
-      
       if (!useExistingResume && resumeFile) {
         const formData = new FormData();
         formData.append("file", resumeFile);
@@ -173,282 +134,310 @@ if (profileData?.skills && Array.isArray(profileData.skills)) {
 
       await axios.post(`${API_BASE}/job-portal/applications/${jobId}`, {
         resumeUrl: finalResumeUrl,
-        extraSkills: extraSkills ? extraSkills.split(",").map(s => s.trim()) : [],
         coverLetter: coverLetter.trim(),
+        extraSkills: extraSkills ? extraSkills.split(",").map(s => s.trim()) : [],
         override: !useProfileData,
-        name: name,
-        email: email
+        name: useProfileData ? profile.name : name,
+        email: useProfileData ? profile.email : email,
+        position: jobDetails.title, // Fix 7
+        availability,
+        workPreference
       }, { headers: { Authorization: `Bearer ${token}` } });
 
       setSuccess(true);
-      setIsDirty(false);
     } catch (err) {
-      const errorMsg = err.response?.data?.message || "Application failed.";
-      alert(errorMsg);
+      alert(err.response?.data?.message || "Application failed.");
     } finally {
       setSubmitting(false);
       setShowConfirm(false);
     }
   };
+  const handleSafeBack = () => {
+  if (isDirty && !success) {
+    const confirmLeave = window.confirm(
+      "You have unsaved changes in your application. Are you sure you want to leave?"
+    );
+    if (confirmLeave) navigate("/jobs");
+  } else {
+    navigate("/jobs");
+  }
+};
 
-  if (!loading && !jobDetails) return <div className="error-state">Job not found.</div>;
-  if (loading) return <div className="modern-loader-container"><div className="loader-circle"></div></div>;
-
-  const isJobClosed = jobDetails?.status !== "OPEN";
+  if (loading) return <div className="modern-loader"><FaSpinner className="spin" /> Loading Opportunity...</div>;
 
   return (
-    
-    <div className="apply-page-wrapper">
-      {/* 1. Back Button */}
-    <button className="btn-back" onClick={() => navigate(-1)}>
-      <FaArrowLeft /> Back to Jobs
+    <div className="apply-page-container">
+      {/* Premium Navbar */}
+     <nav className="top-nav-glass">
+  {/* Left: Quick Actions & Context */}
+  <div className="nav-left">
+    <button className="back-link" onClick={handleSafeBack}>
+      <FaArrowLeft /> <span>Exit Application</span>
     </button>
-      {/* Hero Header */}
-      <div className="job-hero-section glass-premium animate-fade-in">
-        <div className="hero-main">
-          <div className="company-branding">
-            <div className="company-logo-large">{jobDetails?.companyName?.charAt(0)}</div>
-            <div className="hero-text">
-              <h1>{jobDetails?.title} {isJobClosed && <span className="closed-tag">Closed</span>}</h1>
-              <p className="company-meta">
-                <FaBuilding /> {jobDetails?.companyName} • <FaMapMarkerAlt /> {jobDetails?.location}
-              </p>
-            </div>
-          </div>
-          <div className="hero-actions">
-            <span className="salary-badge"><FaWallet /> {jobDetails?.salary || "Not Disclosed"}</span>
-            <span className="type-badge"><FaBriefcase /> {jobDetails?.jobType}</span>
-          </div>
-        </div>
-
-        <div className="tab-navigation">
-          <button className={activeTab === 'details' ? 'active' : ''} onClick={() => setActiveTab('details')}>Role Overview</button>
-          <button className={activeTab === 'apply' ? 'active' : ''} onClick={() => setActiveTab('apply')}>Application</button>
-        </div>
+    <div className="nav-divider"></div>
+    <div className="nav-job-info">
+      <span className="applying-label">Applying for</span>
+      <div className="job-title-stack">
+        <strong>{jobDetails?.title}</strong> 
+        <span className="company-tag">@ {jobDetails?.companyName}</span>
       </div>
+    </div>
+  </div>
 
-      <div className="apply-main-grid">
-        <main className="content-area">
-          {activeTab === 'details' ? (
-            <div className="description-card glass animate-slide-up">
-              <section>
-                <h3><FaInfoCircle /> Description</h3>
-                <p className="rich-text">{jobDetails?.description}</p>
-              </section>
-              
-              <section className="recruiter-box">
-                <div className="recruiter-info">
-                  <FaUserTie className="recruiter-icon" />
-                  <div>
-                    <p className="label">Posted By</p>
-                    <p className="name">{jobDetails?.recruiter?.name || "Hiring Manager"}</p>
-                    {alreadyApplied ? (
-                        <p className="email-reveal animate-fade-in">{jobDetails?.recruiter?.email}</p>
-                    ) : (
-                        <p className="email-locked"><FaLock /> Email hidden until application</p>
-                    )}
-                  </div>
-                </div>
-                <button 
-                    className="btn-secondary" 
-                    disabled={isJobClosed || alreadyApplied} 
-                    onClick={() => setActiveTab('apply')}
-                >
-                  {alreadyApplied ? "Already Applied" : "Proceed to Apply"}
-                </button>
-              </section>
+  {/* Center: Completion Status (Encourages User) */}
+  <div className="nav-center">
+    <div className="app-progress-shield">
+      <div className="progress-label">Application Integrity</div>
+      <div className="progress-track">
+        <div 
+          className="progress-fill" 
+          style={{ width: `${completion}%` }}
+        ></div>
+      </div>
+    </div>
+  </div>
+
+  {/* Right: Personal Status */}
+  <div className="nav-right">
+    <div className="user-mini-profile">
+      <div className="user-info">
+        <p className="u-name">{profile?.name}</p>
+        <p className="u-status"><FaUserCheck /> Verified Student</p>
+      </div>
+      <div className="user-avatar-small">
+        {profile?.name?.charAt(0)}
+      </div>
+    </div>
+  </div>
+</nav>
+
+      <div className="apply-layout">
+        {/* LEFT COLUMN: THE FORM */}
+        <div className="form-column">
+          {alreadyApplied ? (
+            // Fix 3: Already Applied UI
+            <div className="glass-panel applied-status-card animate-slide-up">
+              <FaCheckCircle className="status-icon" />
+              <h2>Application in Review</h2>
+              <p>You have already applied for this position. We've notified the recruiter!</p>
+              <div className="applied-actions">
+                <button className="btn-secondary" onClick={() => navigate("/applications")}>View My Applications</button>
+                <button className="btn-text" onClick={() => navigate("/jobs")}>Keep Browsing</button>
+              </div>
             </div>
           ) : (
-            <div className="apply-form-box glass-premium animate-slide-up">
-              <form className="modern-form-ui" onSubmit={(e) => e.preventDefault()}>
-                
-                {/* Application Identity Toggle */}
-                <div className="form-group">
-                  <label><FaEdit /> Application Identity</label>
-                  <div className="toggle-box-premium">
-                    <button 
-                      type="button"
-                      className={useProfileData ? "active" : ""} 
-                      onClick={() => setUseProfileData(true)}
-                    >
-                      Use Profile Info
-                    </button>
-                    <button 
-                      type="button"
-                      className={!useProfileData ? "active" : ""} 
-                      onClick={() => setUseProfileData(false)}
-                    >
-                      Override Details
-                    </button>
-                  </div>
-                  <small className="help-text">
-                    {useProfileData 
-                      ? `Applying as stored: ${profile?.name || "Loading..."}`
-                      : "Provide a different name or email for this specific application."}
-                  </small>
+            <div className="animate-slide-up">
+              {/* Identity Section */}
+              <section className="glass-panel">
+                <div className="section-header">
+                  <FaUserCheck className="header-icon" />
+                  <h3>Candidate Identity</h3>
                 </div>
-
-                {/* Conditional Override Inputs */}
+                <div className="identity-toggle">
+                  <button className={useProfileData ? "active" : ""} onClick={() => setUseProfileData(true)}>My Profile</button>
+                  <button className={!useProfileData ? "active" : ""} onClick={() => setUseProfileData(false)}>Custom Alias</button>
+                </div>
                 {!useProfileData && (
-                  <div className="override-fields animate-fade-in">
-                    <div className="form-group">
+                  <div className="grid-2 animate-fade">
+                    <div className="input-group">
                       <label>Full Name</label>
-                      <input
-                        type="text"
-                        className="modern-input"
-                        value={name}
-                        onChange={(e) => { setName(e.target.value); setIsDirty(true); }}
-                        placeholder="Enter your full name"
-                      />
+                      <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="John Doe" />
                     </div>
-                    <div className="form-group">
+                    <div className="input-group">
                       <label>Email Address</label>
-                      <input
-                        type="email"
-                        className="modern-input"
-                        value={email}
-                        onChange={(e) => { setEmail(e.target.value); setIsDirty(true); }}
-                        placeholder="Enter your email"
-                      />
+                      <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="john@example.com" />
                     </div>
                   </div>
                 )}
+              </section>
 
-                <div className="form-group">
-                  <label><FaKeyboard /> Add Relevant Skills</label>
+              {/* Position Logic */}
+              <section className="glass-panel mt-20">
+                <div className="section-header">
+                  <FaBriefcase className="header-icon" />
+                  <h3>Logistics</h3>
+                </div>
+                <div className="grid-2">
+                  <div className="input-group">
+                    <label>Availability</label>
+                    <select value={availability} onChange={e => setAvailability(e.target.value)}>
+                      <option>Immediate</option>
+                      <option>15 Days</option>
+                      <option>30 Days</option>
+                    </select>
+                  </div>
+                  <div className="input-group">
+                    <label>Work Mode</label>
+                    <select value={workPreference} onChange={e => setWorkPreference(e.target.value)}>
+                      <option>Remote</option>
+                      <option>Hybrid</option>
+                      <option>On-Site</option>
+                    </select>
+                  </div>
+                </div>
+              </section>
+
+              {/* Skills & Cover Letter */}
+              <section className="glass-panel mt-20">
+                <div className="section-header">
+                  <FaKeyboard className="header-icon" />
+                  <h3>Skills & Statement</h3>
+                </div>
+                <div className="input-group">
+                  <label>Additional Skills (Optional)</label>
                   <input 
                     type="text" 
-                    className="modern-input" 
-                    placeholder="e.g., React, Java, SQL"
-                    value={extraSkills}
-                    onChange={(e) => { setExtraSkills(e.target.value); setIsDirty(true); }}
+                    placeholder="e.g. Docker, AWS, GraphQL" 
+                    value={extraSkills} 
+                    onChange={e => setExtraSkills(e.target.value)} 
                   />
                 </div>
-
-                <div className="form-group">
-                  <label>Cover Letter (Minimum 20 characters)</label>
+                <div className="input-group mt-15">
+                  <div className="label-row">
+                    <label>Cover Letter</label>
+                    <span className={coverLetter.length < 20 ? "char-count error" : "char-count"}>
+                      {coverLetter.length}/500 (Min 20)
+                    </span>
+                  </div>
                   <textarea 
-                    className="modern-textarea" 
-                    placeholder="Why are you the best fit for this role?" 
-                    rows="5"
+                    rows="6" 
+                    placeholder="Tell the recruiter why you're a great fit..."
                     value={coverLetter}
-                    onChange={(e) => { setCoverLetter(e.target.value); setIsDirty(true); }}
-                  />
-                  <div className={`char-count ${coverLetter.length < 20 ? 'text-danger' : ''}`}>
-                    {coverLetter.length} characters
+                    onChange={e => setCoverLetter(e.target.value)}
+                  ></textarea>
+                </div>
+              </section>
+
+              {/* Resume Section */}
+              <section className="glass-panel mt-20">
+                <div className="section-header">
+                  <FaCloudUploadAlt className="header-icon" />
+                  <h3>Resume Source</h3>
+                </div>
+                <div className="resume-options">
+                  <div className={`res-card ${useExistingResume ? 'selected' : ''}`} onClick={() => setUseExistingResume(true)}>
+                    <FaFilePdf /> <span>Use Profile PDF</span>
+                  </div>
+                  <div className={`res-card ${!useExistingResume ? 'selected' : ''}`} onClick={() => setUseExistingResume(false)}>
+                    <FaCloudUploadAlt /> <span>New Upload</span>
                   </div>
                 </div>
-
-                <div className="resume-section">
-                  <label>Resume</label>
-                  <div className="resume-selector-grid">
-                    <div className={`resume-card ${useExistingResume ? 'active' : ''}`} onClick={() => setUseExistingResume(true)}>
-                      <FaFilePdf /> <span>Current Resume</span>
-                    </div>
-                    <div className={`resume-card ${!useExistingResume ? 'active' : ''}`} onClick={() => setUseExistingResume(false)}>
-                      <FaCloudUploadAlt /> <span>New Upload</span>
-                    </div>
+                {!useExistingResume && (
+                  <div className="file-dropzone mt-15 animate-fade">
+                    <input type="file" accept=".pdf" onChange={handleFileChange} />
+                    <p>{resumeFile ? resumeFile.name : "Select PDF (Max 5MB)"}</p>
                   </div>
-                  
-                  {!useExistingResume && (
-                    <div className="upload-dropzone animate-fade-in">
-                      <input type="file" accept=".pdf" onChange={handleFileChange} />
-                      <p>{resumeFile ? resumeFile.name : "Click to upload PDF (Max 5MB)"}</p>
-                    </div>
-                  )}
-                </div>
+                )}
+              </section>
 
-                <button 
-                  type="button" 
-                  className="btn-primary-apply" 
-                  disabled={alreadyApplied || isJobClosed || submitting}
-                  onClick={() => validateApplication() && setShowConfirm(true)}
-                >
-                  {submitting ? "Processing..." : isJobClosed ? "Job Closed" : alreadyApplied ? "Application Sent" : "Review & Submit"}
-                </button>
-              </form>
+              <button 
+                className="btn-primary-apply mt-30" 
+                onClick={() => validateForm() && setShowConfirm(true)}
+                disabled={submitting}
+              >
+                {submitting ? <FaSpinner className="spin" /> : "Review & Submit"}
+              </button>
             </div>
           )}
-        </main>
+        </div>
 
-        <aside className="sidebar-area">
-          <div className="intel-card glass match-intelligence">
-            <header><FaChartPie /> AI Match Score</header>
-            <div className="score-container">
-              <div className="circular-progress" style={{background: `conic-gradient(#10b981 ${matchScore * 3.6}deg, #f1f5f9 0deg)`}}>
-                <div className="inner-white"><span>{matchScore}%</span></div>
-              </div>
-            </div>
-            <p className="intel-desc">Your profile matches <strong>{matchScore}%</strong> of the requirements.</p>
+        {/* RIGHT COLUMN: INTELLIGENCE SIDEBAR */}
+       <aside className="sidebar-column">
+  <div className="sidebar-sticky">
+    
+    {/* 1. Opportunity Brief Card (NEW) */}
+    <div className="glass-panel intel-card animate-fade-in">
+      <div className="intel-header">
+        <FaInfoCircle className="header-icon" />
+        <h4>Opportunity Brief</h4>
+      </div>
+      
+      <div className="intel-body">
+        <div className="brief-item">
+          <FaBuilding className="brief-icon" />
+          <div>
+            <p className="brief-label">Company</p>
+            <p className="brief-value">{jobDetails?.companyName}</p>
           </div>
+        </div>
 
-          <div className="intel-card glass">
-            <header><FaShieldAlt /> Recommended Skills</header>
-            <div className="skills-tags">
-              {missingSkills.map((s, i) => (
-                <span key={i} className="skill-tag missing" onClick={() => handleAddSkill(s)}>+ {s}</span>
-              ))}
-            </div>
+        <div className="brief-item">
+          <FaGlobe className="brief-icon" />
+          <div>
+            <p className="brief-label">Work Mode</p>
+            <p className="brief-value">{jobDetails?.workMode || "Not Specified"}</p>
           </div>
+        </div>
 
-          <div className={`intel-card glass completion-card ${completion < 100 ? 'border-warning' : 'border-success'}`}>
-            <div className="completion-header">
-              <span><FaUserCheck /> Profile Integrity</span>
-              <span className="completion-percent">{completion}%</span>
-            </div>
-            <div className="progress-bar-container">
-              <div 
-                className="progress-bar-fill" 
-                style={{ width: `${completion}%`, backgroundColor: completion < 70 ? '#f59e0b' : '#10b981' }}
-              ></div>
-              <div className="intel-card glass">
-  <header><FaShieldAlt /> Your Profile Skills</header>
-  <div className="skills-tags">
-    {profile?.skills?.map((skill, index) => (
-      <span key={index} className="skill-tag existing">
-        {skill}
-      </span>
-    ))}
+        <div className="brief-item">
+          <FaBriefcase className="brief-icon" />
+          <div>
+            <p className="brief-label">Job Type</p>
+            <p className="brief-value">{jobDetails?.jobType}</p>
+          </div>
+        </div>
+
+        <div className="brief-description">
+          <p className="brief-label">Snapshot</p>
+          <p className="brief-text-truncated">
+            {jobDetails?.description?.substring(0, 120)}...
+          </p>
+        </div>
+      </div>
+    </div>
+
+    {/* 2. AI Match Score (Refined) */}
+    <div className="glass-panel match-card mt-20">
+      <div className="intel-header">
+        <FaChartPie className="header-icon" />
+        <h4>Match Intelligence</h4>
+      </div>
+      <div className="score-viz">
+        <svg viewBox="0 0 36 36" className="circular-chart">
+          <path className="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path className="circle" strokeDasharray={`${matchScore}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <text x="18" y="20.35" className="percentage">{matchScore}%</text>
+        </svg>
+      </div>
+      <p className="score-hint">Add recommended skills to improve your ranking.</p>
+    </div>
+
+    {/* 3. Recommended Skills (Interactive) */}
+    <div className="glass-panel mt-20">
+      <div className="intel-header">
+        <FaShieldAlt className="header-icon" />
+        <h4>Skill Gaps</h4>
+      </div>
+      <div className="tags-container">
+        {missingSkills.length === 0 ? (
+          <p className="empty-msg">Perfect Match! 🎉</p>
+        ) : (
+          missingSkills.map(skill => (
+            <button key={skill} className="skill-tag" onClick={() => handleAddSkill(skill)}>
+              + {skill}
+            </button>
+          ))
+        )}
+      </div>
+    </div>
   </div>
-</div>
-            </div>
-          </div>
-        </aside>
+</aside>
       </div>
 
-      {/* Confirmation Modal */}
+      {/* CONFIRMATION MODAL */}
       {showConfirm && (
-        <div className="modal-overlay animate-fade-in">
-           <div className="confirmation-modal glass-premium animate-bounce-in">
-             <div className="modal-header">
-                <h3>Final Review</h3>
-                <button className="close-btn" onClick={() => setShowConfirm(false)}><FaTimes /></button>
-             </div>
-             <div className="summary-content">
-                <div className="summary-item"><strong>Applying as:</strong> {useProfileData ? profile?.name : name}</div>
-                <div className="summary-item"><strong>Email:</strong> {useProfileData ? profile?.email : email}</div>
-                <div className="summary-item"><strong>Job:</strong> {jobDetails?.title}</div>
-                <div className="summary-item"><strong>Resume:</strong> {useExistingResume ? "Profile Resume" : resumeFile?.name}</div>
-                <div className="summary-item"><strong>Match Score:</strong> {matchScore}%</div>
-             </div>
-             <div className="modal-footer">
-                <button className="btn-text" onClick={() => setShowConfirm(false)}>Back to Edit</button>
-                <button className="btn-confirm" onClick={handleFinalSubmit} disabled={submitting}>
-                    {submitting ? "Sending..." : "Confirm & Apply"}
-                </button>
-             </div>
-           </div>
-        </div>
-      )}
-
-      {/* Success Overlay */}
-      {success && (
-        <div className="full-screen-overlay animate-fade-in">
-          <div className="success-anim-box">
-             <FaCheckCircle className="check-icon animate-pop" />
-             <h2>Application Successful!</h2>
-             <p>You have successfully applied to {jobDetails?.companyName}.</p>
-             <button className="btn-primary" onClick={() => navigate("/jobs")}>Explore More Jobs</button>
+        <div className="modal-overlay">
+          <div className="glass-modal animate-bounce-in">
+            <h2>Final Confirmation</h2>
+            <div className="review-list">
+              <div className="review-item"><span>Role</span><strong>{jobDetails.title}</strong></div>
+              <div className="review-item"><span>Name</span><strong>{useProfileData ? profile.name : name}</strong></div>
+              <div className="review-item"><span>Availability</span><strong>{availability}</strong></div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn-secondary" onClick={() => setShowConfirm(false)}>Edit</button>
+              <button className="btn-primary" onClick={handleFinalSubmit} disabled={submitting}>Send Application</button>
+            </div>
           </div>
         </div>
       )}

@@ -1,213 +1,334 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { 
-  FaBriefcase, FaClock, FaFilePdf, FaChartLine, 
-  FaArrowRight, FaBookmark, FaMapMarkerAlt, 
-  FaWallet, FaTrashAlt, FaSearch, FaSortAmountDown, FaArrowLeft 
-} from 'react-icons/fa';
-import "../components/Styles/applications.css";
+import React, { useEffect, useState, useCallback } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import {
+  FaBookmark,
+  FaBriefcase,
+  FaSearch,
+  FaCheckCircle,
+  FaChartLine,
+  FaMapMarkerAlt,
+  FaMoneyBillWave,
+  FaBuilding,
+  FaCalendarAlt,
+  FaTrash,
+  FaExternalLinkAlt,
+  FaClock
+} from "react-icons/fa";
 
-const MyApplications = () => {
+// ================= UTILS =================
+const formatCurrency = (val) => {
+  if (!val) return "Not Disclosed";
+  return new Intl.NumberFormat('en-IN', { 
+    style: 'currency', 
+    currency: 'INR', 
+    maximumSignificantDigits: 3 
+  }).format(val);
+};
+
+const JobSeekerDashboard = () => {
   const navigate = useNavigate();
-  
-  const [activeTab, setActiveTab] = useState('applications'); 
-  const [applications, setApplications] = useState([]);
   const [savedJobs, setSavedJobs] = useState([]);
+  const [applications, setApplications] = useState([]);
+  const [activeTab, setActiveTab] = useState("saved");
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortOrder, setSortOrder] = useState("desc");
+  const [filters, setFilters] = useState({ keyword: "" });
+  const [error, setError] = useState(null);
+
+  const token = localStorage.getItem("token");
+
+  const fetchSavedJobs = useCallback(async () => {
+    try {
+      const res = await axios.get("http://localhost:8080/job-portal/saved", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setSavedJobs(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error("Saved Jobs Fetch Error:", err);
+      setError("Failed to load saved jobs.");
+    }
+  }, [token]);
+
+  const fetchApplications = useCallback(async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:8080/job-portal/applications/my?page=0&size=10",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setApplications(Array.isArray(res.data?.content) ? res.data.content : []);
+    } catch (err) {
+      console.error("Applications Fetch Error:", err);
+      setError("Failed to load applications.");
+    }
+  }, [token]);
+
+  const unsaveJob = useCallback(async (jobId) => {
+    // 🟢 OPTIMISTIC UI: Remove from state immediately
+    const previousSaved = [...savedJobs];
+    setSavedJobs(prev => prev.filter(j => j.publicId !== jobId));
+
+    try {
+      await axios.delete(`http://localhost:8080/job-portal/saved/${jobId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch (err) {
+      console.error("Unsave Error:", err);
+      // Rollback if API fails
+      setSavedJobs(previousSaved);
+      alert("Failed to unsave job. Please try again.");
+    }
+  }, [token, savedJobs]);
 
   useEffect(() => {
-    fetchData();
-  }, [activeTab, page]);
-
-  const fetchData = async () => {
     setLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      const headers = { Authorization: `Bearer ${token}` };
+    Promise.all([fetchSavedJobs(), fetchApplications()]).finally(() => setLoading(false));
+  }, [fetchSavedJobs, fetchApplications]);
 
-      if (activeTab === 'applications') {
-        // MATCHES: http://localhost:8080/job-portal/applications/my?page=0&size=10
-        const res = await axios.get(`/job-portal/applications/my?page=${page}&size=10`, { headers });
-        setApplications(res.data.content || []);
-        setTotalPages(res.data.totalPages || 0);
-      } else {
-        // MATCHES: http://localhost:8080/job-portal/saved
-        const res = await axios.get(`/job-portal/saved`, { headers });
-        setSavedJobs(Array.isArray(res.data) ? res.data : []);
-      }
-    } catch (err) {
-      console.error("API Error:", err);
-      setApplications([]);
-      setSavedJobs([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const filteredSaved = savedJobs.filter((job) =>
+    job?.title?.toLowerCase()?.includes(filters.keyword.toLowerCase()) ||
+    job?.companyName?.toLowerCase()?.includes(filters.keyword.toLowerCase())
+  );
 
-  const handleUnsave = async (e, jobId) => {
-    e.stopPropagation();
-    try {
-      await axios.delete(`/job-portal/saved/${jobId}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      setSavedJobs(prev => prev.filter(job => job.publicId !== jobId));
-    } catch (err) {
-      alert("Error removing saved job");
-    }
-  };
-
-  // Redirection Logic to specific job
-  // MATCHES: http://localhost:8080/job-portal/jobs/JOB_ID
-  const goToJobDetails = (jobId) => {
-    navigate(`/job-portal/jobs/${jobId}`);
-  };
-
-  const filteredApps = applications
-    .filter(app => 
-      app.jobTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.companyName?.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) => {
-      const d1 = new Date(a.appliedAt);
-      const d2 = new Date(b.appliedAt);
-      return sortOrder === 'desc' ? d2 - d1 : d1 - d2;
-    });
-
-  const filteredSaved = savedJobs.filter(job => 
-    job.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    job.company?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredApps = applications.filter((app) =>
+    app?.jobTitle?.toLowerCase()?.includes(filters.keyword.toLowerCase()) ||
+    app?.companyName?.toLowerCase()?.includes(filters.keyword.toLowerCase())
   );
 
   return (
-    <div className="my-apps-container">
-      <nav className="back-nav">
-        {/* Navigate back to the job search hub */}
-        <button className="btn-back" onClick={() => navigate('/job-portal/jobs')}>
-          <FaArrowLeft /> Back to Jobs
-        </button>
-      </nav>
+    <div className="p-4 md:p-8 bg-gray-50 min-h-screen text-gray-800 font-sans">
+      <div className="max-w-6xl mx-auto">
+        {/* ================= HEADER ================= */}
+        <header className="mb-8">
+          <h1 className="text-4xl font-extrabold text-gray-900 flex items-center gap-3">
+            🎯 <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">Career Hub</span>
+          </h1>
+          <p className="text-gray-500 mt-2">Track your progress and manage saved opportunities.</p>
+        </header>
 
-      <header className="apps-header">
-        <div className="header-text">
-          <h1>Student Dashboard</h1>
-          <p>Track applications and manage your saved opportunities</p>
-        </div>
-        
-        <div className="controls-row">
-          <div className="search-box">
-            <FaSearch />
-            <input 
-              type="text" 
-              placeholder="Filter by title or company..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+        {error && (
+            <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-xl border border-red-100 flex items-center gap-2">
+                <FaTrash /> {error}
+            </div>
+        )}
+
+        {/* ================= SEARCH & FILTERS ================= */}
+        <div className="flex flex-wrap gap-4 mb-8 bg-white p-5 rounded-2xl shadow-sm border border-gray-100 items-center">
+          <div className="flex items-center border border-gray-200 px-4 py-3 rounded-xl w-full md:w-96 focus-within:ring-2 focus-within:ring-blue-500 transition-all">
+            <FaSearch className="text-gray-400 mr-3" />
+            <input
+              type="text"
+              placeholder="Search by title or company..."
+              className="w-full outline-none bg-transparent"
+              value={filters.keyword}
+              onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
             />
           </div>
-          <button className="sort-btn" onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}>
-            <FaSortAmountDown /> {sortOrder === 'desc' ? 'Newest' : 'Oldest'}
-          </button>
+          
+          <div className="flex bg-gray-100 p-1 rounded-xl">
+            <button
+              className={`px-6 py-2 rounded-lg font-medium transition-all ${
+                activeTab === "saved" ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
+              }`}
+              onClick={() => setActiveTab("saved")}
+            >
+              <FaBookmark className="inline mr-2" /> Saved
+            </button>
+            <button
+              className={`px-6 py-2 rounded-lg font-medium transition-all ${
+                activeTab === "applications" ? "bg-white text-green-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
+              }`}
+              onClick={() => setActiveTab("applications")}
+            >
+              <FaBriefcase className="inline mr-2" /> Applied
+            </button>
+          </div>
         </div>
-      </header>
 
-      <div className="tabs-nav">
-        <button 
-          className={activeTab === 'applications' ? 'active' : ''} 
-          onClick={() => { setActiveTab('applications'); setPage(0); }}
-        >
-          <FaBriefcase /> My Applications
-        </button>
-        <button 
-          className={activeTab === 'saved' ? 'active' : ''} 
-          onClick={() => setActiveTab('saved')}
-        >
-          <FaBookmark /> Saved Jobs
-        </button>
-      </div>
-
-      {loading ? (
-        <div className="loader-box"><div className="spinner"></div></div>
-      ) : activeTab === 'applications' ? (
-        <div className="apps-list">
-          {filteredApps.length > 0 ? (
-            filteredApps.map((app) => (
-              <div key={app.applicationId} className="app-card" onClick={() => goToJobDetails(app.jobPublicId)}>
-                <div className="app-card-header">
-                  <div className="job-info">
-                    <h3>{app.jobTitle}</h3>
-                    <p className="company-text">{app.companyName}</p>
-                  </div>
-                  <span className={`status-badge status-${app.status?.toLowerCase()}`}>
-                    {app.status === 'APPLIED' && <FaClock />} {app.status}
-                  </span>
+        {/* ================= CONTENT ================= */}
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        ) : (
+          <div className="grid gap-6">
+            {activeTab === "saved" ? (
+              filteredSaved.length === 0 ? (
+                <div className="text-center py-20 bg-white rounded-2xl border border-dashed flex flex-col items-center">
+                  <p className="text-gray-400 mb-4">No saved jobs found matching your search.</p>
+                  <button onClick={() => navigate("/jobs")} className="text-blue-600 font-bold hover:underline">Browse Jobs →</button>
                 </div>
-
-                <div className="app-card-body">
-                  <div className="stats-row">
-                    <div className="stat-item">
-                      <label>Match Score</label>
-                      <div className="score-pill" style={{ color: app.matchScore > 75 ? '#10b981' : '#f59e0b' }}>
-                        <FaChartLine /> {app.matchScore}%
+              ) : (
+                filteredSaved.map((job) => (
+                  <div key={job.publicId} className="group bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div className="flex gap-4 items-start">
+                      <div className="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 text-2xl font-bold">
+                        {job.companyName?.charAt(0) || <FaBuilding />}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                            <h2 className="text-xl font-bold group-hover:text-blue-600 transition-colors">{job.title}</h2>
+                            {job.alreadyApplied && <span className="bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-full font-bold">APPLIED</span>}
+                        </div>
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-gray-500 font-medium">
+                          <span className="flex items-center gap-1"><FaBuilding /> {job.companyName}</span>
+                          <span className="flex items-center gap-1"><FaMapMarkerAlt /> {job.location}</span>
+                          <span className="flex items-center gap-1 text-green-600"><FaMoneyBillWave /> {formatCurrency(job.salary)}</span>
+                        </div>
+                        {/* 🟢 NEW FIELDS */}
+                        <div className="mt-2 flex gap-3 text-xs text-gray-400">
+                            <span className="bg-gray-100 px-2 py-1 rounded">{job.jobType || "Full-time"}</span>
+                            <span className="bg-gray-100 px-2 py-1 rounded">{job.experience || "0-1"} yrs Exp</span>
+                            <span className="flex items-center gap-1"><FaClock /> Posted: {job.postedAt || "Recently"}</span>
+                        </div>
                       </div>
                     </div>
-                    <div className="stat-item">
-                      <label>Applied</label>
-                      <span>{new Date(app.appliedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
+                    <div className="flex gap-3 w-full md:w-auto">
+                      <button 
+                        onClick={() => navigate(`/jobs/${job.publicId}`)}
+                        className="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-semibold transition-all"
+                      >
+                        {job.alreadyApplied ? "View Job" : "Apply Now"}
+                      </button>
+                      <button 
+                        onClick={() => unsaveJob(job.publicId)}
+                        className="p-3 text-red-500 bg-red-50 hover:bg-red-100 rounded-xl transition-all"
+                        title="Remove"
+                      >
+                        <FaTrash />
+                      </button>
                     </div>
                   </div>
+                ))
+              )
+            ) : (
+              filteredApps.length === 0 ? (
+                <div className="text-center py-20 bg-white rounded-2xl border border-dashed">
+                  <p className="text-gray-400">You haven't applied to any jobs yet.</p>
                 </div>
+              ) : (
+                filteredApps.map((app) => (
+                  <div key={app.applicationId} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:border-blue-200 transition-all">
+                    <div className="flex flex-col md:flex-row justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h2 className="text-xl font-bold">{app.jobTitle}</h2>
+                            <p className="text-blue-600 font-semibold">{app.companyName}</p>
+                          </div>
+                          <span className={`px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm ${
+                            app.status === "SELECTED" ? "bg-green-100 text-green-700" :
+                            app.status === "REJECTED" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"
+                          }`}>
+                            {app.status || "PENDING"}
+                          </span>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                          <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                             {/* 🟢 FIXED: Using stored score from app snapshot */}
+                             <p className="text-sm font-semibold text-gray-500 flex items-center gap-2 mb-1">
+                                <FaChartLine className="text-blue-500" /> Match Score
+                             </p>
+                             <div className="text-xl font-bold text-gray-800">
+                                {app.matchScore ? `${app.matchScore.toFixed(1)}%` : "N/A"}
+                             </div>
+                          </div>
+                          <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                             {/* 🟢 FIXED: Using Application ID for context */}
+                             <MissingSkills applicationId={app.applicationId} />
+                          </div>
+                        </div>
 
-                <div className="app-card-footer">
-                  <a href={app.resumeUrl} target="_blank" rel="noreferrer" className="resume-link" onClick={(e) => e.stopPropagation()}>
-                    <FaFilePdf /> View Resume
-                  </a>
-                  <button className="view-job-btn">Details <FaArrowRight /></button>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="empty-state">No matching applications.</div>
-          )}
+                        {/* 🟢 NEW: Application Snapshot Details */}
+                       <div className="flex gap-4 ml-auto">
+  <a
+    href={encodeURI(`http://localhost:8080${app.resumeUrl}`)}
+    target="_blank"
+    rel="noreferrer"
+    className="text-blue-600 hover:underline"
+  >
+    View
+  </a>
 
-          {totalPages > 1 && (
-            <div className="pagination">
-              <button disabled={page === 0} onClick={() => setPage(page - 1)}>Prev</button>
-              <span>{page + 1} / {totalPages}</span>
-              <button disabled={page === totalPages - 1} onClick={() => setPage(page + 1)}>Next</button>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="saved-jobs-grid">
-          {filteredSaved.length > 0 ? (
-            filteredSaved.map((job) => (
-              <div key={job.publicId} className="saved-card" onClick={() => goToJobDetails(job.publicId)}>
-                <div className="saved-header">
-                  <div className="company-logo">{job.company?.charAt(0)}</div>
-                  <button onClick={(e) => handleUnsave(e, job.publicId)} className="unsave-btn">
-                    <FaTrashAlt />
-                  </button>
-                </div>
-                <h4>{job.title}</h4>
-                <p className="company-name">{job.company}</p>
-                <div className="job-meta">
-                  <span><FaMapMarkerAlt /> {job.location}</span>
-                  <span><FaWallet /> ₹{(job.salary/1000).toFixed(0)}k</span>
-                </div>
-                <button className="apply-now-btn">Apply Now</button>
-              </div>
-            ))
-          ) : (
-            <div className="empty-state">Your saved list is empty.</div>
-          )}
-        </div>
-      )}
+  <a
+    href={encodeURI(`http://localhost:8080${app.resumeUrl}`)}
+    download
+    className="text-green-600 hover:underline"
+  >
+    Download
+  </a>
+</div>
+                      </div>
+                    </div>
+                    <div className="mt-4 flex justify-between items-center text-xs text-gray-400">
+                       <span className="flex items-center gap-1"><FaCalendarAlt /> Applied on: {new Date(app.appliedAt).toLocaleDateString()}</span>
+                       <button 
+                        onClick={() => navigate(`/applications/${app.applicationId}`)}
+                        className="text-blue-600 font-bold hover:underline"
+                       >
+                            View Details →
+                       </button>
+                    </div>
+                  </div>
+                ))
+              )
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
-export default MyApplications;
+// ================= MISSING SKILLS COMPONENT =================
+// 🟢 FIXED: Props changed from jobId to applicationId
+const MissingSkills = ({ applicationId }) => {
+  const [skills, setSkills] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    let isMounted = true;
+    // 🟢 FIXED: API endpoint now targets the specific application snapshot
+    axios
+      .get(`http://localhost:8080/job-portal/applications/${applicationId}/missing-skills`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        if (isMounted) setSkills(Array.isArray(res.data) ? res.data : []);
+      })
+      .catch(() => {
+        if (isMounted) setSkills([]);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+    return () => { isMounted = false; };
+  }, [applicationId, token]);
+
+  if (loading) return <p className="text-xs text-gray-400 italic">Analyzing application snapshot...</p>;
+
+  return (
+    <div>
+      <p className="text-sm font-semibold text-gray-500 mb-2">Gap Analysis:</p>
+      <div className="flex gap-2 flex-wrap">
+        {skills.length > 0 ? (
+          skills.map((skill, i) => (
+            <span
+              key={`${skill}-${i}`}
+              className="bg-red-50 text-red-600 border border-red-100 px-2 py-0.5 rounded-lg text-[10px] font-bold"
+            >
+              +{skill.toUpperCase()}
+            </span>
+          ))
+        ) : (
+          <span className="text-xs text-green-600 flex items-center gap-1">
+            <FaCheckCircle /> Profile met all requirements
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default JobSeekerDashboard;
