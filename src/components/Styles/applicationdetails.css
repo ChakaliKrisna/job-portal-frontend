@@ -1,0 +1,455 @@
+/* --- Root Variables for Theme Consistency --- */
+:root {
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --bg-app: #f1f5f9;
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-border: #e2e8f0;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --radius: 16px;
+}
+
+.app-details-wrapper {
+  background-color: var(--bg-app);
+  min-height: 100vh;
+  padding-top: calc(var(--navbar-height, 70px) + 20px);
+  padding: 2rem 5%;
+  font-family: 'Inter', -apple-system, sans-serif;
+}
+
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* --- Navigation --- */
+.back-link {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 24px;
+  transition: all 0.2s ease;
+  padding: 8px 0;
+}
+
+.back-link:hover {
+  color: var(--primary);
+  transform: translateX(-4px);
+}
+
+/* --- Layout Grid --- */
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 24px;
+}
+
+/* --- Glassmorphism Base --- */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.glass:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+}
+
+/* --- Header Card --- */
+.job-header-card {
+  margin-bottom: 24px;
+}
+
+.header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.job-title {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+
+.company-name {
+  font-size: 1.15rem;
+  color: var(--primary);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* --- Status Badges --- */
+.status-badge {
+  padding: 6px 14px;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-green { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.status-red { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.status-yellow { background: #fef9c3; color: #854d0e; border: 1px solid #fef08a; }
+
+.meta-info {
+  display: flex;
+  gap: 24px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  border-top: 1px solid var(--glass-border);
+  padding-top: 16px;
+}
+
+.meta-info span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* --- Skills Tags --- */
+.skills-analysis-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.1rem;
+  margin-top: 0;
+}
+
+.skill-tag {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin: 4px;
+  background: #f8fafc;
+  color: var(--text-main);
+  border: 1px solid var(--glass-border);
+}
+
+.skill-tag.missing {
+  background: #fff1f2;
+  color: #be123c;
+  border-color: #fecdd3;
+}
+
+.success-msg {
+  color: var(--success);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* --- Cover Letter --- */
+.cover-letter-card {
+  margin-top: 24px;
+}
+
+.letter-body {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 12px;
+  line-height: 1.7;
+  color: #334155;
+  font-size: 0.95rem;
+  border: 1px solid #f1f5f9;
+  white-space: pre-wrap;
+}
+
+/* --- Sidebar: Resume & Actions --- */
+.resume-preview {
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(145deg, #ffffff, #f1f5f9);
+  border-radius: 12px;
+  margin-top: 15px;
+}
+
+.pdf-icon {
+  font-size: 3rem;
+  color: var(--danger);
+  margin-bottom: 12px;
+}
+
+.btn-view {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--primary);
+  color: white;
+  text-decoration: none;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: background 0.2s;
+  margin-top: 12px;
+}
+
+.btn-view:hover {
+  background: var(--primary-hover);
+}
+
+/* --- Sidebar: Timeline --- */
+.timeline-card {
+  margin-top: 24px;
+}
+
+.timeline {
+  margin-top: 20px;
+  padding-left: 10px;
+}
+
+.timeline-item {
+  position: relative;
+  padding-left: 30px;
+  padding-bottom: 30px;
+  border-left: 2px solid var(--glass-border);
+}
+
+.timeline-item:last-child {
+  border-left: 2px solid transparent;
+  padding-bottom: 0;
+}
+
+.dot {
+  position: absolute;
+  left: -9px;
+  top: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid var(--glass-border);
+}
+
+.timeline-item.active .dot {
+  background: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+}
+
+.timeline-item.active {
+  border-left-color: var(--primary);
+}
+
+.timeline-content h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-main);
+}
+
+.timeline-content p {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* --- Loader & Errors --- */
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #e2e8f0;
+  border-top: 5px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* --- Mobile Responsive --- */
+@media (max-width: 992px) {
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .sidebar {
+    order: -1; /* Puts status summary on top for mobile */
+  }
+}
+/* applicationdetails.css */
+
+.app-details-wrapper {
+    /* CRITICAL FIX: Pushes the page content below the fixed navbar */
+    padding-top: 85px; 
+    min-height: 100vh;
+    background-color: #f8fafc;
+    padding-bottom: 3rem;
+}
+
+.app-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* Back Button Styling - Adjusted for visibility */
+.back-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: #64748b;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 1.5rem;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.back-link:hover {
+    color: #2563eb;
+    background: #eff6ff;
+}
+
+/* Layout Grid */
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 2rem;
+}
+
+/* Glassmorphism Cards */
+.glass {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 1.25rem;
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+}
+
+/* Header Section */
+.job-header-card {
+    border-left: 6px solid #2563eb;
+}
+
+.header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.job-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.company-name {
+    font-size: 1.25rem;
+    color: #4f46e5;
+    font-weight: 600;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 6px 16px;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.status-green { background: #dcfce7; color: #15803d; }
+.status-red { background: #fee2e2; color: #b91c1c; }
+.status-yellow { background: #fef9c3; color: #a16207; }
+
+/* Timeline UI */
+.timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 5px;
+    bottom: 5px;
+    width: 2px;
+    background: #e2e8f0;
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 1.5rem;
+}
+
+.timeline-item .dot {
+    position: absolute;
+    left: -2rem;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #cbd5e1;
+    border: 3px solid white;
+    z-index: 2;
+}
+
+.timeline-item.active .dot {
+    background: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+}
+
+.timeline-item.active .timeline-content h4 {
+    color: #1e293b;
+}
+
+/* Skill Tags */
+.skill-tag {
+    background: #f1f5f9;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 4px;
+    display: inline-block;
+}
+
+.skill-tag.missing {
+    background: #fff1f2;
+    color: #e11d48;
+    border: 1px solid #fecdd3;
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+}

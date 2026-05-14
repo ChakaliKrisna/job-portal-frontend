@@ -168,7 +168,8 @@ const handleFinalSubmit = async () => {
 if (!formData.useExistingResume && resumeFile) {
 
   const uploadForm = new FormData();
-  uploadForm.append("file", resumeFile);
+
+  uploadForm.append("resume", resumeFile);
 
   const uploadRes = await axios.post(
     `${API_BASE}/api/users/student/upload`,
@@ -183,15 +184,12 @@ if (!formData.useExistingResume && resumeFile) {
 
   console.log("UPLOAD RESPONSE:", uploadRes.data);
 
-  finalResumeUrl =
-    uploadRes.data.resumeUrl ||
-    uploadRes.data.url;
+  finalResumeUrl = uploadRes.data.resumeUrl;
 
   if (!finalResumeUrl) {
     throw new Error("Resume upload failed");
   }
 }
-
     const payload = {
   resumeUrl: finalResumeUrl,
 
@@ -220,8 +218,10 @@ if (!formData.useExistingResume && resumeFile) {
   
 };
  await axios.post(`${API_BASE}/job-portal/applications/${jobId}`, payload, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+        headers: { Authorization: `Bearer ${token}` },
+          
+      }
+    );
      
 
       setSuccess(true);
@@ -265,7 +265,21 @@ if (!formData.useExistingResume && resumeFile) {
   );
 
   return (
+    
     <div className="apply-page-wrapper">
+      <nav className="glass-header">
+        <button className="back-btn" onClick={() => navigate(-1)}>
+          <FaArrowLeft /> BACK
+        </button>
+        
+        <div className="header-title">
+          <span className="font-extrabold text-indigo-600">APPLICATION</span> PORTAL
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <div className="avatar-circle bg-indigo-100 p-2 rounded-full">👤</div>
+        </div>
+      </nav>
       {/* Dynamic Header */}
       <nav className="glass-header">
         <div className="header-left">

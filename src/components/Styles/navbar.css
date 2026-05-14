@@ -441,3 +441,174 @@
   z-index: 1000; /* High value to stay on top */
   height: 70px; /* Make sure you know the height */
 }
+/* navbar.css */
+
+:root {
+  --nav-height: 72px;
+  --primary-blue: #2563eb;
+  --glass-bg: rgba(255, 255, 255, 0.85);
+}
+
+.main-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--nav-height);
+  background: white;
+  display: flex;
+  align-items: center;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* Glassmorphism effect when scrolling */
+.main-nav.scrolled {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px -10px rgba(0, 0, 0, 0.1);
+  height: 64px; /* Shrinks slightly on scroll for a premium feel */
+}
+
+.nav-content {
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Logo Styling */
+.brand-logo img {
+  height: 32px;
+  width: auto;
+  display: block;
+}
+
+/* Menu Items */
+.nav-menu {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.menu-item {
+  text-decoration: none;
+  color: #475569;
+  font-weight: 500;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s;
+}
+
+.menu-item:hover {
+  color: var(--primary-blue);
+}
+
+/* Mini Search Bar */
+.search-bar-mini {
+  background: #f1f5f9;
+  padding: 8px 12px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.search-bar-mini:focus-within {
+  background: white;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.search-bar-mini input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.85rem;
+  width: 150px;
+}
+
+/* Avatar & Profile */
+.avatar-circle {
+  width: 36px;
+  height: 36px;
+  background: var(--primary-blue);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.avatar-circle:hover {
+  transform: scale(1.05);
+}
+
+/* Auth Buttons */
+.auth-group {
+  display: flex;
+  gap: 12px;
+}
+
+.login-btn {
+  background: transparent;
+  color: var(--primary-blue);
+  font-weight: 600;
+  padding: 8px 16px;
+  border: 1px solid var(--primary-blue);
+  border-radius: 8px;
+}
+
+.register-btn {
+  background: var(--primary-blue);
+  color: white;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px;
+}
+
+/* Mobile Toggle */
+.hamburger {
+  display: none;
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .hamburger { display: block; }
+  .nav-menu, .search-bar-mini { display: none; }
+}
+.main-nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 72px;
+  
+  /* High z-index to stay above page content */
+  z-index: 9999; 
+  
+  /* Ensure it has a solid background so content doesn't bleed through */
+  background-color: #ffffff; 
+  
+  /* Add a subtle shadow so it looks separated from the page */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  
+  /* Smooth transitions for scroll effects */
+  transition: all 0.3s ease-in-out;
+}

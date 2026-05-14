@@ -109,3 +109,14 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+/* Ensure this matches the height of your Navbar */
+:root {
+  --navbar-height: 72px; 
+}
+
+.page-container {
+  margin-top: var(--navbar-height);
+  min-height: calc(100vh - var(--navbar-height));
+  display: flex;
+  flex-direction: column;
+}

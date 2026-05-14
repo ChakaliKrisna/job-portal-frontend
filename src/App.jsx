@@ -6,6 +6,7 @@ import JobPortal from "./components/JobList";
 import CompanySection from "./components/CompanySection";
 import InternshipsPage from "./components/Internship";
 import About from "./components/About";
+import ApplicationDetails from "./pages/ApplicationDetails"; // Adjust path as needed
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import JobDetails from "./components/JobDetails";
@@ -138,7 +139,18 @@ function App() {
         <Route path="/profile" element={<UserDashboard />} />
         {/* Protected Route */}
      <Route path="/apply/:jobId" element={<ApplyJob />} />
+     <Route 
+      path="/applications/:applicationId" 
+      element={<ApplicationDetails />} 
+    />
         <Route path="/applications" element={<MyApplications />} />
+        {/* ⭐ NEW: Separate Route for Detailed View */}
+        <Route path="/job-details/:id" element={<JobDetails />} />
+        
+        {/* ⭐ Apply Page: Ensure it takes the publicId */}
+        <Route path="/apply/:id" element={<ApplyJob />} />
+        
+        {/* <Route path="/dashboard" element={<JobSeekerDashboard />} /> */}
       </Routes>
     </>
   );
