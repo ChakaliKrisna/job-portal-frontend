@@ -5,12 +5,12 @@ import {
   FaMapMarkerAlt, FaWallet, FaBriefcase, FaBuilding, 
   FaArrowLeft, FaCheckCircle, FaUser, FaBolt, FaEnvelope, FaCalendarAlt 
 } from "react-icons/fa";
-import "../components/Styles/jobdetails.css";
+import "../components/Styles/jobDetails.css"; // Double-check this path matches your folder structure
 
 const API_BASE = "http://localhost:8080/job-portal";
 
 const JobDetails = () => {
-  const { id } = useParams(); // This is the 'publicId' from your Java Entity
+  const { id } = useParams(); 
   const navigate = useNavigate();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -21,8 +21,9 @@ const JobDetails = () => {
     const fetchJobDetails = async () => {
       try {
         setLoading(true);
-        // Ensure this maps to a controller using @GetMapping("/public/{publicId}")
-        const res = await axios.get(`${API_BASE}/jobs/public/${id}`);
+        const res = await axios.get(`${API_BASE}/jobs/${id}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
         setJob(res.data);
       } catch (err) {
         setError("Job listing not found or has been removed.");
@@ -31,12 +32,10 @@ const JobDetails = () => {
       }
     };
     fetchJobDetails();
-  }, [id]);
+  }, [id, token]);
 
-  // Matches your 'Double salary' field
   const formatSalary = (s) => (s ? (s / 100000).toFixed(1) : "N/A");
   
-  // Formats 'LocalDateTime postedDate'
   const formatDate = (dateString) => {
     if (!dateString) return "Recently";
     return new Date(dateString).toLocaleDateString('en-IN', {
@@ -46,6 +45,7 @@ const JobDetails = () => {
 
   if (loading) return <div className="loading-screen">Loading Opportunity...</div>;
   if (error) return <div className="error-screen">{error}</div>;
+  if (!job) return null;
 
   return (
     <div className="job-details-page-container">
@@ -55,14 +55,14 @@ const JobDetails = () => {
 
       <div className="job-details-hero">
         <div className="hero-content">
-          {/* Matches Company entity. Assuming Company has a 'logoUrl' or use name initial */}
+          {/* FIX: job.company is a string "TCS" in your JSON */}
           <div className="company-logo-xl">
-            {job.company?.name ? job.company.name.charAt(0) : <FaBuilding />}
+            {job.company ? job.company.charAt(0) : <FaBuilding />}
           </div>
           <div className="hero-text">
             <h1>{job.title}</h1>
             <p className="hero-subtitle">
-              <span className="company-name">{job.company?.name}</span>
+              <span className="company-name">{job.company}</span>
               <span className="separator">•</span>
               <span className="location"><FaMapMarkerAlt /> {job.location}</span>
             </p>
@@ -80,20 +80,18 @@ const JobDetails = () => {
         <main className="main-description">
           <section className="info-section">
             <h3>Job Description</h3>
-            {/* Matches @Column(columnDefinition = "TEXT") */}
             <p className="description-text">{job.description}</p>
           </section>
 
           <section className="info-section">
             <h3>Skills & Requirements</h3>
             <div className="skills-list">
-              {/* Matches @ElementCollection List<String> skillsRequired */}
               {job.skillsRequired?.map((skill, index) => (
                 <span key={index} className="skill-tag">{skill}</span>
               ))}
             </div>
             {job.education && (
-              <p className="education-info">
+              <p className="education-info" style={{marginTop: '20px'}}>
                 <strong>Education:</strong> {job.education}
               </p>
             )}
@@ -140,18 +138,18 @@ const JobDetails = () => {
             </div>
           </div>
 
-          {/* Matches recruiter relationship (ensure your DTO exposes recruiter name/email) */}
           <div className="recruiter-card">
             <h4>Recruiter Details</h4>
             <div className="recruiter-user">
               <div className="recruiter-avatar"><FaUser /></div>
               <div className="recruiter-details">
-                <p><strong>{job.recruiter?.firstName} {job.recruiter?.lastName}</strong></p>
+                {/* FIX: Your JSON uses job.recruiter.name */}
+                <p><strong>{job.recruiter?.name || "N/A"}</strong></p>
                 <p className="email"><FaEnvelope /> {job.recruiter?.email}</p>
               </div>
             </div>
-            <div className="applicant-count">
-               {job.applicantsCount} candidates have applied
+            <div className="applicant-count" style={{marginTop: '15px', fontSize: '0.9rem', color: '#64748b'}}>
+               {job.openings} Positions Available
             </div>
           </div>
         </aside>

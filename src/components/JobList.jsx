@@ -507,31 +507,45 @@ const JobPortal = ({ isHomePage = false }) => {
         </div>
       </div>
 
-     <div className="action-bar">
+     {/* <div className="action-bar"> */}
  <div className="action-bar">
   <button 
     className="apply-now-btn" 
     onClick={() => {
       if (!token) {
-        // If not logged in, show login drawer and set mode
         setAuthMode("login");
         setAuthDrawerOpen(true);
       } else {
-        // If logged in, proceed to application
         navigate(`/apply/${selectedJob.publicId}`);
       }
     }}
   >
     Apply Now <FaArrowRight />
   </button>
-  
-  {/* Rest of your buttons... */}
-</div>
+
+  {/* New View Full Page Button */}
+  <button 
+    className="view-full-details-btn"
+    onClick={() => navigate(`/job-details/${selectedJob.publicId}`)}
+    style={{
+        padding: '10px 15px',
+        borderRadius: '8px',
+        border: '1px solid #e2e8f0',
+        backgroundColor: 'white',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px'
+    }}
+  >
+    Full View
+  </button>
   
   <button className="save-large-btn" onClick={(e) => toggleSave(e, selectedJob.publicId)}>
     {savedJobIds.has(selectedJob.publicId) ? <FaBookmark color="#10b981" /> : <FaRegBookmark />}
   </button>
-</div>
+</div>  
+
 
       <div className="details-scroll-area">
         {/* Statistics Grid */}
@@ -564,7 +578,31 @@ const JobPortal = ({ isHomePage = false }) => {
           </div>
 
           <h3 className="section-title">Description</h3>
-          <p className="full-description">{selectedJob.description}</p>
+         <h3 className="section-title">Description</h3>
+<p className="full-description">
+  {selectedJob.description?.length > 300 ? (
+    <>
+      {selectedJob.description.substring(0, 300)}...
+      <button 
+        className="read-more-inline-btn"
+        onClick={() => navigate(`/job-details/${selectedJob.publicId}`)}
+        style={{
+          background: 'none',
+          border: 'none',
+          color: '#4f46e5',
+          cursor: 'pointer',
+          fontWeight: '600',
+          paddingLeft: '5px',
+          textDecoration: 'underline'
+        }}
+      >
+        Read Full Description
+      </button>
+    </>
+  ) : (
+    selectedJob.description
+  )}
+</p>
 
           {/* Recruiter Card */}
           <div className="recruiter-mini-card">

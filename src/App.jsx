@@ -145,12 +145,9 @@ function App() {
     />
         <Route path="/applications" element={<MyApplications />} />
         {/* ⭐ NEW: Separate Route for Detailed View */}
-        <Route path="/job-details/:id" element={<JobDetails />} />
-        
-        {/* ⭐ Apply Page: Ensure it takes the publicId */}
-        <Route path="/apply/:id" element={<ApplyJob />} />
-        
-        {/* <Route path="/dashboard" element={<JobSeekerDashboard />} /> */}
+       <Route path="/jobs" element={<JobPortal />} />
+  {/* This matches the navigate(`/job-details/${id}`) call */}
+  <Route path="/job-details/:id" element={<JobDetails />} />
       </Routes>
     </>
   );
