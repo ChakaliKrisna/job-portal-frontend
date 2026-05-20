@@ -18,6 +18,7 @@ import RecruiterNavbar from "./components/recruter/RecruterNavbar";
 import ManageJobs from "./pages/recruter/ManageJobs";
 import Myjobs from "./pages/recruter/Myjobs";
 import ApplyJob  from "./components/ApplyJob";
+import RecruiterMyApplications from "./pages/recruter/RecruiterMyApplications";
 
 function App() {
   const role = localStorage.getItem("role");
@@ -148,6 +149,19 @@ function App() {
        <Route path="/jobs" element={<JobPortal />} />
   {/* This matches the navigate(`/job-details/${id}`) call */}
   <Route path="/job-details/:id" element={<JobDetails />} />
+  <Route
+                    path="/recruiter/applications"
+                    element={<RecruiterMyApplications />}
+                />
+
+                {/* ================================================= */}
+                {/* SEARCH TALENT */}
+                {/* ================================================= */}
+
+                {/* <Route
+                    path="/recruiter/search-talent"
+                    element={<SearchTalent />}
+                /> */}
       </Routes>
     </>
   );
