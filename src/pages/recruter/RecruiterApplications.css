@@ -1,0 +1,48 @@
+/* Custom UI enhancements for the Recruiter Portal */
+
+.custom-portal-wrapper select,
+.custom-portal-wrapper input {
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.custom-portal-wrapper select:focus,
+.custom-portal-wrapper input:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+/* Modal Overlay Animation Configuration */
+.modal-overlay {
+  animation: bgFadeIn 0.2s ease-out forwards;
+}
+
+@keyframes bgFadeIn {
+  from {
+    background-color: rgba(15, 23, 42, 0);
+    backdrop-filter: blur(0px);
+  }
+  to {
+    background-color: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(4px);
+  }
+}
+
+/* Clean Custom Scrollbar styling inside the preview modal */
+.custom-portal-wrapper div::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-portal-wrapper div::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 8px;
+}
+
+.custom-portal-wrapper div::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 8px;
+}
+
+.custom-portal-wrapper div::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

@@ -56,10 +56,10 @@ export default function RecruiterNavbar() {
           <Link to="/manage-jobs" className={isActive("/manage-jobs")}>
             <FaBriefcase /> <span>My Jobs</span>
           </Link>
-          <Link to="/applications" className={isActive("/recruiter/applications")}>
+          <Link to="/recruiter/applications" className={isActive("/recruiter/applications")}>
             <FaUsers /> <span>Applicants</span>
           </Link>
-          <Link to="/search-talent" className={isActive("/search-talent")}>
+          <Link to="/recruiter/search-talent" className={isActive("/recruiter/search-talent")}>
             <FaSearch /> <span>Search Talent</span>
           </Link>
           <Link to="/analytics" className={isActive("/analytics")}>

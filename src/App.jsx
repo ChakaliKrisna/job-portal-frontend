@@ -19,6 +19,7 @@ import ManageJobs from "./pages/recruter/ManageJobs";
 import Myjobs from "./pages/recruter/Myjobs";
 import ApplyJob  from "./components/ApplyJob";
 import RecruiterMyApplications from "./pages/recruter/RecruiterMyApplications";
+import SearchTalent from "./pages/recruter/Searchtalent";
 
 function App() {
   const role = localStorage.getItem("role");
@@ -158,10 +159,10 @@ function App() {
                 {/* SEARCH TALENT */}
                 {/* ================================================= */}
 
-                {/* <Route
-                    path="/recruiter/search-talent"
-                    element={<SearchTalent />}
-                /> */}
+                <Route
+          path="/recruiter/search-talent"
+          element={<SearchTalent />}
+        />
       </Routes>
     </>
   );
