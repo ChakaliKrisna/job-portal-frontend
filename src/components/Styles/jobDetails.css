@@ -1,294 +1,833 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
+/* --- Modern Dashboard Design Tokens --- */
 :root {
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
-  --bg-main: #f8fafc;
-  --card-bg: #ffffff;
-  --text-main: #1e293b;
+  --bg-canvas: #f8fafc;
+  --bg-surface: #ffffff;
+  --text-main: #0f172a;
   --text-muted: #64748b;
-  --border-color: #e2e8f0;
-  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --accent-primary: #2563eb;
+  --accent-primary-hover: #1d4ed8;
+  --accent-primary-glow: rgba(37, 99, 235, 0.05);
+  --accent-success: #10b981;
+  --border-light: #e2e8f0;
+  
+  --radius-lg: 16px;
+  --radius-md: 10px;
+  --radius-sm: 6px;
+  
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
+/* --- Strict Component-Level Isolation --- */
 .job-details-page-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 120px 24px 60px; /* Extra top padding for your Navbar */
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  background-color: var(--bg-main);
-  min-height: 100vh;
+  box-sizing: border-box;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  max-width: 1140px;
+  margin: 1.5rem auto;
+  padding: 0 1.5rem;
+  background-color: var(--bg-canvas);
   color: var(--text-main);
 }
 
-/* Back Button - Sleeker Animation */
-.back-btn {
+/* Force containment on all nested structural descendants */
+.job-details-page-container * {
+  box-sizing: border-box;
+}
+
+/* --- Scoped Top Navigation Area (Prevents Main Nav Overrides) --- */
+.job-details-page-container .job-details-back-nav {
+  margin-bottom: 1.25rem;
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: white;
-  border: 1px solid var(--border-color);
+  justify-content: flex-start;
+}
+
+.job-details-page-container .back-btn {
+  background: transparent;
+  border: none;
   color: var(--text-muted);
-  padding: 8px 16px;
-  border-radius: 12px;
-  font-weight: 500;
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
-  margin-bottom: 32px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.2s ease;
+  padding: 0;
 }
 
-.back-btn:hover {
-  color: var(--primary);
-  border-color: var(--primary);
-  transform: translateX(-4px);
+.job-details-page-container .back-btn:hover {
+  color: var(--accent-primary);
 }
 
-/* Hero Section - The "Statement" Piece */
-.job-details-hero {
-  background: var(--card-bg);
-  padding: 40px;
-  border-radius: 24px;
+/* --- Scoped Hero Banner Frame --- */
+.job-details-page-container .job-details-hero {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-md);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 32px;
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-md);
-  position: relative;
-  overflow: hidden;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-bottom: 2rem;
 }
 
-/* Subtle background glow for the hero */
-.job-details-hero::before {
-  content: "";
-  position: absolute;
-  top: -50px;
-  right: -50px;
-  width: 150px;
-  height: 150px;
-  background: radial-gradient(circle, rgba(79, 70, 229, 0.08) 0%, transparent 70%);
-  z-index: 0;
-}
-
-.hero-content {
+.job-details-page-container .hero-content {
   display: flex;
   align-items: center;
-  gap: 28px;
-  position: relative;
-  z-index: 1;
+  gap: 1.5rem;
+  flex: 1;
+  min-width: 300px;
 }
 
-.company-logo-xl {
-  width: 88px;
-  height: 88px;
-  background: var(--primary);
-  color: white;
-  border-radius: 20px;
+.job-details-page-container .company-logo-xl {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+  overflow: hidden;
+  background: #f8fafc;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.2rem;
-  font-weight: 700;
-  box-shadow: 0 12px 20px -8px rgba(79, 70, 229, 0.4);
+  flex-shrink: 0;
 }
 
-.hero-text h1 {
+.job-details-page-container .company-logo-xl img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.job-details-page-container .logo-placeholder {
   font-size: 2rem;
   font-weight: 800;
-  letter-spacing: -0.02em;
-  margin: 0 0 10px 0;
-}
-
-.hero-subtitle {
   color: var(--text-muted);
+}
+
+.job-details-page-container .hero-text {
+  flex: 1;
+}
+
+.job-details-page-container .title-row {
   display: flex;
   align-items: center;
-  gap: 16px;
-  font-size: 1.05rem;
-}
-
-.company-name {
-  font-weight: 600;
-  color: var(--primary);
-}
-
-.apply-main-btn {
-  background: var(--primary);
-  color: white;
-  padding: 16px 40px;
-  border-radius: 14px;
-  border: none;
-  font-weight: 700;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 8px 16px -4px rgba(79, 70, 229, 0.3);
-}
-
-.apply-main-btn:hover {
-  background: var(--primary-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 20px -4px rgba(79, 70, 229, 0.4);
-}
-
-/* Grid Layout */
-.details-grid {
-  display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: 32px;
-}
-
-.main-description, .stat-card, .recruiter-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-sm);
-}
-
-.main-description {
-  padding: 40px;
-  border-radius: 24px;
-}
-
-.info-section h3 {
-  font-size: 1.4rem;
-  font-weight: 700;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.info-section h3::before {
-  content: "";
-  width: 4px;
-  height: 24px;
-  background: var(--primary);
-  border-radius: 4px;
-}
-
-.description-text {
-  line-height: 1.8;
-  color: #475569;
-  font-size: 1.1rem;
-}
-
-/* Skills Tags - Modern Pill Style */
-.skills-list {
-  display: flex;
+  gap: 1rem;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 15px;
+  margin-bottom: 0.5rem;
 }
 
-.skill-tag {
-  background: #f1f5f9;
+.job-details-page-container .hero-text h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0;
   color: var(--text-main);
-  padding: 8px 20px;
-  border-radius: 100px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  border: 1px solid transparent;
-  transition: all 0.2s;
 }
 
-.skill-tag:hover {
-  background: white;
-  border-color: var(--primary);
-  color: var(--primary);
-}
-
-/* Sidebar Styling */
-.stat-card, .recruiter-card {
-  padding: 30px;
-  border-radius: 24px;
-  margin-bottom: 24px;
-}
-
-.stat-card h4, .recruiter-card h4 {
-  margin: 0 0 24px 0;
-  font-size: 1.2rem;
+.job-details-page-container .category-chip {
+  background-color: var(--accent-primary-glow);
+  color: var(--accent-primary);
+  border: 1px solid rgba(37, 99, 235, 0.15);
+  font-size: 0.725rem;
   font-weight: 700;
-}
-
-.stat-item {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  margin-bottom: 24px;
-}
-
-.stat-icon {
-  width: 44px;
-  height: 44px;
-  background: #f8fafc;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--primary);
-  font-size: 1.1rem;
-}
-
-.stat-item label {
-  display: block;
-  font-size: 0.75rem;
-  color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 2px;
+  letter-spacing: 0.03em;
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  white-space: nowrap;
 }
 
-.stat-item span {
-  font-weight: 700;
-  color: var(--text-main);
-  font-size: 1.05rem;
-}
-
-/* Recruiter Profile */
-.recruiter-user {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 16px;
-}
-
-.recruiter-avatar {
-  width: 64px;
-  height: 64px;
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-  border-radius: 50%;
+.job-details-page-container .hero-subtitle {
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 1.5rem;
-  box-shadow: 0 8px 15px -4px rgba(79, 70, 229, 0.3);
-}
-
-.recruiter-details p { margin: 2px 0; }
-.recruiter-details strong { font-size: 1.15rem; }
-
-.email {
-  color: var(--primary);
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
   font-weight: 500;
+}
+
+.job-details-page-container .company-name.clickable {
+  color: var(--accent-primary);
+  font-weight: 600;
   text-decoration: none;
 }
 
-/* Responsive adjustments */
-@media (max-width: 1024px) {
-  .details-grid { grid-template-columns: 1fr; }
-  .job-details-page-container { padding-top: 100px; }
+.job-details-page-container .company-name.clickable:hover {
+  text-decoration: underline;
 }
 
-@media (max-width: 640px) {
-  .job-details-hero {
-    flex-direction: column;
-    text-align: center;
-    padding: 30px 20px;
+.job-details-page-container .separator {
+  color: #cbd5e1;
+}
+
+.job-details-page-container .location {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.job-details-page-container .clickable {
+  cursor: pointer;
+}
+
+/* --- Scoped Hero Action Interactors --- */
+.job-details-page-container .hero-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.job-details-page-container .apply-main-btn {
+  background-color: var(--accent-primary);
+  color: #ffffff;
+  border: none;
+  padding: 0.75rem 1.75rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+.job-details-page-container .apply-main-btn:hover {
+  background-color: var(--accent-primary-hover);
+}
+
+.job-details-page-container .share-btn {
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border-light);
+  padding: 0.75rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.job-details-page-container .share-btn:hover {
+  border-color: #cbd5e1;
+  color: var(--text-main);
+  background: #f8fafc;
+}
+
+/* --- Scoped Structural Dashboard Layout Grid --- */
+.job-details-page-container .details-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 868px) {
+  .job-details-page-container .details-grid {
+    grid-template-columns: 1fr;
   }
-  .hero-content { flex-direction: column; gap: 15px; }
-  .apply-main-btn { width: 100%; }
+}
+
+.job-details-page-container .main-description {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* --- Scoped Deadlines Banner --- */
+.job-details-page-container .deadline-box-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fffbeb;
+  border: 1px solid #fef3c7;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-md);
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.job-details-page-container .deadline-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #b45309;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.job-details-page-container .urgency-badge {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 4px;
+}
+
+/* --- Scoped Corporate Insights Board --- */
+.job-details-page-container .insights-section {
+  background-color: #fafafa;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+}
+
+.job-details-page-container .insights-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.job-details-page-container .insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.job-details-page-container .insight-item {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+/* --- Scoped Document Info Blocks --- */
+.job-details-page-container .info-section {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.job-details-page-container .info-section h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0 0 1.25rem 0;
+  color: var(--text-main);
+}
+
+.job-details-page-container .description-text {
+  color: #334155;
+  line-height: 1.65;
+  font-size: 1.05rem;
+  margin: 0;
+  white-space: pre-line;
+}
+
+.job-details-page-container .skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.job-details-page-container .skill-tag {
+  background: var(--bg-canvas);
+  border: 1px solid var(--border-light);
+  color: #334155;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.job-details-page-container .no-skills {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.job-details-page-container .education-info {
+  margin-top: 1.75rem;
+  border-top: 1px dashed var(--border-light);
+  padding-top: 1.25rem;
+}
+
+.job-details-page-container .education-info h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: #475569;
+}
+
+.job-details-page-container .education-info p {
+  color: #475569;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* --- Scoped Profile Match Vector Block --- */
+.job-details-page-container .match-percentage-section {
+  background: #f0fdf4;
+  border: 1px dashed #bbf7d0;
+}
+
+.job-details-page-container .match-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.job-details-page-container .match-badge {
+  background: var(--accent-success);
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+}
+
+.job-details-page-container .match-description-text {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #166534;
+  line-height: 1.5;
+}
+
+/* --- Scoped Sidebar Layout Column Panels --- */
+.job-details-page-container .job-stats-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.job-details-page-container .stat-card,
+.job-details-page-container .company-quick-card,
+.job-details-page-container .recruiter-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.job-details-page-container .stat-card h4,
+.job-details-page-container .company-quick-card h4,
+.job-details-page-container .recruiter-card h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 1.25rem 0;
+  color: #334155;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.job-details-page-container .stat-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.15rem;
+}
+
+.job-details-page-container .stat-item:last-child {
+  margin-bottom: 0;
+}
+
+.job-details-page-container .stat-icon {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.job-details-page-container .stat-item label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 0.15rem;
+}
+
+.job-details-page-container .stat-item span {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* --- Scoped Corporate Profile Sidebar Widget --- */
+.job-details-page-container .company-quick-card h4 {
+  margin-bottom: 1rem;
+}
+
+.job-details-page-container .company-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.job-details-page-container .company-card-logo,
+.job-details-page-container .company-card-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.job-details-page-container .company-card-placeholder {
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.job-details-page-container .company-card-header h4 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+  color: var(--text-main);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.job-details-page-container .company-card-header p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.job-details-page-container .company-card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.job-details-page-container .view-profile-btn,
+.job-details-page-container .website-external-btn {
+  padding: 0.55rem;
+  font-size: 0.825rem;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  transition: all 0.2s ease;
+}
+
+.job-details-page-container .view-profile-btn {
+  background: var(--accent-primary);
+  color: white;
+  border: none;
+}
+
+.job-details-page-container .view-profile-btn:hover {
+  background: var(--accent-primary-hover);
+}
+
+.job-details-page-container .website-external-btn {
+  background: var(--bg-surface);
+  color: var(--text-main);
+  border: 1px solid var(--border-light);
+}
+
+.job-details-page-container .website-external-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+/* --- Scoped Recruiter Sidebar Widget --- */
+.job-details-page-container .recruiter-user {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.job-details-page-container .recruiter-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background-color: #f1f5f9;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  border: 1px solid var(--border-light);
+}
+
+.job-details-page-container .recruiter-details p {
+  margin: 0;
+}
+
+.job-details-page-container .recruiter-role-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem !important;
+}
+
+.job-details-page-container .recruiter-details .email {
+  font-size: 0.8rem;
+  color: var(--accent-primary);
+  margin-top: 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.job-details-page-container .message-recruiter-btn {
+  width: 100%;
+  background: #e2e8f0;
+  color: #94a3b8;
+  border: none;
+  padding: 0.55rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.825rem;
+  font-weight: 600;
+  cursor: not-allowed;
+}
+
+/* --- Scoped Recommendation System Feeds (Footer) --- */
+.job-details-page-container .job-details-recommendations-footer {
+  margin-top: 3.5rem;
+  border-top: 1px solid var(--border-light);
+  padding-top: 2.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+}
+
+@media (max-width: 768px) {
+  .job-details-page-container .job-details-recommendations-footer {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+.job-details-page-container .recommendation-block-section h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 0 0 1.25rem 0;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+}
+
+.job-details-page-container .recommendations-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.job-details-page-container .mini-job-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 1.15rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.job-details-page-container .mini-job-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-md);
+}
+
+.job-details-page-container .mini-job-card h5 {
+  margin: 0 0 0.35rem 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+}
+
+.job-details-page-container .mini-job-card p {
+  margin: 0;
+  font-size: 0.825rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.job-details-page-container .mini-job-card .company-lbl {
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.2rem;
+}
+
+/* --- Isolated Page Status Screens --- */
+.job-details-page-container-fallback {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+}
+
+.loading-screen { color: var(--text-muted); }
+.error-screen { color: #b91c1c; }
+/* --- Strict Component-Level Isolation & Full Page Expansion --- */
+.job-details-page-container {
+  box-sizing: border-box;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  
+  /* FIX 1: Make it cover the full page stretch across the screen */
+  width: 100%;
+  max-width: 1440px; /* Expands layout space for wide screens */
+  
+  /* FIX 2: Creates perfect breathing room just below your global navbar button strip */
+  margin: 1.5rem auto 3rem auto; 
+  
+  /* Inner side breathing room so cards don't touch the absolute edges of the display */
+  padding: 0 2rem; 
+  
+  background-color: var(--bg-canvas);
+  color: var(--text-main);
+}
+
+/* Force containment on all nested structural descendants */
+.job-details-page-container * {
+  box-sizing: border-box;
+}
+
+/* --- Adjusted Main Layout Grid for Enhanced Width --- */
+.job-details-page-container .details-grid {
+  display: grid;
+  /* Gives the main content more room to breathe on full screen scales */
+  grid-template-columns: minmax(0, 2.5fr) minmax(320px, 1fr); 
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 992px) {
+  .job-details-page-container .details-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .job-details-page-container {
+    padding: 0 1rem;
+    margin-top: 1rem;
+  }
+}/* --- Scoped Top Navigation Area --- */
+.job-details-page-container .job-details-back-nav {
+  /* Pushes the back button cleanly below your global navbar */
+  margin-top: 0.5rem;
+  
+  /* Creates space directly between the button and your main job card banner */
+  margin-bottom: 1.5rem; 
+  
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.job-details-page-container .back-btn {
+  background: #ffffff; /* Gives it a clean background */
+  border: 1px solid var(--border-light);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  /* Adds perfect padding layout so it looks like a clean utility option */
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.job-details-page-container .back-btn:hover {
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  background-color: var(--accent-primary-glow);
+}
+.job-details-page-container {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1440px; 
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.job-details-back-nav {
+  width: 100%;
+  display: flex;
+  margin-top: 1rem;       /* Keeps it just below your localhost main navigation button area */
+  margin-bottom: 1.25rem;  /* Keeps it cleanly separated above the Java Developer card container */
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #4a5568;
+}
+
+.back-btn:hover {
+  background-color: #f7fafc;
+  color: #2b6cb0;
+}
+.job-details-page-container {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1440px; 
+  margin: 0 auto;
+  padding: 0 2rem;
+
+  /* 
+    FIX 1: Safe clearance block. Change 70px to match the height 
+    of your main global header bar if it is thicker. 
+  */
+  padding-top: 80px; 
+}
+
+.job-details-back-nav {
+  width: 100%;
+  display: flex;
+  margin-top: 1rem;       /* Separates it safely just below the navbar track line */
+  margin-bottom: 1.25rem;  /* Pushes the Java Developer card container safely below it */
+  
+  /* 
+    FIX 2: Stack Layer Elevation 
+    Forces the browser to put the back-button section on top of any overlapping container layers.
+  */
+  position: relative;
+  z-index: 10; 
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #4a5568;
 }

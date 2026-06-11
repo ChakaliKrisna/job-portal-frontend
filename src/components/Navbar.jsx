@@ -1,216 +1,300 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { 
-  FaUserCircle, FaBars, FaTimes, FaBell, 
-  FaChevronDown, FaSignOutAlt, FaSearch, FaBriefcase 
+import axios from "axios";
+import {
+  FaBell,
+  FaUserCircle,
+  FaBars,
+  FaTimes,
+  FaSignOutAlt,
+  FaSearch,
+  FaBriefcase,
+  FaBuilding,
+  FaMapMarkerAlt,
+  FaChevronDown,
+  FaGraduationCap
 } from "react-icons/fa";
-import AuthDrawer from "../pages/AuthDrawer"; 
+import AuthDrawer from "../pages/AuthDrawer";
 import "./Styles/navbar.css";
 
 const Navbar = () => {
-  const [isMobile, setIsMobile] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState(null);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [authMode, setAuthMode] = useState("login");
-  const [searchQuery, setSearchQuery] = useState("");
-
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 1. Unified User State
+  const [isMobile, setIsMobile] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState("login");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [locationQuery, setLocationQuery] = useState("");
+  const [showProfile, setShowProfile] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  // Modern tracking for active elements to improve mobile toggles
+  const [activeDropdown, setActiveDropdown] = useState(null); 
+
   const [user, setUser] = useState({
-    isLoggedIn: !!localStorage.getItem("token"),
-    name: localStorage.getItem("userName") || "User",
-    role: localStorage.getItem("userRole") || "STUDENT"
+    isLoggedIn: false,
+    name: "",
+    role: ""
   });
 
-  // 2. Sync Logic: Updates Navbar state whenever AuthDrawer closes
-  // This ensures that when a user logs in, the "Login/Register" buttons disappear instantly.
+  // Sync Auth State
   useEffect(() => {
-    if (!isAuthOpen) {
-      setUser({
-        isLoggedIn: !!localStorage.getItem("token"),
-        name: localStorage.getItem("userName") || "User",
-        role: localStorage.getItem("userRole") || "STUDENT"
-      });
-    }
+    const token = localStorage.getItem("token");
+    setUser({
+      isLoggedIn: !!token,
+      name: localStorage.getItem("userName") || "User",
+      role: localStorage.getItem("userRole") || "STUDENT"
+    });
   }, [isAuthOpen]);
 
-  // Handle Scroll effect for glassmorphism
+  // Read URL search parameters to keep inputs synced globally
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    const params = new URLSearchParams(location.search);
+    setSearchQuery(params.get("keyword") || "");
+    setLocationQuery(params.get("location") || "");
+  }, [location.search]);
 
-  // Close menus when route changes
+  // Notification Engine 
   useEffect(() => {
+    if (user.isLoggedIn && user.role === "STUDENT") {
+      const token = localStorage.getItem("token");
+      axios
+        .get("http://localhost:8080/job-portal/notifications", {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        .then((res) => setNotifications(res.data))
+        .catch((err) => console.error("Error fetching notifications:", err));
+    }
+  }, [user.isLoggedIn, user.role]);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (searchQuery.trim()) params.append("keyword", searchQuery.trim());
+    if (locationQuery.trim()) params.append("location", locationQuery.trim());
+    navigate(`/jobs?${params.toString()}`);
     setIsMobile(false);
-    setActiveDropdown(null);
-  }, [location]);
+  };
 
   const handleLogout = () => {
     localStorage.clear();
     setUser({ isLoggedIn: false, name: "", role: "" });
     navigate("/");
+    window.location.reload();
   };
 
-  const openAuth = (mode) => {
-    setAuthMode(mode);
-    setIsAuthOpen(true);
-  };
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/jobs?search=${searchQuery}`);
-      setSearchQuery("");
+  const toggleDropdown = (menuName) => {
+    if (activeDropdown === menuName) {
+      setActiveDropdown(null);
+    } else {
+      setActiveDropdown(menuName);
     }
-  };
-
-  // Toggle dropdown for mobile (Click instead of Hover)
-  const toggleDropdown = (name) => {
-    if (activeDropdown === name) setActiveDropdown(null);
-    else setActiveDropdown(name);
   };
 
   return (
     <>
-      <nav className={`main-nav ${isScrolled ? "scrolled" : ""} ${isMobile ? "mobile-open" : ""}`}>
-        <div className="nav-content">
+      <nav className="glass-nav">
+        <div className="nav-container-fluid">
           
-          {/* LEFT: Logo & Mega Menus */}
-          <div className="nav-left">
-            <Link to="/" className="brand-logo">
-              <img src="/logo.png" alt="Hunter" />
-            </Link>
+          {/* BRAND LOGO */}
+          <Link to="/" className="brand-modern" onClick={() => setIsMobile(false)}>
+            Hunter<span className="brand-dot">.</span>
+          </Link>
 
-            <ul className={`nav-menu ${isMobile ? "active" : ""}`}>
-              {/* INTERNSHIPS MEGA MENU */}
-              <li 
-                className="menu-item has-mega"
-                onMouseEnter={() => !isMobile && setActiveDropdown('internships')}
-                onMouseLeave={() => !isMobile && setActiveDropdown(null)}
-                onClick={() => isMobile && toggleDropdown('internships')}
-              >
-                <span className="menu-trigger">
-                  Internships <FaChevronDown className={activeDropdown === 'internships' ? 'rotate' : ''} />
-                </span>
-                <div className={`mega-box ${activeDropdown === 'internships' ? 'show' : ''}`}>
-                  <div className="mega-grid">
-                    <div className="mega-col bento-style">
-                      <h5>By Profile</h5>
-                      <Link to="/internships/web-development">Web Development</Link>
-                      <Link to="/internships/marketing">Marketing</Link>
-                      <Link to="/internships/design">Graphic Design</Link>
-                    </div>
-                    <div className="mega-col bento-style">
-                      <h5>By Location</h5>
-                      <Link to="/internships/remote">Work from Home</Link>
-                      <Link to="/internships/delhi">Delhi</Link>
-                      <Link to="/internships/mumbai">Mumbai</Link>
-                    </div>
-                  </div>
-                </div>
-              </li>
-
-              {/* JOBS MEGA MENU */}
-              <li 
-                className="menu-item has-mega"
-                onMouseEnter={() => !isMobile && setActiveDropdown('jobs')}
-                onMouseLeave={() => !isMobile && setActiveDropdown(null)}
-                onClick={() => isMobile && toggleDropdown('jobs')}
-              >
-                <span className="menu-trigger">
-                  Jobs <FaChevronDown className={activeDropdown === 'jobs' ? 'rotate' : ''} />
-                </span>
-                <div className={`mega-box ${activeDropdown === 'jobs' ? 'show' : ''}`}>
-                  <div className="mega-grid">
-                    <div className="mega-col bento-style">
-                      <h5>Role</h5>
-                      <Link to="/jobs/software-engineer">Software Engineer</Link>
-                      <Link to="/jobs/data-science">Data Scientist</Link>
-                    </div>
-                    <div className="mega-col bento-style">
-                      <h5>Type</h5>
-                      <Link to="/jobs/fresher">Fresher Jobs</Link>
-                      <Link to="/jobs/remote">Remote Jobs</Link>
-                    </div>
-                  </div>
-                </div>
-              </li>
-
-              <li>
-                <Link to="/courses" className="menu-item">
-                  Courses <span className="badge-new">Sale</span>
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* RIGHT: Actions & Profile */}
-          <div className="nav-right">
-            <form className="search-bar-mini" onSubmit={handleSearchSubmit}>
-              <FaSearch onClick={handleSearchSubmit} className="search-icon" />
-              <input 
-                type="text" 
-                placeholder="Search jobs..." 
+          {/* ADVANCED INTEGRATED SEARCH BAR */}
+          <form className="modern-search-composite" onSubmit={handleSearch}>
+            <div className="search-segment">
+              <FaSearch className="segment-icon search-focus-icon" />
+              <input
+                type="text"
+                placeholder="Job title, skills, company..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-            </form>
+            </div>
+            <div className="segment-divider"></div>
+            <div className="search-segment">
+              <FaMapMarkerAlt className="segment-icon location-focus-icon" />
+              <input
+                type="text"
+                placeholder="City or 'Remote'..."
+                value={locationQuery}
+                onChange={(e) => setLocationQuery(e.target.value)}
+              />
+            </div>
+            <button type="submit" className="modern-search-action-btn" aria-label="Execute Search">
+              <FaSearch />
+            </button>
+          </form>
 
-            {user.isLoggedIn ? (
-              <div className="user-actions">
-                <Link to="/notifications" className="icon-btn">
-                  <FaBell />
-                  <span className="dot"></span>
-                </Link>
-                
-                <div 
-                  className="profile-container"
-                  onMouseEnter={() => !isMobile && setActiveDropdown('profile')}
-                  onMouseLeave={() => !isMobile && setActiveDropdown(null)}
-                  onClick={() => isMobile && toggleDropdown('profile')}
-                >
-                  <div className="avatar-circle">
-                    {user.name.charAt(0).toUpperCase()}
+          {/* NAVIGATION LINKS */}
+          <ul className={`modern-menu-links ${isMobile ? "mobile-active" : ""}`}>
+            
+            {/* JOBS DROP-DOWN */}
+            <li className={`has-mega-dropdown ${activeDropdown === "jobs" ? "forced-open" : ""}`}>
+              <span className="modern-nav-trigger" onClick={() => toggleDropdown("jobs")}>
+                Find Jobs <FaChevronDown className="chevron-transition" />
+              </span>
+              
+              <div className="premium-mega-panel">
+                <div className="mega-grid">
+                  <div className="mega-column">
+                    <h6 className="column-title">By Domain / Category</h6>
+                    <Link to="/jobs?jobType=FULL_TIME&category=SOFTWARE_DEVELOPMENT" onClick={() => setIsMobile(false)}>Software Development</Link>
+                    <Link to="/jobs?jobType=FULL_TIME&category=DATA_SCIENCE" onClick={() => setIsMobile(false)}>Data Science & AI</Link>
+                    <Link to="/jobs?jobType=FULL_TIME&category=DEVOPS" onClick={() => setIsMobile(false)}>DevOps Engineering</Link>
+                    <Link to="/jobs?jobType=FULL_TIME&category=CYBER_SECURITY" onClick={() => setIsMobile(false)}>Cyber Security</Link>
+                    <Link to="/jobs?jobType=FULL_TIME&category=UI_UX" onClick={() => setIsMobile(false)}>UI/UX Design</Link>
                   </div>
-                  
-                  <div className={`profile-dropdown ${activeDropdown === 'profile' ? 'show' : ''}`}>
-                    <div className="user-meta">
-                      <p className="user-name">{user.name}</p>
-                      <p className="user-role">{user.role.toLowerCase()}</p>
-                    </div>
-                    <hr />
-                    <Link to="/applications"><FaBriefcase /> My Applications</Link>
-                    <Link to="/profile"><FaUserCircle /> View Profile</Link>
-                    <button onClick={handleLogout} className="logout-link">
-                      <FaSignOutAlt /> Logout
-                    </button>
+                  <div className="mega-column">
+                    <h6 className="column-title">By Work Mode</h6>
+                    <Link to="/jobs?jobType=FULL_TIME&workMode=REMOTE" onClick={() => setIsMobile(false)} className="highlight-link">💥 Remote Jobs</Link>
+                    <Link to="/jobs?jobType=FULL_TIME&workMode=HYBRID" onClick={() => setIsMobile(false)}>Hybrid Work</Link>
+                    <Link to="/jobs?jobType=FULL_TIME&workMode=ONSITE" onClick={() => setIsMobile(false)}>Onsite / Office</Link>
+                  </div>
+                  <div className="mega-column">
+                    <h6 className="column-title">Business Roles</h6>
+                    <Link to="/jobs?jobType=FULL_TIME&category=MANAGEMENT" onClick={() => setIsMobile(false)}>Management</Link>
+                    <Link to="/jobs?jobType=FULL_TIME&category=MARKETING" onClick={() => setIsMobile(false)}>Digital Marketing</Link>
+                    <Link to="/jobs?jobType=FULL_TIME&category=FINANCE" onClick={() => setIsMobile(false)}>Finance & Accounts</Link>
+                    <Link to="/jobs?jobType=FULL_TIME&category=HUMAN_RESOURCES" onClick={() => setIsMobile(false)}>Human Resources</Link>
                   </div>
                 </div>
               </div>
+            </li>
+
+            {/* INTERNSHIPS DROP-DOWN */}
+            <li className={`has-mega-dropdown ${activeDropdown === "internships" ? "forced-open" : ""}`}>
+              <span className="modern-nav-trigger" onClick={() => toggleDropdown("internships")}>
+                Internships <FaChevronDown className="chevron-transition" />
+              </span>
+              
+              <div className="premium-mega-panel">
+                <div className="mega-grid">
+                  <div className="mega-column">
+                    <h6 className="column-title">Tech Tracks</h6>
+                    <Link to="/jobs?jobType=INTERNSHIP&category=SOFTWARE_DEVELOPMENT" onClick={() => setIsMobile(false)}>Web Development</Link>
+                    <Link to="/jobs?jobType=INTERNSHIP&category=DATA_SCIENCE" onClick={() => setIsMobile(false)}>Data Analytics</Link>
+                    <Link to="/jobs?jobType=INTERNSHIP&category=UI_UX" onClick={() => setIsMobile(false)}>Product Design</Link>
+                    <Link to="/jobs?jobType=INTERNSHIP&category=QA_TESTING" onClick={() => setIsMobile(false)}>QA & Testing</Link>
+                  </div>
+                  <div className="mega-column">
+                    <h6 className="column-title">Non-Tech Tracks</h6>
+                    <Link to="/jobs?jobType=INTERNSHIP&category=MARKETING" onClick={() => setIsMobile(false)}>Content Writing</Link>
+                    <Link to="/jobs?jobType=INTERNSHIP&category=SALES" onClick={() => setIsMobile(false)}>Business Development</Link>
+                    <Link to="/jobs?jobType=INTERNSHIP&category=DIGITAL_MARKETING" onClick={() => setIsMobile(false)}>Social Media Growth</Link>
+                  </div>
+                  <div className="mega-column">
+                    <h6 className="column-title">Preferences</h6>
+                    <Link to="/jobs?jobType=INTERNSHIP&workMode=REMOTE" onClick={() => setIsMobile(false)}>Work From Home (WFH)</Link>
+                    <Link to="/jobs?jobType=INTERNSHIP&workMode=PART_TIME" onClick={() => setIsMobile(false)}>Part-Time Allowed</Link>
+                  </div>
+                </div>
+              </div>
+            </li>
+
+            <li><Link to="/companies" className="modern-nav-trigger" onClick={() => setIsMobile(false)}>Companies</Link></li>
+            <li><Link to="/courses" className="modern-nav-trigger" onClick={() => setIsMobile(false)}>Courses</Link></li>
+          </ul>
+
+          {/* RIGHT CONTROLS */}
+          <div className="utility-action-hub">
+            {user.isLoggedIn ? (
+              <div className="auth-user-dashboard-controls">
+                
+                {/* NOTIFICATIONS */}
+                {user.role === "STUDENT" && (
+                  <div 
+                    className="wrapper-relative-notif" 
+                    onMouseEnter={() => setShowNotifications(true)} 
+                    onMouseLeave={() => setShowNotifications(false)}
+                  >
+                    <button className="minimal-icon-action-btn" aria-label="Toggle notifications">
+                      <FaBell />
+                      {notifications.length > 0 && <span className="pulse-badge">{notifications.length}</span>}
+                    </button>
+                    
+                    {showNotifications && (
+                      <div className="glass-dropdown-card notifications-card">
+                        <div className="dropdown-card-header">
+                          <h6>Notifications</h6>
+                          {notifications.length > 0 && <span className="pill-counter-accent">{notifications.length} Unread</span>}
+                        </div>
+                        <div className="dropdown-scroll-tray">
+                          {notifications.length === 0 ? (
+                            <div className="empty-notif-state">No new notifications</div>
+                          ) : (
+                            notifications.map((n) => (
+                              <div key={n.id || Math.random()} className="notif-row-item">
+                                <p className="notif-text-content">{n.message || n.content}</p>
+                                <span className="notif-timestamp-tag">Just Now</span>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* USER PROFILE */}
+                <div 
+                  className="wrapper-relative-profile" 
+                  onMouseEnter={() => setShowProfile(true)} 
+                  onMouseLeave={() => setShowProfile(false)}
+                >
+                  <button className="premium-avatar-trigger-button" aria-label="Open user operations">
+                    <div className="internal-avatar-gradient">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                  </button>
+
+                  {showProfile && (
+                    <div className="glass-dropdown-card profile-card">
+                      <div className="profile-identity-segment">
+                        <p className="identity-display-name">{user.name}</p>
+                        <span className="identity-display-role">{user.role}</span>
+                      </div>
+                      <div className="dropdown-action-list">
+                        <Link className="action-row-link" to="/profile" onClick={() => setShowProfile(false)}>
+                          <FaUserCircle className="row-icon" /> Profile Details
+                        </Link>
+                        {user.role === "STUDENT" && (
+                          <Link className="action-row-link" to="/applications" onClick={() => setShowProfile(false)}>
+                            <FaBriefcase className="row-icon" /> My Applications
+                          </Link>
+                        )}
+                        {user.role === "RECRUITER" && (
+                          <Link className="action-row-link" to="/recruiter/dashboard" onClick={() => setShowProfile(false)}>
+                            <FaBuilding className="row-icon" /> Recruiter Console
+                          </Link>
+                        )}
+                        <button onClick={handleLogout} className="action-row-link extreme-logout-row">
+                          <FaSignOutAlt className="row-icon" /> Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+              </div>
             ) : (
-              <div className="auth-group">
-                <button className="login-btn" onClick={() => openAuth("login")}>Login</button>
-                <button className="register-btn" onClick={() => openAuth("register")}>Register</button>
+              <div className="modern-auth-trigger-group">
+                <button className="btn-secondary-clean" onClick={() => { setAuthMode("login"); setIsAuthOpen(true); }}>Log In</button>
+                <button className="btn-primary-gradient" onClick={() => { setAuthMode("register"); setIsAuthOpen(true); }}>Sign Up</button>
               </div>
             )}
 
-            <button className="hamburger" onClick={() => setIsMobile(!isMobile)}>
+            <button className="mobile-hamburger-trigger" onClick={() => setIsMobile(!isMobile)} aria-label="Toggle structural layout">
               {isMobile ? <FaTimes /> : <FaBars />}
             </button>
           </div>
+
         </div>
       </nav>
-
-      <AuthDrawer 
-        isOpen={isAuthOpen} 
-        initialMode={authMode} 
-        onClose={() => setIsAuthOpen(false)} 
-      />
+      <AuthDrawer isOpen={isAuthOpen} initialMode={authMode} onClose={() => setIsAuthOpen(false)} />
     </>
   );
 };

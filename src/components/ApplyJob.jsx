@@ -1,13 +1,15 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+// FIX: Added useMemo explicitly to the core React hook imports
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { 
   FaCheckCircle, FaCloudUploadAlt, FaFilePdf, FaBriefcase, FaMapMarkerAlt, 
   FaWallet, FaChartPie, FaShieldAlt, FaInfoCircle, FaBuilding, 
-  FaKeyboard, FaTimes, FaUserCheck, FaEdit, FaArrowLeft, FaClock, FaGlobe,FaPaperPlane,FaExclamationTriangle, FaSpinner, FaRocket
+  FaTimes, FaUserCheck, FaEdit, FaArrowLeft, FaEnvelope, FaSpinner, 
+  FaRocket, FaUsers, FaRegClock, FaGlobe, FaExclamationTriangle, FaHourglassHalf
 } from "react-icons/fa";
 import axios from "axios";
-import "../components/Styles/applyjob.css";
-// const API_BASE = import.meta.env.VITE_APP_API_URL;
+import "../../src/components/Appyjob.css";
+// src\components\Appyjob.css;
 
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
@@ -23,6 +25,9 @@ const ApplyJob = () => {
   const [completion, setCompletion] = useState(0);
   const [alreadyApplied, setAlreadyApplied] = useState(false);
   const [matchScore, setMatchScore] = useState(0);
+
+  // --- New Dynamic Recommendation States ---
+  const [similarJobs, setSimilarJobs] = useState([]);
 
   // --- Form States ---
   const [formData, setFormData] = useState({
@@ -46,7 +51,7 @@ const ApplyJob = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // --- Initialization ---
+  // --- Initialization & LocalStorage Draft Reload ---
   useEffect(() => {
     if (!token) return navigate("/login");
 
@@ -67,16 +72,37 @@ const ApplyJob = () => {
         setCompletion(compRes.data);
         setAlreadyApplied(applyCheck.data);
         
-        // Populate initial form data from profile
-        setFormData(prev => ({
-          ...prev,
-          name: profRes.data?.name || "",
-          email: profRes.data?.email || "",
-          useExistingResume: !!profRes.data?.resumeUrl
-        }));
+        // Load Item Draft configurations if present for this job scope
+        const savedDraft = localStorage.getItem(`jobDraft_${jobId}`);
+        if (savedDraft) {
+          const parsedDraft = JSON.parse(savedDraft);
+          setFormData(prev => ({
+            ...prev,
+            ...parsedDraft,
+            name: parsedDraft.name || profRes.data?.name || "",
+            email: parsedDraft.email || profRes.data?.email || ""
+          }));
+        } else {
+          setFormData(prev => ({
+            ...prev,
+            name: profRes.data?.name || "",
+            email: profRes.data?.email || "",
+            useExistingResume: !!profRes.data?.resumeUrl
+          }));
+        }
+
+        // Fetch Similar Jobs Recommendation Matrix
+        try {
+          const allJobsRes = await axios.get(`${API_BASE}/job-portal/jobs`, { headers });
+          const jobsList = allJobsRes.data?.content || allJobsRes.data || [];
+          const matchedSims = jobsList.filter(j => j.category === jobRes.data?.category && j.publicId !== jobId);
+          setSimilarJobs(matchedSims);
+        } catch (simErr) {
+          console.warn("Could not synchronize similar opportunities pipeline:", simErr);
+        }
 
       } catch (err) {
-        setError("Failed to load job details. Please try again later.");
+        setError("Failed to load application system metrics. Redirecting...");
         setTimeout(() => navigate("/jobs"), 3000);
       } finally {
         setLoading(false);
@@ -85,7 +111,7 @@ const ApplyJob = () => {
     fetchAllData();
   }, [jobId, token, navigate]);
 
-  // --- Match Score Logic (Debounced) ---
+  // --- Match Score Sync Logic ---
   useEffect(() => {
     if (!token || loading || alreadyApplied) return;
     const controller = new AbortController();
@@ -108,6 +134,13 @@ const ApplyJob = () => {
     };
   }, [formData.extraSkills, jobId, token, loading, alreadyApplied]);
 
+  // --- Auto Save Draft Pipeline on Modification ---
+  useEffect(() => {
+    if (isDirty && !success) {
+      localStorage.setItem(`jobDraft_${jobId}`, JSON.stringify(formData));
+    }
+  }, [formData, jobId, isDirty, success]);
+
   // --- Handlers ---
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -127,563 +160,463 @@ const ApplyJob = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.type !== "application/pdf") return alert("Only PDF files are accepted.");
-    if (file.size > 5 * 1024 * 1024) return alert("File size must be under 5MB.");
+    if (file.type !== "application/pdf") return alert("Only PDF formats are accepted.");
+    if (file.size > 5 * 1024 * 1024) return alert("File sizes must be under 5MB.");
     setResumeFile(file);
     setIsDirty(true);
   };
 
   const validateForm = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
     if (formData.coverLetter.trim().length < 20) {
-      setError("Cover letter is too short (min 20 chars).");
+      setError("Cover statement statement is too short (Minimum 20 characters required).");
       return false;
     }
     if (formData.coverLetter.length > 1000) {
-      setError("Cover letter exceeds 1000 characters.");
+      setError("Cover letter exceeds the maximum allowable space threshold.");
       return false;
     }
     if (!formData.useExistingResume && !resumeFile) {
-      setError("Please upload a resume PDF.");
+      setError("Please pick a valid local workspace PDF resume to upload.");
       return false;
     }
     if (!formData.useProfileData) {
-      if (!formData.name.trim()) { setError("Name is required."); return false; }
-      if (!emailRegex.test(formData.email)) { setError("Invalid email address."); return false; }
+      if (!formData.name.trim()) { setError("Custom identity profile name parameters required."); return false; }
+      if (!emailRegex.test(formData.email)) { setError("Invalid Custom context verification email address."); return false; }
     }
     setError(null);
     return true;
   };
-const handleFinalSubmit = async () => {
-  console.log("HANDLE FINAL SUBMIT CALLED");
 
-  setSubmitting(true);
-
-  try {
+  const handleFinalSubmit = async () => {
+    setSubmitting(true);
+    try {
       let finalResumeUrl = profile?.resumeUrl;
       
-      // Handle New Resume Upload
-     // Handle New Resume Upload
-if (!formData.useExistingResume && resumeFile) {
-
-  const uploadForm = new FormData();
-
-  uploadForm.append("resume", resumeFile);
-
-  const uploadRes = await axios.post(
-    `${API_BASE}/api/users/student/upload`,
-    uploadForm,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data"
+      if (!formData.useExistingResume && resumeFile) {
+        const uploadForm = new FormData();
+        uploadForm.append("resume", resumeFile);
+        const uploadRes = await axios.post(`${API_BASE}/api/users/student/upload`, uploadForm, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data"
+          }
+        });
+        finalResumeUrl = uploadRes.data.resumeUrl;
+        if (!finalResumeUrl) throw new Error("Resume cloud synchronization failed.");
       }
-    }
-  );
 
-  console.log("UPLOAD RESPONSE:", uploadRes.data);
+      const payload = {
+        resumeUrl: finalResumeUrl,
+        coverLetter: formData.coverLetter.trim(),
+        extraSkills: formData.extraSkills ? formData.extraSkills.split(",").map(s => s.trim()).filter(Boolean) : [],
+        override: !formData.useProfileData,
+        name: formData.useProfileData ? profile?.name : formData.name,
+        email: formData.useProfileData ? profile?.email : formData.email,
+        availability: formData.availability,
+        workPreference: formData.workPreference
+      };
 
-  finalResumeUrl = uploadRes.data.resumeUrl;
-
-  if (!finalResumeUrl) {
-    throw new Error("Resume upload failed");
-  }
-}
-    const payload = {
-  resumeUrl: finalResumeUrl,
-
-  coverLetter: formData.coverLetter.trim(),
-
-  extraSkills: formData.extraSkills
-    ? formData.extraSkills
-        .split(",")
-        .map(s => s.trim())
-        .filter(Boolean)
-    : [],
-
-  override: !formData.useProfileData,
-
-  name: formData.useProfileData
-    ? profile?.name
-    : formData.name,
-
-  email: formData.useProfileData
-    ? profile?.email
-    : formData.email,
-
-  availability: formData.availability,
-
-  workPreference: formData.workPreference
-  
-};
- await axios.post(`${API_BASE}/job-portal/applications/${jobId}`, payload, {
+      await axios.post(`${API_BASE}/job-portal/applications/${jobId}`, payload, {
         headers: { Authorization: `Bearer ${token}` },
-          
-      }
-    );
-     
+      });
 
+      localStorage.removeItem(`jobDraft_${jobId}`);
       setSuccess(true);
       setIsDirty(false);
     } catch (err) {
-      setError(err.response?.data?.message || "Something went wrong during submission.");
+      setError(err.response?.data?.message || "Something went wrong during entry registration.");
     } finally {
       setSubmitting(false);
       setShowConfirm(false);
     }
   };
 
-  const handleSafeBack = () => {
-    if (isDirty && !success) {
-      if (window.confirm("You have unsaved changes. Exit anyway?")) navigate("/jobs");
-    } else {
-      navigate("/jobs");
-    }
-  };
+  // --- Formatting & Urgency Data Trackers ---
+  const daysLeft = useMemo(() => {
+    if (!jobDetails?.closedDate) return null;
+    const diff = new Date(jobDetails.closedDate) - new Date();
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  }, [jobDetails?.closedDate]);
 
-  // --- Sub-Components ---
-  // if (loading) return (
-   if (loading) return (
-    <div className="modern-loader-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
-      <FaSpinner className="spin-icon" style={{ fontSize: '2rem', color: '#4f46e5' }} />
-      <p style={{ marginTop: '1rem', fontWeight: '500' }}>Synchronizing Opportunity Data...</p>
+  const liveLetterLength = formData.coverLetter.length;
+
+  if (loading) return (
+    <div className="modern-loader-container">
+      <FaSpinner className="spin-icon" />
+      <p>Synchronizing Opportunity Data Engineering Space...</p>
     </div>
   );
 
-  // 2. SUCCESS STATE
   if (success) return (
-    <div className="success-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, background: '#fff', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div className="success-card" style={{ textAlign: 'center', padding: '40px' }}>
-        <div className="confetti-icon" style={{ fontSize: '4rem', color: '#4f46e5', marginBottom: '20px' }}><FaRocket /></div>
-        <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Application Sent!</h1>
-        <p>Your profile has been shared with <strong>{jobDetails?.companyName}</strong>.</p>
-        <div className="success-actions" style={{ marginTop: '30px', display: 'flex', gap: '15px', justifyContent: 'center' }}>
-          <button className="btn-primary" onClick={() => navigate("/applications")}>Track Application</button>
-          <button className="btn-secondary" onClick={() => navigate("/jobs")}>Browse More</button>
+    <div className="success-overlay">
+      <div className="success-card">
+        <div className="confetti-icon"><FaRocket /></div>
+        <h1>Application Dispatched Successfully!</h1>
+        <p>Your verified credentials profile matrix has been pushed onto <strong>{jobDetails?.companyName || jobDetails?.company}</strong>.</p>
+        <div className="success-actions">
+          <button className="btn-primary" onClick={() => navigate("/applications")}>Track Application Status</button>
+          <button className="btn-secondary" onClick={() => navigate("/jobs")}>Explore Other Profiles</button>
         </div>
       </div>
     </div>
   );
 
   return (
-    <div className="apply-page-wrapper" style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+    <div className="apply-page-wrapper">
       
-      {/* 3. SUB-HEADER (Safe below your global nav) */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', padding: '15px 0', marginBottom: '30px' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <button 
-              className="back-btn" 
-              onClick={() => navigate("/jobs")}
-              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', border: '1px solid #d1d5db', background: '#fff', cursor: 'pointer', fontWeight: '600' }}
-            >
-              <FaArrowLeft /> BACK TO JOBS
+      {/* SUB-HEADER Component */}
+      <div className="portal-sub-header">
+        <div className="sub-header-content">
+          <div className="header-identity-block">
+            <button className="back-btn" onClick={() => navigate(-1)}>
+              <FaArrowLeft /> Back to Opening
             </button>
             <div>
-              <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#111827' }}>{jobDetails?.title}</h2>
-              <span style={{ fontSize: '12px', color: '#6b7280' }}>Application Portal</span>
+              <h2>{jobDetails?.title}</h2>
+              <span className="sub-tag-lbl">Verification Entry Gate</span>
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <div className="profile-strength" style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#4f46e5', marginBottom: '4px' }}>PROFILE STRENGTH: {completion}%</div>
-              <div style={{ width: '120px', height: '6px', background: '#e5e7eb', borderRadius: '10px' }}>
-                <div style={{ width: `${completion}%`, height: '100%', background: '#4f46e5', borderRadius: '10px' }}></div>
+          <div className="header-metrics-block">
+            <div className="profile-strength">
+              <label>Profile Health: {completion}%</label>
+              <div className="progress-track-rail">
+                <div className="progress-fill-bar" style={{ width: `${completion}%` }}></div>
               </div>
             </div>
-            <div className="user-badge" style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingLeft: '20px', borderLeft: '1px solid #e5e7eb' }}>
-               <div style={{ width: '35px', height: '35px', borderRadius: '50%', background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#4f46e5' }}>
-                {profile?.name?.charAt(0)}
-               </div>
-               <span style={{ fontWeight: '600' }}>{profile?.name}</span>
+            <div className="user-badge">
+               <div className="avatar-initials">{profile?.name?.charAt(0).toUpperCase()}</div>
+               <span className="profile-alias-name">{profile?.name}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 4. MAIN CONTENT GRID */}
-      <main className="apply-content-grid" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px 50px', display: 'grid', gridTemplateColumns: '1fr 380px', gap: '30px' }}>
+      {/* MAIN TWO-COLUMN LAYOUT CONTENT */}
+      <main className="apply-content-grid">
         
-        {/* Left Side: Forms */}
+        {/* Left Column Forms */}
         <div className="apply-form-container">
-          {error && <div className="error-toast" style={{ background: '#fef2f2', color: '#b91c1c', padding: '12px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #fecaca', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <FaInfoCircle /> {error}
-          </div>}
+          {error && (
+            <div className="error-toast">
+              <FaInfoCircle /> {error}
+            </div>
+          )}
 
           {alreadyApplied ? (
-            <div className="already-applied-card glass-panel" style={{ background: '#fff', padding: '40px', borderRadius: '12px', textAlign: 'center', border: '1px solid #e5e7eb' }}>
-              <FaCheckCircle style={{ fontSize: '3rem', color: '#10b981', marginBottom: '15px' }} />
-              <h2>Application Received</h2>
-              <p>You've already applied for this role. Check your status in the dashboard.</p>
-              <button className="btn-primary" style={{ marginTop: '20px' }} onClick={() => navigate("/applications")}>Go to Dashboard</button>
+            <div className="already-applied-card">
+              <FaCheckCircle className="check-done-icon" />
+              <h2>Application Already On Record</h2>
+              <p>Your portfolio package for this assignment index has been submitted. Check parameters in dashboard tracking lines.</p>
+              <button className="btn-primary" onClick={() => navigate("/applications")}>Go to Tracking Dashboard</button>
             </div>
           ) : (
-            <div className="form-sections-stack" style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+            <div className="form-sections-stack">
               
+              <div className="smart-alert-panel">
+                {completion < 50 && (
+                  <div className="alert-strip warning-strip">
+                    <FaExclamationTriangle /> <span>Your profile configuration is incomplete ({completion}%). Complete configuration fields to avoid employer screening drops.</span>
+                  </div>
+                )}
+                {!formData.useExistingResume && !resumeFile && (
+                  <div className="alert-strip generic-strip">
+                    <FaInfoCircle /> <span>Shortlist Optimization Tip: Uploading a focused resume file improves vetting response metrics up to 3x.</span>
+                  </div>
+                )}
+              </div>
+
               {/* Personal Info */}
-              <section className="form-section glass-panel" style={{ background: '#fff', padding: '25px', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-                  <FaUserCheck style={{ color: '#4f46e5' }} /> <h3 style={{ margin: 0 }}>Personal Information</h3>
+              <section className="form-section">
+                <div className="section-title-strip">
+                  <FaUserCheck className="icon-blue" /> <h3>Candidate Meta Parameters</h3>
                 </div>
-                <div className="toggle-container" style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-                  <button className={`toggle-item ${formData.useProfileData ? 'active' : ''}`} onClick={() => setFormData(p => ({...p, useProfileData: true}))}>Use Profile</button>
-                  <button className={`toggle-item ${!formData.useProfileData ? 'active' : ''}`} onClick={() => setFormData(p => ({...p, useProfileData: false}))}>Custom Alias</button>
+                <div className="toggle-container">
+                  <button className={`toggle-item ${formData.useProfileData ? 'active' : ''}`} onClick={() => setFormData(p => ({...p, useProfileData: true}))}>Deploy Core Profile Data</button>
+                  <button className={`toggle-item ${!formData.useProfileData ? 'active' : ''}`} onClick={() => setFormData(p => ({...p, useProfileData: false}))}>Declare Override Alias</button>
                 </div>
                 {!formData.useProfileData && (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                    <input name="name" value={formData.name} onChange={handleInputChange} placeholder="Full Name" style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ddd' }} />
-                    <input name="email" value={formData.email} onChange={handleInputChange} placeholder="Email" style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ddd' }} />
+                  <div className="custom-input-matrix">
+                    <input name="name" value={formData.name} onChange={handleInputChange} placeholder="Full Display Name" className="text-input" />
+                    <input name="email" value={formData.email} onChange={handleInputChange} placeholder="Context Validation Email" className="text-input" />
                   </div>
                 )}
               </section>
 
-              <section className="form-section glass-panel" style={{ background: '#fff', padding: '25px', borderRadius: '16px', border: '1px solid #e5e7eb', marginBottom: '25px' }}>
-  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-    <FaCloudUploadAlt style={{ color: '#10b981', fontSize: '1.2rem' }} /> 
-    <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#1f2937' }}>Resume Submission</h3>
-  </div>
+              {/* Resume Selector */}
+              <section className="form-section">
+                <div className="section-title-strip">
+                  <FaCloudUploadAlt className="icon-green" /> <h3>Workspace Resume Package</h3>
+                </div>
 
-  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
-    {/* Option 1: Use Existing */}
-    <div 
-      onClick={() => profile?.resumeUrl && setFormData(p => ({...p, useExistingResume: true}))}
-      style={{ 
-        padding: '20px', 
-        border: formData.useExistingResume ? '2px solid #4f46e5' : '1px solid #e5e7eb', 
-        background: formData.useExistingResume ? '#f5f3ff' : '#fff',
-        borderRadius: '12px', 
-        cursor: profile?.resumeUrl ? 'pointer' : 'not-allowed', 
-        textAlign: 'center',
-        opacity: profile?.resumeUrl ? 1 : 0.6,
-        transition: 'all 0.2s'
-      }}
-    >
-      <FaFilePdf style={{ fontSize: '1.5rem', color: '#ef4444', marginBottom: '8px' }} />
-      <div style={{ fontWeight: '600', fontSize: '14px' }}>Use Profile Resume</div>
-      {!profile?.resumeUrl && <div style={{ fontSize: '11px', color: '#9ca3af' }}>No resume found in profile</div>}
-    </div>
+                <div className="resume-grid-choices">
+                  <div 
+                    onClick={() => profile?.resumeUrl && setFormData(p => ({...p, useExistingResume: true}))}
+                    className={`resume-choice-box ${formData.useExistingResume ? 'selected' : ''} ${!profile?.resumeUrl ? 'disabled' : ''}`}
+                  >
+                    <FaFilePdf className="pdf-icon-frame" />
+                    <div className="choice-lbl">Use Default Account Resume</div>
+                    {!profile?.resumeUrl && <div className="choice-fallback-warning">No resume configuration file detected in account logs.</div>}
+                  </div>
 
-    {/* Option 2: Upload New */}
-    <div 
-      onClick={() => setFormData(p => ({...p, useExistingResume: false}))}
-      style={{ 
-        padding: '20px', 
-        border: !formData.useExistingResume ? '2px solid #4f46e5' : '1px solid #e5e7eb', 
-        background: !formData.useExistingResume ? '#f5f3ff' : '#fff',
-        borderRadius: '12px', 
-        cursor: 'pointer', 
-        textAlign: 'center',
-        transition: 'all 0.2s'
-      }}
-    >
-      <FaCloudUploadAlt style={{ fontSize: '1.5rem', color: '#10b981', marginBottom: '8px' }} />
-      <div style={{ fontWeight: '600', fontSize: '14px' }}>Upload New PDF</div>
-    </div>
-  </div>
+                  <div 
+                    onClick={() => setFormData(p => ({...p, useExistingResume: false}))}
+                    className={`resume-choice-box ${!formData.useExistingResume ? 'selected' : ''}`}
+                  >
+                    <FaCloudUploadAlt className="upload-icon-frame" />
+                    <div className="choice-lbl">Upload Dynamic PDF Segment</div>
+                  </div>
+                </div>
 
-  {/* THE ACTUAL FILE INPUT (Restored) */}
-  {!formData.useExistingResume && (
-    <div className="upload-zone animate-fade" style={{ marginTop: '10px' }}>
-      <input 
-        type="file" 
-        id="resume-upload-input" 
-        hidden 
-        onChange={handleFileChange} // Ensures your file logic triggers
-        accept=".pdf" 
-      />
-      <label 
-        htmlFor="resume-upload-input" 
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '30px',
-          border: '2px dashed #cbd5e1',
-          borderRadius: '12px',
-          background: '#f8fafc',
-          cursor: 'pointer',
-          transition: 'border-color 0.2s'
-        }}
-        onMouseOver={(e) => e.currentTarget.style.borderColor = '#4f46e5'}
-        onMouseOut={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
-      >
-        <FaCloudUploadAlt style={{ fontSize: '2rem', color: '#94a3b8', marginBottom: '10px' }} />
-        <span style={{ fontWeight: '500', color: '#475569' }}>
-          {resumeFile ? resumeFile.name : "Click to select or drag PDF"}
-        </span>
-        <span style={{ fontSize: '11px', color: '#94a3b8', marginTop: '5px' }}>Max file size: 5MB</span>
-      </label>
-    </div>
-  )}
-</section>
-              {/* Cover Letter Section */}
-              <section className="form-section glass-panel" style={{ background: '#fff', padding: '25px', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-                  <FaEdit style={{ color: '#f59e0b' }} /> <h3 style={{ margin: 0 }}>Why You?</h3>
+                {!formData.useExistingResume && (
+                  <div className="upload-zone-wrapper">
+                    <input type="file" id="resume-upload-input" hidden onChange={handleFileChange} accept=".pdf" />
+                    <label htmlFor="resume-upload-input" className="drag-upload-label">
+                      <FaCloudUploadAlt className="cloud-icon" />
+                      <span className="file-feedback-name">{resumeFile ? resumeFile.name : "Select or drag updated resume PDF files"}</span>
+                      <span className="file-constraints-text">Maximum allowable limit: 5MB File size</span>
+                    </label>
+                  </div>
+                )}
+              </section>
+
+              {/* Cover Letter */}
+              <section className="form-section">
+                <div className="section-title-strip">
+                  <FaEdit className="icon-amber" /> <h3>Cover Statement Dossier</h3>
                 </div>
                 <textarea 
                   name="coverLetter" rows="6" value={formData.coverLetter} onChange={handleInputChange} 
-                  placeholder="Explain your suitability..." 
-                  style={{ width: '100%', padding: '15px', borderRadius: '8px', border: '1px solid #ddd', resize: 'none' }}
+                  placeholder="Elaborate clearly on projects, tech stacks, or engineering alignments matching this exact scope..." 
+                  className="master-textarea"
                 />
+                <div className="live-metrics-footer-row">
+                  <span className={`character-count-lbl ${liveLetterLength > 1000 ? 'count-overflow' : ''}`}>
+                    Length: <strong>{liveLetterLength}</strong> / 1000 Chars
+                  </span>
+                  {liveLetterLength >= 20 && liveLetterLength <= 1000 ? (
+                    <span className="metric-pill success-pill">Good Length ✔</span>
+                  ) : (
+                    <span className="metric-pill danger-pill">Requires 20-1000 Chars</span>
+                  )}
+                </div>
               </section>
 
-              <button className="submit-master-btn" onClick={() => validateForm() && setShowConfirm(true)} disabled={submitting} style={{ padding: '18px', background: '#4f46e5', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 'bold', fontSize: '1rem', cursor: 'pointer' }}>
-                {submitting ? <FaSpinner className="spin" /> : "Review Application"}
+              <button className="submit-master-btn" onClick={() => validateForm() && setShowConfirm(true)} disabled={submitting}>
+                {submitting ? <FaSpinner className="spin-animation" /> : "Review Application Packaging Matrix"}
               </button>
             </div>
           )}
         </div>
 
-        {/* Right Side: Sidebar */}
-       <aside className="apply-sidebar" style={{ width: '380px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-  
-  {/* Score Section */}
-  <div className="intel-card glass-panel" style={{ background: '#fff', padding: '24px', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px', fontWeight: '700' }}>
-      <FaChartPie style={{ color: '#4f46e5' }} /> Compatibility Analysis
-    </div>
-    <div style={{ textAlign: 'center' }}>
-      <div style={{ fontSize: '2.8rem', fontWeight: '800', color: '#4f46e5' }}>
-        {Number(matchScore).toFixed(2)}%
-      </div>
-      <p style={{ fontSize: '13px', color: '#6b7280' }}>Requirements Match</p>
-    </div>
-  </div>
+        {/* Right Side Sidebar Info Panel */}
+        <aside className="apply-sidebar">
+          
+          {/* Compatibility Analysis Widget */}
+          <div className="intel-card match-analytics-card">
+            <div className="intel-card-title"><FaChartPie className="color-purple" /> Compatibility Index Analysis</div>
+            <div className="gauge-score-display">
+              <div className="score-numerical-header">{Number(matchScore).toFixed(1)}%</div>
+              <div className="visual-progress-gauge-track">
+                <div className="visual-progress-gauge-fill" style={{ width: `${matchScore}%` }}></div>
+              </div>
+              <p className="gauge-sub-label">Profile Target Matrix Balance Match</p>
+            </div>
 
-  {/* Skills Section */}
-  <div className="intel-card glass-panel" style={{ background: '#fff', padding: '20px', borderRadius: '16px', border: '1px solid #e5e7eb', marginBottom: '20px' }}>
-  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px', fontWeight: '700', color: '#374151' }}>
-    <FaShieldAlt style={{ color: '#10b981' }} /> Skills for this Role
-  </div>
+            <div className="granular-skills-match-breakdown">
+              <label className="breakdown-headline">Requirement Verification Matrix</label>
+              <div className="checklist-stack-lines">
+                {profile?.skills?.map(skill => (
+                  <div key={skill} className="checklist-line item-verified">
+                    <span className="check-symbol">✔</span> <span className="skill-text-lbl">{skill}</span>
+                  </div>
+                ))}
+                {missingSkills?.map(skill => (
+                  <div key={skill} className="checklist-line item-missing">
+                    <span className="check-symbol">✖</span> <span className="skill-text-lbl">{skill} (Missing)</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
 
-  {/* SECTION A: SKILLS ALREADY IN YOUR PROFILE */}
-  <div style={{ marginBottom: '15px' }}>
-    <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '800', display: 'block', marginBottom: '8px' }}>FROM YOUR PROFILE</span>
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-      {profile?.skills?.map((skill, index) => (
-        <span 
-          key={index} 
-          style={{ padding: '4px 10px', background: '#eff6ff', color: '#2563eb', borderRadius: '6px', fontSize: '12px', fontWeight: '600', border: '1px solid #dbeafe' }}
-        >
-          {skill}
-        </span>
-      ))}
-    </div>
-  </div>
+          {/* Skill Booster Recommendation */}
+          <div className="intel-card optimization-accelerator-card">
+            <div className="intel-card-title"><FaShieldAlt className="color-emerald" /> Skill Booster Recommendation</div>
+            
+            {jobDetails?.experienceLevel && (!profile?.experience || profile.experience.trim() === "") && (
+              <div className="experience-match-warning-banner">
+                <FaExclamationTriangle />
+                <p>This role expects an <strong>{jobDetails.experienceLevel.replaceAll("_", " ")}</strong> profile depth. Your dashboard file lists 0 entries. Verify profile completeness.</p>
+              </div>
+            )}
 
-  {/* SECTION B: DYNAMICALLY ADDED SKILLS (Visible when you click recommendations) */}
-  {formData.extraSkills && (
-    <div style={{ marginBottom: '15px' }}>
-      <span style={{ fontSize: '11px', color: '#4f46e5', fontWeight: '800', display: 'block', marginBottom: '8px' }}>ADDED FOR THIS APP</span>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-        {formData.extraSkills.split(',').filter(s => s.trim() !== "").map((skill, index) => (
-          <span 
-            key={index} 
-            style={{ padding: '4px 10px', background: '#f5f3ff', color: '#7c3aed', borderRadius: '6px', fontSize: '12px', fontWeight: '600', border: '1px solid #ddd6fe' }}
-          >
-            {skill.trim()}
-          </span>
-        ))}
-      </div>
-    </div>
-  )}
+            <span className="accelerator-sub-lbl">Click missing tech targets to bind them into this session payload and boost compatibility score scores instantly:</span>
+            <div className="accelerator-chips-pool">
+              {missingSkills?.length > 0 ? (
+                missingSkills.map(skill => (
+                  <button key={skill} onClick={() => handleAddSkill(skill)} className="booster-add-pill-btn">
+                    + {skill}
+                  </button>
+                ))
+              ) : (
+                <div className="perfection-alert-box">
+                  <FaCheckCircle /> Profile criteria completely covers requirements!
+                </div>
+              )}
+            </div>
+          </div>
 
-  <hr style={{ border: '0', borderTop: '1px solid #f1f5f9', margin: '15px 0' }} />
+          {/* IMPROVED CONTENT: Enterprise Snapshot Dossier Card */}
+          <div className="intel-card job-snapshot-summary-card">
+            <div className="intel-card-title"><FaBuilding className="color-slate" /> Enterprise Snapshot Dossier</div>
+            
+            {/* Enhanced Corporate Header Info Layout */}
+            <div className="snapshot-corporate-header-container">
+              <div className="corporate-avatar-box">
+                {jobDetails?.companyLogo ? (
+                  <img src={jobDetails.companyLogo} alt={jobDetails?.companyName || "Company logo"} className="corporate-card-img" />
+                ) : (
+                  <FaBuilding className="fallback-corp-icon" />
+                )}
+              </div>
+              <div className="corporate-meta-text-rail">
+                <h4 
+                  className="company-link-header"
+                  onClick={() => jobDetails?.companyPublicId && navigate(`/companies/${jobDetails.companyPublicId}`)}
+                >
+                  {jobDetails?.companyName || jobDetails?.company || "Target Enterprise Hub"}
+                </h4>
+                <p className="location-lbl"><FaMapMarkerAlt /> {jobDetails?.companyLocation || jobDetails?.location || "Global Field Operations"}</p>
+              </div>
+            </div>
 
-  {/* SECTION C: RECOMMENDATIONS (The buttons you click) */}
-  <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '800', display: 'block', marginBottom: '8px' }}>RECOMMENDED TO BOOST SCORE</span>
-  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-    {missingSkills?.length > 0 ? (
-      missingSkills.map(skill => (
-        <button 
-          key={skill} 
-          onClick={() => handleAddSkill(skill)}
-          style={{
-            padding: '6px 12px',
-            background: '#fff',
-            color: '#16a34a',
-            border: '1px solid #16a34a',
-            borderRadius: '100px',
-            fontSize: '11px',
-            cursor: 'pointer',
-            fontWeight: '600',
-            transition: 'all 0.2s'
-          }}
-          onMouseOver={(e) => {e.target.style.background = '#f0fdf4'}}
-          onMouseOut={(e) => {e.target.style.background = '#fff'}}
-        >
-          + {skill}
-        </button>
-      ))
-    ) : (
-      <div style={{ color: '#10b981', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-        <FaCheckCircle /> All requirements met!
-      </div>
-    )}
-  </div>
-</div>
+            {/* Corporate Actions Stack Link Layout */}
+            <div className="snapshot-corporate-actions-panel">
+              <button 
+                className="sidebar-view-profile-btn"
+                onClick={() => jobDetails?.companyPublicId && navigate(`/companies/${jobDetails.companyPublicId}`)}
+              >
+                View Company Profile
+              </button>
+              {jobDetails?.companyWebsite && (
+                <a href={jobDetails.companyWebsite} target="_blank" rel="noreferrer" className="company-external-site-link-btn">
+                  Visit Website <FaGlobe size={11} />
+                </a>
+              )}
+            </div>
 
-  {/* Job Snapshot Section */}
- <div className="intel-card glass-panel" style={{ background: '#fff', padding: '20px', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
-  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', fontWeight: '700' }}>
-    <FaBuilding style={{ color: '#64748b' }} /> Full Job Snapshot
-  </div>
-  
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-    
-    {/* Organization & Location (Mapped to 'company' and 'location') */}
-    <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
-      <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '800', textTransform: 'uppercase' }}>Organization</span>
-      <div style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', marginTop: '2px' }}>
-        {jobDetails?.company} {/* Matches your JSON 'company' */}
-      </div>
-      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-        📍 {jobDetails?.location} {/* Matches your JSON 'location' */}
-      </div>
-    </div>
+            {/* Category Mapping Badges */}
+            <div className="snapshot-metadata-chips-row">
+              {jobDetails?.category && (
+                <span className="snapshot-meta-badge category-badge-pill">
+                  🏷 {jobDetails.category.replaceAll("_", " ")}
+                </span>
+              )}
+              <span className="snapshot-meta-badge">💼 {jobDetails?.workMode}</span>
+            </div>
 
-    {/* Work Mode & Experience Level */}
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-      <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '12px' }}>
-        <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '800' }}>MODE</span>
-        <div style={{ fontSize: '13px', fontWeight: '600', textTransform: 'capitalize' }}>
-          {jobDetails?.workMode?.toLowerCase()} {/* Matches 'ONSITE' */}
-        </div>
-      </div>
-      <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '12px' }}>
-        <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '800' }}>LEVEL</span>
-        <div style={{ fontSize: '13px', fontWeight: '600', textTransform: 'capitalize' }}>
-          {jobDetails?.experienceLevel?.toLowerCase()} {/* Matches 'FRESHER' */}
-        </div>
-      </div>
-    </div>
+            {/* Urgency Metrics Data Grid */}
+            <div className="snapshot-data-grid">
+              <div className="snapshot-data-cell bg-indigo-tint">
+                <FaUsers />
+                <div className="cell-text-wrap">
+                  <span className="cell-value-num">{jobDetails?.applicationsCount || 0} Candidates</span>
+                  <span className="cell-label-text">Applied for Role</span>
+                </div>
+              </div>
 
-    {/* Salary Section (Formatted to Currency) */}
-    <div style={{ background: '#eff6ff', padding: '14px', borderRadius: '12px', border: '1px solid #dbeafe' }}>
-      <span style={{ fontSize: '10px', color: '#2563eb', fontWeight: '800' }}>ANNUAL CTC</span>
-      <div style={{ fontSize: '18px', fontWeight: '800', color: '#1e40af', display: 'flex', alignItems: 'center', gap: '6px' }}>
-        <FaWallet size={14}/> 
-        {jobDetails?.salary ? `₹${Number(jobDetails.salary).toLocaleString('en-IN')}` : "Competitive"}
-      </div>
-    </div>
+              {daysLeft !== null && (
+                <div className="snapshot-data-cell bg-amber-tint">
+                  <FaHourglassHalf />
+                  <div className="cell-text-wrap">
+                    <span className="cell-value-num">{daysLeft} Days Left</span>
+                    <span className="cell-label-text">Registration Closes</span>
+                  </div>
+                </div>
+              )}
+            </div>
 
-    {/* Metadata Footer */}
-    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 5px 0', fontSize: '11px', color: '#94a3b8' }}>
-      <span>Type: {jobDetails?.jobType?.replace('_', ' ')}</span>
-      <span>Ref: {jobDetails?.publicId}</span>
-    </div>
+            {/* Rich Recruiter Contact Mapping Widget */}
+            {jobDetails?.recruiter && (
+              <div className="snapshot-recruiter-footer-panel">
+                <span className="panel-label">Hiring Partner Directory</span>
+                <div className="recruiter-mini-strip">
+                  <div className="recruiter-initial-circle">{jobDetails.recruiter.name?.charAt(0).toUpperCase()}</div>
+                  <div className="recruiter-meta">
+                    <span className="recruiter-name-text">{jobDetails.recruiter.name}</span>
+                    <span className="recruiter-assignment-sub">Acquisition Manager &bull; Vetting Team</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
-  </div>
-</div>
-</aside>
+            <div className="snapshot-financial-footer-strip">
+              <FaWallet /> <span>Annual Package Compensation: <strong>₹{jobDetails?.salary ? Number(jobDetails.salary).toLocaleString('en-IN') : "Competitive Matrix Bounds"}</strong></span>
+            </div>
+          </div>
+
+          {/* Similar Opportunities */}
+          {similarJobs.length > 0 && (
+            <div className="intel-card similar-recommendations-card">
+              <div className="intel-card-title"><FaRocket className="color-indigo" /> Similar Opportunities</div>
+              <div className="similar-stack-rail">
+                {similarJobs.slice(0, 3).map((simJob) => (
+                  <div key={simJob.publicId} className="sidebar-mini-job-card" onClick={() => navigate(`/job/${simJob.publicId}`)}>
+                    <div className="mini-card-top">
+                      <h5>{simJob.title}</h5>
+                      <span className="mini-mode-tag">{simJob.workMode}</span>
+                    </div>
+                    <p className="mini-company-name">{simJob.companyName || "Verified Enterprise Provider"}</p>
+                    <p className="mini-location-meta">📍 {simJob.location}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </aside>
       </main>
 
-      {/* 5. CONFIRMATION MODAL */}
+      {/* CONFIRMATION MODAL */}
       {showConfirm && (
-        <div className="modal-backdrop" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 11000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="confirmation-modal" style={{ background: '#fff', padding: '30px', borderRadius: '16px', maxWidth: '500px', width: '90%', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
-            <h2 style={{ marginBottom: '10px' }}>Submit Application?</h2>
-            <p style={{ color: '#6b7280', marginBottom: '20px' }}>Double check your details. Once submitted, you cannot edit this application.</p>
-            <div style={{ background: '#f9fafb', padding: '15px', borderRadius: '8px', marginBottom: '20px' }}>
-               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}><span>Role:</span> <strong>{jobDetails?.title}</strong></div>
-               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Name:</span> <strong>{formData.useProfileData ? profile?.name : formData.name}</strong></div>
+        <div className="modal-backdrop-layer">
+          <div className="confirmation-modal-container">
+            <button className="close-modal-top-btn" onClick={() => setShowConfirm(false)}><FaTimes /></button>
+            <div className="modal-header-graphic-area">
+              <div className="graphic-circle-icon"><FaRocket /></div>
+              <h2>Ready to Route Application?</h2>
+              <p>Review credentials layout parameters before submission verification block locking.</p>
             </div>
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button style={{ flex: 1, padding: '12px', borderRadius: '8px', border: '1px solid #ddd', cursor: 'pointer' }} onClick={() => setShowConfirm(false)}>Edit</button>
-              <button style={{ flex: 1, padding: '12px', borderRadius: '8px', border: 'none', background: '#4f46e5', color: '#fff', fontWeight: 'bold', cursor: 'pointer' }} onClick={handleFinalSubmit}>
-                {submitting ? "Sending..." : "Confirm & Send"}
+
+            <div className="modal-summary-fact-sheet">
+              <div className="summary-fact-line">
+                <span className="fact-lbl">Target Assignment Role:</span>
+                <strong className="fact-val-highlight">{jobDetails?.title}</strong>
+              </div>
+              <div className="summary-fact-line">
+                <span className="fact-lbl">Assigned Operator Identity:</span>
+                <strong className="fact-val">{formData.useProfileData ? profile?.name : formData.name}</strong>
+              </div>
+              <div className="summary-fact-line">
+                <span className="fact-lbl">Verification Routing Target:</span>
+                <strong className="fact-val">{formData.useProfileData ? profile?.email : formData.email}</strong>
+              </div>
+              <div className="summary-fact-line">
+                <span className="fact-lbl">Core Resume Cloud Reference:</span>
+                <strong className="fact-val text-emerald-color">{formData.useExistingResume ? "Default Account Profile Object" : "Dynamic Local PDF Session Upload"}</strong>
+              </div>
+            </div>
+
+            <div className="modal-interactive-action-row">
+              <button className="modal-btn-dismiss" onClick={() => setShowConfirm(false)}>Return to Modification</button>
+              <button className="modal-btn-confirm-route" onClick={handleFinalSubmit} disabled={submitting}>
+                {submitting ? "Processing Queue Load..." : "Confirm & Commit application"}
               </button>
             </div>
           </div>
         </div>
-      )}{showConfirm && (
-  <div className="modal-backdrop" style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(4px)', zIndex: 11000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-    <div className="confirmation-modal" style={{ background: '#fff', padding: '32px', borderRadius: '20px', maxWidth: '550px', width: '90%', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', border: '1px solid #e2e8f0' }}>
-      
-      <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-        <div style={{ background: '#eef2ff', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 15px' }}>
-          <FaPaperPlane style={{ color: '#4f46e5', fontSize: '1.5rem' }} />
-        </div>
-        <h2 style={{ margin: 0, color: '#1e293b', fontSize: '1.5rem', fontWeight: '800' }}>Ready to Apply?</h2>
-        <p style={{ color: '#64748b', fontSize: '14px', marginTop: '8px' }}>Please review your application details below.</p>
-      </div>
-
-      {/* DETAILED SUMMARY CARD */}
-      <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '14px', border: '1px solid #f1f5f9', marginBottom: '24px' }}>
-        <div style={{ display: 'grid', gap: '12px', fontSize: '14px' }}>
-          
-          <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px' }}>
-            <span style={{ color: '#64748b' }}>Applying for:</span>
-            <strong style={{ color: '#1e293b' }}>{jobDetails?.title}</strong>
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px' }}>
-            <span style={{ color: '#64748b' }}>Applicant:</span>
-            <strong style={{ color: '#1e293b' }}>{formData.useProfileData ? profile?.name : formData.name}</strong>
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px' }}>
-            <span style={{ color: '#64748b' }}>Resume:</span>
-            <span style={{ fontWeight: '600', color: '#10b981', display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <FaFilePdf size={12}/> {formData.useExistingResume ? "Profile Resume" : (resumeFile?.name || "Uploaded File")}
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: '#64748b' }}>Match Score:</span>
-            <strong style={{ color: '#4f46e5' }}>{Number(matchScore).toFixed(2)}%</strong>
-          </div>
-
-        </div>
-      </div>
-
-      <div style={{ background: '#fff9f2', border: '1px solid #fee2e2', padding: '12px', borderRadius: '8px', marginBottom: '24px', display: 'flex', gap: '10px' }}>
-         <FaExclamationTriangle style={{ color: '#f97316', flexShrink: 0, marginTop: '2px' }} />
-         <p style={{ margin: 0, fontSize: '12px', color: '#9a3412', lineHeight: '1.5' }}>
-           Once submitted, you cannot change your resume or contact info for this specific role.
-         </p>
-      </div>
-
-      <div style={{ display: 'flex', gap: '12px' }}>
-        <button 
-          style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff', color: '#64748b', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }} 
-          onClick={() => setShowConfirm(false)}
-        >
-          Go Back
-        </button>
-        <button 
-          style={{ 
-            flex: 2, 
-            padding: '14px', 
-            borderRadius: '12px', 
-            border: 'none', 
-            background: '#4f46e5', 
-            color: '#fff', 
-            fontWeight: '700', 
-            cursor: submitting ? 'not-allowed' : 'pointer',
-            boxShadow: '0 4px 14px 0 rgba(79, 70, 229, 0.39)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px'
-          }} 
-          onClick={handleFinalSubmit}
-          disabled={submitting}
-        >
-          {submitting ? (
-            <> <div className="spinner" /> Sending... </>
-          ) : (
-            "Submit Application"
-          )}
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+      )}
     </div>
   );
 };

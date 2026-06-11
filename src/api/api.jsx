@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:8080/job-portal",
+  baseURL: "http://localhost:8080",
 });
 
 // Automatically attaches token to every request

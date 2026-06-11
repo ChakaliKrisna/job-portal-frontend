@@ -1,105 +1,419 @@
-:root {
-  /* Green Palette */
-  --primary: #10b981;        /* Emerald 500 */
-  --primary-dark: #059669;   /* Emerald 600 */
-  --primary-light: #d1fae5;  /* Mint Green 100 */
-  --bg-subtle: #f0fdf4;      /* Very Light Green wash */
-  
-  --dark-bg: #064e3b;        /* Deep Forest (for contrast) */
-  --text-main: #065f46;      /* Deep Teal-Green text */
-  --text-muted: #6b7280;
-  --border-color: #e5e7eb;
-}
-
 .home-wrapper {
-  background-color: #ffffff;
-  color: var(--text-main);
+  background-color: #f8fafc;
+  min-height: 100vh;
 }
 
-/* Scroll Progress in Green */
-.scroll-progress {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 4px;
-  background: linear-gradient(to right, var(--primary), #34d399);
-  z-index: 9999;
+.home-main {
+  padding-bottom: 60px;
 }
 
-/* Elegant Section Background */
-.listings-bg {
-  /* Sublte green gradient transition */
-  background: linear-gradient(to bottom, #ffffff, var(--bg-subtle), #ffffff);
-  padding: 100px 0;
-}
-
-/* Modern Green Newsletter Section */
-.newsletter-section {
-  background-color: var(--dark-bg);
-  /* Added organic green glow shapes */
-  background-image: 
-    radial-gradient(circle at 0% 0%, rgba(16, 185, 129, 0.2) 0%, transparent 50%),
-    radial-gradient(circle at 100% 100%, rgba(52, 211, 153, 0.1) 0%, transparent 50%);
+.home-section {
+  max-width: 1280px;
+  margin: 0 auto;
   padding: 80px 24px;
-  margin: 40px 5%;
-  border-radius: 40px;
-  text-align: center;
-  color: #ffffff;
 }
 
-.newsletter-title {
-  font-size: 2.5rem;
+.section-title-area {
+  margin-bottom: 40px;
+}
+
+.section-title-area h2 {
+  font-size: 32px;
   font-weight: 800;
-  color: #ffffff;
+  color: #0f172a;
+  letter-spacing: -1px;
+  margin: 0 0 8px 0;
 }
 
-.newsletter-form {
+.text-gradient {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.section-title-area p {
+  color: #64748b;
+  margin: 0;
+  font-size: 16px;
+}
+
+.trending-jobs-bg {
+  background: #f1f5f9;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.padding-box {
+  padding: 40px 0;
+}
+
+.recruiter-hero-dashboard {
+  background: #0f172a;
+  color: white;
+  padding: 100px 24px;
+  text-center: center;
+}
+
+.recruiter-hero-content {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.recruiter-hero-content h1 {
+  font-size: 42px;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.dashboard-btn {
+  background: #4f46e5;
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* Bento Cards Styling */
+.mock-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 24px;
+}
+
+.job-card-bento {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.job-card-bento:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px -10px rgba(0,0,0,0.08);
+}
+
+.status-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 99px;
+  display: inline-block;
+  margin-bottom: 16px;
+}
+
+.status-tag.live { background: #d1fae5; color: #065f46; }
+.status-tag.active-tag { background: #e0e7ff; color: #3730a3; }
+
+.job-card-bento h4 { margin: 0 0 8px 0; font-size: 18px; color: #0f172a; }
+.company-meta { color: #64748b; font-size: 14px; margin: 0 0 12px 0; }
+.salary-meta { color: #0f172a; font-weight: 600; font-size: 14px; margin-bottom: 20px; }
+
+.apply-bento-btn {
+  width: 100%;
+  background: #f1f5f9;
+  color: #0f172a;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.apply-bento-btn:hover { background: #e2e8f0; }
+
+/* Workflow Steps UI */
+.workflow-bento-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.workflow-step {
+  background: white;
+  border: 1px solid #e2e8f0;
+  padding: 32px;
+  border-radius: 16px;
+}
+
+.step-num {
+  font-size: 36px;
+  font-weight: 800;
+  color: #4f46e5;
+  margin-bottom: 16px;
+  opacity: 0.3;
+}
+
+.workflow-step h4 { margin: 0 0 8px 0; font-size: 18px; color: #0f172a; }
+.workflow-step p { margin: 0; color: #64748b; font-size: 14px; line-height: 1.5; }
+
+/* Statistics Bento Layout */
+.stats-bento-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+}
+
+.stat-box-bento {
+  padding: 40px 32px;
+  border-radius: 20px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.blue-gradient { background: linear-gradient(135deg, #1e3a8a, #3b82f6); }
+.purple-gradient { background: linear-gradient(135deg, #4c1d95, #8b5cf6); }
+.emerald-gradient { background: linear-gradient(135deg, #064e3b, #10b981); }
+
+.bento-icon {
+  position: absolute;
+  right: -10px;
+  bottom: -10px;
+  font-size: 120px;
+  opacity: 0.1;
+}
+
+.stat-box-bento h3 { font-size: 42px; font-weight: 800; margin: 0 0 4px 0; }
+.stat-box-bento p { margin: 0; font-size: 15px; opacity: 0.9; }
+
+/* Company strip placeholder */
+.company-logos-strip {
   display: flex;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 8px;
-  border-radius: 24px;
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  max-width: 500px;
-  margin: 2.5rem auto 0;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 32px;
 }
 
-.newsletter-input {
+.logo-placeholder {
+  font-size: 20px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.partner-headline {
+  font-size: 16px;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 1px;
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+/* Modern Newsletter Block */
+.modern-newsletter {
+  max-width: 1280px;
+  margin: 40px auto 0 auto;
+  padding: 0 24px;
+}
+
+.newsletter-inner {
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  border-radius: 24px;
+  padding: 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 32px;
+  color: white;
+}
+
+.news-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bell-icon { font-size: 24px; color: #fbbf24; }
+.news-text h3 { margin: 0; font-size: 24px; font-weight: 700; }
+.news-text p { margin: 0; color: #94a3b8; font-size: 15px; }
+
+.news-form {
+  display: flex;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 6px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.news-form input {
   background: transparent;
   border: none;
-  padding: 12px 20px;
+  outline: none;
   color: white;
+  padding: 0 16px;
+  font-size: 14px;
   flex: 1;
 }
 
-.newsletter-btn {
-  background: var(--primary);
-  color: white;
-  padding: 12px 28px;
-  border-radius: 18px;
-  font-weight: 700;
-  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+.news-form button {
+  background: white;
+  color: #0f172a;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-.newsletter-btn:hover {
-  background: #ffffff;
-  color: var(--dark-bg);
-  transform: translateY(-2px);
+.section-loader {
+  text-align: center;
+  padding: 40px;
 }
 
-/* Badge for "Light Green" accents */
-.badge {
-  background: var(--primary-light);
-  color: var(--primary-dark);
-  padding: 6px 16px;
-  border-radius: 50px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  display: inline-block;
-  margin-bottom: 1rem;
-}
-
-/* Loader */
 .spinner {
-  border-top-color: var(--primary) !important;
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e2e8f0;
+  border-top-color: #4f46e5;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 12px auto;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+/* Layout Alignment Grid */
+.modern-bento-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 32px;
+  width: 100%;
+}
+
+/* Card Styling Base Structuring */
+.modern-job-card {
+  background: #ffffff;
+  border: 1px solid #eef2f6;
+  border-radius: 16px;
+  padding: 20px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease-in-out;
+}
+
+.modern-job-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
+  border-color: #cbd5e1;
+}
+
+/* Custom styles mapping to your elements */
+.card-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 11px;
+  font-weight: 700;
+  background: #ecfdf5;
+  color: #065f46;
+  padding: 4px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+}
+
+.internship-badge {
+  background: #eff6ff;
+  color: #1e40af;
+}
+
+.company-logo-sm {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: #a855f7;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-bottom: 12px;
+}
+
+.intern-logo {
+  background: #0ea5e9;
+}
+
+.modern-job-card h4 {
+  font-size: 1.15rem;
+  color: #1e293b;
+  margin: 0 0 4px 0;
+  font-weight: 600;
+}
+
+.company-name {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-bottom: 16px;
+}
+
+.card-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.card-meta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.card-meta svg {
+  color: #94a3b8;
+}
+
+/* Footer layout elements */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 14px;
+}
+
+.mode-pill {
+  font-size: 11px;
+  font-weight: 600;
+  background: #f1f5f9;
+  color: #475569;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.save-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #94a3b8;
+  padding: 6px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.save-icon-btn:hover {
+  background: #f8fafc;
+  color: #64748b;
 }
