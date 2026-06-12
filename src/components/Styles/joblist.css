@@ -1215,447 +1215,118 @@ html, body {
   .portal-content-grid { grid-template-columns: 1fr; }
   .jobs-split-view { grid-template-columns: 1fr; }
   .job-details-pane { position: relative; top: 0; }
-}
-/* --- COMMAND DECK CORE TOKENS --- */
-:root {
-  --canvas: #090a0f;
-  --panel: #0d0f1a;
-  --accent-neon: #6366f1;
-  --accent-glow: rgba(99, 102, 241, 0.1);
-  --font-code: 'JetBrains Mono', 'Fira Code', monospace;
-}
-
-/* 1. Resetting the "Naukri-Style" look */
-.explorer-console-frame {
-  background: var(--canvas);
-  color: #e2e8f0;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-/* 2. Command Hub instead of Search Bar */
-.console-control-hub {
-  background: var(--panel);
-  border: 1px solid #1e293b;
-  border-radius: 12px;
-  padding: 1rem 2rem;
-  margin: 2rem;
-  display: flex;
-  align-items: center;
-  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
-}
-
-/* 3. The "Bento-Node" Grid (Replaces standard rows) */
-.stream-asymmetric-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-  gap: 1.5rem;
-  padding: 0 2rem;
-}
-
-/* 4. The "Server Node" Card Style */
-.stream-cell-card {
-  background: var(--panel);
-  border: 1px solid #1e293b;
-  border-radius: 16px;
-  padding: 2rem;
-  position: relative;
-  overflow: hidden;
-  transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.stream-cell-card::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; width: 4px; height: 100%;
-  background: var(--accent-neon);
-  opacity: 0.2;
-}
-
-.stream-cell-card:hover {
-  border-color: var(--accent-neon);
-  box-shadow: 0 0 30px var(--accent-glow);
-}
-
-/* 5. Typography for DX (Data-centric) */
-.tile-title {
-  font-family: var(--font-code);
-  font-size: 0.9rem;
-  color: var(--accent-neon);
-  text-transform: uppercase;
-}
-
-.cell-card-role-heading {
-  font-size: 1.5rem;
-  font-weight: 800;
-  margin: 1rem 0;
-  letter-spacing: -0.02em;
-}
-
-/* 6. Metadata as "System Logs" */
-.cell-card-parameter-pills-row-strip {
-  display: flex;
-  gap: 0.5rem;
-  font-family: var(--font-code);
-  font-size: 0.7rem;
-}
-
-.parameter-pill-tag {
-  background: #0f172a;
-  padding: 0.4rem 0.8rem;
-  border-radius: 4px;
-  border: 1px solid #334155;
-}
-/* --- 🎛️ MODERN COLORWAY CONFIG & CSS VARIABLES --- */
-:root {
-  /* The Color Palette */
-  --bg-canvas: #0b0f19;                 /* Deep space dark background */
-  --bg-surface: #131b2e;                /* Rich navy card surfaces */
-  --bg-surface-hover: #1e2942;          /* Brighter surface for interaction */
-  
-  --primary-glow: #6366f1;              /* Electric Indigo */
-  --accent-cyan: #06b6d4;               /* Neon Cyan */
-  --accent-green: #10b981;              /* Emerald Green for badges */
-  
-  /* Text Spectrum */
-  --text-main: #f8fafc;                 /* Crisp white-silver */
-  --text-muted: #94a3b8;                /* Cool slate gray */
-  --text-gradient: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
-  
-  /* Layout Structures */
-  --border-glow: rgba(99, 102, 241, 0.15);
-  --border-hover: rgba(6, 182, 212, 0.4);
-  --radius-card: 20px;
-  --radius-pill: 50px;
-  
-  /* Advanced Shadows */
-  --shadow-neon: 0 0 20px rgba(99, 102, 241, 0.1);
-  --shadow-card-hover: 0 20px 40px -15px rgba(0, 0, 0, 0.5), 0 0 30px rgba(6, 182, 212, 0.05);
-  --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Base Layout Refresh */
-.full-portal-layout {
-  min-height: 100vh;
-  background-color: var(--bg-canvas);
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.03) 0px, transparent 50%);
-  color: var(--text-main);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-}
-
-/* ==========================================================================
-   🏠 MODULE 1: HOMEPAGE VIEW (Neon Grid Experience)
+}/* ==========================================================================
+   THEME: ENTERPRISE SAGE & STONE (Clean, High-Density)
    ========================================================================== */
-.home-featured-section {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 4rem 2rem;
+:root {
+  --bg-canvas: #f8fafc;
+  --bg-card: #ffffff;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --accent: #059669; /* Emerald Green */
+  --border: #e2e8f0;
+  --radius: 6px;
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 3rem;
+* { box-sizing: border-box; }
+
+body { 
+  margin: 0; 
+  background-color: var(--bg-canvas); 
+  color: var(--text-main); 
+  font-family: var(--font-family); 
 }
 
-.title-stack h2 {
-  font-size: 2.5rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  background: var(--text-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin: 0 0 0.5rem 0;
+/* --- 1. Layout Wrappers --- */
+.home-featured-section { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+.portal-content-grid { 
+  display: grid; 
+  grid-template-columns: 280px 1fr; 
+  gap: 2rem; 
+  max-width: 1400px; 
+  margin: 0 auto; 
+  padding: 2rem; 
 }
 
-.title-stack h2 .highlight {
-  background: linear-gradient(135deg, var(--primary-glow), var(--accent-cyan));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+/* --- 2. Headers & Meta --- */
+.section-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; }
+.title-stack h2 { font-size: 1.75rem; font-weight: 700; margin: 0; }
+.title-stack p { color: var(--text-muted); margin: 0.5rem 0 0 0; font-size: 0.95rem; }
+.highlight { color: var(--accent); }
+
+.view-all-btn { 
+  background: var(--bg-card); border: 1px solid var(--border); 
+  padding: 0.6rem 1.2rem; border-radius: var(--radius); 
+  cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;
 }
 
-.title-stack p {
-  color: var(--text-muted);
-  font-size: 1.15rem;
-  margin: 0;
-}
+/* --- 3. Job Cards (The "Modern Job Card") --- */
+.home-jobs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
 
-/* Modern Pill Button with Gradient Border Effect */
-.view-all-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.03);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 0.8rem 1.5rem;
-  border-radius: var(--radius-pill);
-  font-weight: 600;
-  cursor: pointer;
-  backdrop-filter: blur(8px);
-  transition: var(--transition-smooth);
-}
-
-.view-all-btn:hover {
-  background: rgba(99, 102, 241, 0.1);
-  border-color: var(--primary-glow);
-  box-shadow: var(--shadow-neon);
-  transform: translateY(-2px);
-}
-
-.view-all-btn svg {
-  color: var(--accent-cyan);
-  transition: transform 0.2s ease;
-}
-
-.view-all-btn:hover svg {
-  transform: translateX(4px);
-}
-
-/* Grid Framework */
-.home-jobs-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 2rem;
-}
-
-/* --- THE CYBERPUNK/PREMIUM JOB CARD --- */
 .modern-job-card {
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-glow);
-  border-radius: var(--radius-card);
-  padding: 1.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  position: relative;
-  cursor: pointer;
-  transition: var(--transition-smooth);
-}
-
-.modern-job-card:hover {
-  background-color: var(--bg-surface-hover);
-  border-color: var(--border-hover);
-  transform: translateY(-6px) scale(1.01);
-  box-shadow: var(--shadow-card-hover);
-}
-
-/* Glowing Neon Badge */
-.card-badge {
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--accent-green);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.3rem 0.8rem;
-  border-radius: var(--radius-pill);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.card-body {
-  margin-top: 0.25rem;
-}
-
-/* Monogram / Logo Avatar Styling */
-.company-logo-img-sm, 
-.company-logo-sm {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  object-fit: cover;
-  margin-bottom: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.company-logo-sm {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(6, 182, 212, 0.2));
-  color: #fff;
-  font-weight: 800;
-  font-size: 1.4rem;
-  border: 1px solid rgba(6, 182, 212, 0.3);
-}
-
-.modern-job-card h4 {
-  font-size: 1.35rem;
-  font-weight: 700;
-  margin: 0 0 0.5rem 0;
-  padding-right: 4.5rem; 
-  line-height: 1.3;
-  color: #ffffff;
-}
-
-.company-name {
-  color: var(--accent-cyan); /* Pops the brand out */
-  font-weight: 600;
-  font-size: 0.95rem;
-  margin: 0 0 1.5rem 0;
-}
-
-/* Horizontal Info Metrics Bar */
-.card-meta {
-  display: flex;
-  gap: 1.25rem;
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  padding-bottom: 1.25rem;
-  margin-bottom: 1.25rem;
-}
-
-.card-meta span {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.card-meta svg {
-  color: var(--primary-glow); /* Colored utility icons */
-}
-
-/* Card Bottom Actions Row */
-.card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.mode-pill {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: var(--text-main);
-  font-size: 0.8rem;
-  font-weight: 600;
-  padding: 0.4rem 0.8rem;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.03);
-}
-
-/* Bookmark Utility Handle */
-.save-icon-btn {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  cursor: pointer;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-muted);
-  transition: var(--transition-smooth);
-}
-
-.save-icon-btn:hover {
-  background-color: rgba(99, 102, 241, 0.2);
-  border-color: var(--primary-glow);
-  color: #fff;
-}
-
-
-/* ==========================================================================
-   💼 MODULE 2: RECRUITER SPLIT VIEW (Glassmorphic Panels)
-   ========================================================================== */
-
-.portal-results-meta-strip {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 2rem 2rem 0 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.meta-left-count h3 {
-  font-size: 1.75rem;
-  font-weight: 800;
-  color: #fff;
-  margin: 0 0 0.25rem 0;
-}
-
-.meta-left-count p {
-  color: var(--text-muted);
-  margin: 0;
-}
-
-/* Dropdown Menu System Style */
-.sort-input-combo {
-  display: flex;
-  align-items: center;
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-glow);
-  border-radius: 12px;
-  padding: 0.6rem 1rem;
-  gap: 0.5rem;
-}
-
-.sort-trigger-icon {
-  color: var(--accent-cyan);
-}
-
-.premium-sort-select {
-  border: none;
-  background: transparent;
-  font-weight: 600;
-  color: var(--text-main);
-  outline: none;
+  transition: all 0.15s ease;
   cursor: pointer;
 }
+.modern-job-card:hover { border-color: var(--accent); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
 
-/* Options Dropdown Color Fix (prevents invisible text on dark backgrounds) */
-.premium-sort-select option {
-  background-color: var(--bg-surface);
-  color: var(--text-main);
+.card-badge { 
+  font-size: 0.7rem; color: var(--accent); font-weight: 700; 
+  text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; 
 }
 
-.portal-content-grid {
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  gap: 2rem;
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 2rem;
-  height: calc(100vh - 140px);
+.card-body h4 { margin: 0.5rem 0; font-size: 1.1rem; color: var(--text-main); }
+.company-name { font-size: 0.85rem; color: var(--text-muted); margin: 0; }
+
+.company-logo-img-sm { width: 36px; height: 36px; object-fit: contain; margin-bottom: 1rem; }
+.company-logo-sm { 
+  width: 36px; height: 36px; background: var(--bg-canvas); 
+  display: flex; align-items: center; justify-content: center; 
+  border-radius: 4px; font-weight: 600; margin-bottom: 1rem; font-size: 1rem;
 }
 
-/* Sidebar Box Container */
-.portal-filters-sidebar {
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-glow);
-  border-radius: var(--radius-card);
-  padding: 1.75rem;
-  overflow-y: auto;
+.card-meta { display: flex; gap: 1.2rem; margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted); }
+
+.card-footer { 
+  margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border); 
+  display: flex; justify-content: space-between; align-items: center; 
 }
 
-.jobs-split-view {
-  display: grid;
-  grid-template-columns: 440px 1fr;
-  gap: 1.5rem;
-  height: 100%;
+.mode-pill { background: var(--bg-canvas); padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; color: var(--text-muted); }
+.save-icon-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1.1rem; }
+.save-icon-btn:hover { color: var(--accent); }
+
+/* --- 4. Portal Views --- */
+.portal-results-meta-strip { 
+  max-width: 1400px; margin: 0 auto; padding: 2rem 2rem 0 2rem; 
+  display: flex; justify-content: space-between; align-items: center; 
+}
+.meta-left-count h3 { margin: 0; font-size: 1.25rem; }
+.meta-left-count p { margin: 0.25rem 0 0 0; color: var(--text-muted); font-size: 0.9rem; }
+
+.sort-input-combo { 
+  display: flex; align-items: center; gap: 0.5rem; 
+  background: var(--bg-card); border: 1px solid var(--border); 
+  padding: 0.5rem 1rem; border-radius: var(--radius); 
+}
+.premium-sort-select { border: none; background: transparent; font-size: 0.9rem; outline: none; cursor: pointer; }
+
+.portal-filters-sidebar { 
+  background: var(--bg-card); border: 1px solid var(--border); 
+  border-radius: var(--radius); padding: 1.5rem; height: fit-content;
 }
 
-/* ==========================================================================
-   ⏳ LOADING SKELETONS
-   ========================================================================== */
-.skeleton-card {
-  height: 280px;
-  background: linear-gradient(90deg, var(--bg-surface) 25%, #1e293b 50%, var(--bg-surface) 75%);
-  background-size: 200% 100%;
-  animation: loadingShimmer 1.5s infinite;
-  border-radius: var(--radius-card);
-  border: 1px solid var(--border-glow);
-}
+/* --- 5. States --- */
+.skeleton-card { height: 180px; background: #e2e8f0; border-radius: var(--radius); animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
 
-@keyframes loadingShimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+@media (max-width: 768px) {
+  .portal-content-grid { grid-template-columns: 1fr; }
+  .home-jobs-grid { grid-template-columns: 1fr; }
 }

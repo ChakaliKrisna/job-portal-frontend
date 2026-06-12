@@ -12,7 +12,10 @@ import "../components/Styles/joblist.css";
 
 const API_BASE = "http://localhost:8080/job-portal";
 
-const JobPortal = ({ isHomePage = false }) => {
+const JobPortal = ({ 
+  isHomePage = false, 
+  internshipMode = false 
+}) => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const debounceTimer = useRef(null);
@@ -30,23 +33,22 @@ const JobPortal = ({ isHomePage = false }) => {
   const [error, setError] = useState(null);
   const [totalPages, setTotalPages] = useState(0);
 
-  // De-serialize configuration states directly out of the URL string parameters
+  // CRITICAL FIX: Pre-seed the jobType state if internshipMode is explicitly passed down
   const [filters, setFilters] = useState({
     keyword: searchParams.get("keyword") || "",
     location: searchParams.get("location") || "",
     category: searchParams.get("category") || "",
-    jobType: searchParams.get("jobType") || "",
+    jobType: internshipMode ? "INTERNSHIP" : (searchParams.get("jobType") || ""),
     workMode: searchParams.get("workMode") || "",
     experienceLevel: searchParams.get("experienceLevel") || "",
     minSalary: searchParams.get("minSalary") || "",
-    jobStatus: searchParams.get("jobStatus") || "OPEN",
+    jobStatus: "OPEN",
     sort: searchParams.get("sort") || "postedDate,desc",
     page: Number(searchParams.get("page")) || 0,
     size: isHomePage ? 6 : 10
   });
 
-  // CRITICAL FIX: Watch for changes in the URL search params (e.g., from Navbar searches) 
-  // and pull those values straight down into your active filter state inputs.
+  // Watch for changes in the URL search params and sync active filters (Only for full Browse page)
   useEffect(() => {
     if (isHomePage) return;
     
@@ -55,14 +57,14 @@ const JobPortal = ({ isHomePage = false }) => {
       keyword: searchParams.get("keyword") || "",
       location: searchParams.get("location") || "",
       category: searchParams.get("category") || "",
-      jobType: searchParams.get("jobType") || "",
+      jobType: internshipMode ? "INTERNSHIP" : (searchParams.get("jobType") || ""),
       workMode: searchParams.get("workMode") || "",
       experienceLevel: searchParams.get("experienceLevel") || "",
       minSalary: searchParams.get("minSalary") || "",
       sort: searchParams.get("sort") || "postedDate,desc",
       page: Number(searchParams.get("page")) || 0,
     }));
-  }, [searchParams, isHomePage]);
+  }, [searchParams, isHomePage, internshipMode]);
 
   // Dynamic state synchronization back downstream inside URL search space parameters
   useEffect(() => {
@@ -75,13 +77,11 @@ const JobPortal = ({ isHomePage = false }) => {
       }
     });
 
-    // Retain selected job identifier parameter if available
     const activeJobId = searchParams.get("id");
     if (activeJobId) {
       cleanParams.id = activeJobId;
     }
 
-    // Stringify check to avoid infinite loop cycles between states and search query mutations
     const currentParamsString = searchParams.toString();
     const newParamsString = new URLSearchParams(cleanParams).toString();
     
@@ -90,16 +90,16 @@ const JobPortal = ({ isHomePage = false }) => {
     }
   }, [filters, setSearchParams, isHomePage, searchParams]);
   
-  // Major Architecture Fix #10: Fetch LinkedIn-style similar job matching contextual sets
+  // Fetch similar jobs
   const fetchSimilarJobs = useCallback(async (jobId) => {
     if (!jobId) return;
     try {
-      const res = await axios.get(`${API_BASE}/jobs/similar/${jobId}`, {
+      const res = await axios.get(`${API_BASE}/jobs/${jobId}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       setSimilarJobs(res.data || []);
     } catch (err) {
-      console.error("Contextual lookup failure for matching matrix keys", err);
+      console.error("Contextual lookup failure", err);
       setSimilarJobs([]);
     }
   }, [token]);
@@ -109,9 +109,15 @@ const JobPortal = ({ isHomePage = false }) => {
     setLoading(true);
     setError(null);
     try {
+      // Clean query inputs completely before building request package
       const cleanParams = Object.fromEntries(
         Object.entries(filters).filter(([_, v]) => v !== "" && v !== null)
       );
+
+      // Force safety layer assignment
+      if (internshipMode) {
+        cleanParams.jobType = "INTERNSHIP";
+      }
 
       const res = await axios.get(`${API_BASE}/jobs`, {
         params: cleanParams,
@@ -122,7 +128,6 @@ const JobPortal = ({ isHomePage = false }) => {
       setJobs(content);
       setTotalPages(res.data?.totalPages || 0);
 
-      // Structural Architecture Fix #2: Map target execution scopes directly through the URL parameters tracking keys
       const jobIdFromUrl = searchParams.get("id");
       
       if (content.length > 0 && !isHomePage) {
@@ -130,14 +135,11 @@ const JobPortal = ({ isHomePage = false }) => {
           const targetedJob = content.find(j => j.publicId === jobIdFromUrl);
           const activeSelection = targetedJob || content[0];
           setSelectedJob(activeSelection);
-          
-          // Structural Architecture Fix #15: Populate local user activity histories
           trackRecentlyViewed(activeSelection);
         } else {
           setSelectedJob(content[0]);
           trackRecentlyViewed(content[0]);
           
-          // Fallback auto-injection configuration to assign state safely back inside the routing history
           setSearchParams(prev => {
             const current = Object.fromEntries(prev.entries());
             return { ...current, id: content[0].publicId };
@@ -147,11 +149,12 @@ const JobPortal = ({ isHomePage = false }) => {
         setSelectedJob(null);
       }
     } catch (err) {
+      console.error("Fetch lifecycle failure execution context:", err);
       setError(err.response?.status === 403 ? "Access Denied" : "Failed to load jobs.");
     } finally {
       setLoading(false);
     }
-  }, [filters, token, isHomePage, searchParams, setSearchParams]);
+  }, [filters, token, isHomePage, internshipMode, searchParams, setSearchParams]);
 
   const fetchSavedStatus = useCallback(async () => {
     if (!token) return;
@@ -164,7 +167,6 @@ const JobPortal = ({ isHomePage = false }) => {
     } catch (err) { console.error(err); }
   }, [token]);
 
-  // Monitor changes on targeted selected nodes to initialize side-panel operations
   useEffect(() => {
     if (selectedJob?.publicId) {
       fetchSimilarJobs(selectedJob.publicId);
@@ -178,7 +180,6 @@ const JobPortal = ({ isHomePage = false }) => {
       setAuthDrawerOpen(true);
       return;
     }
-
     try {
       if (savedJobIds.has(jobId)) {
         await axios.delete(`${API_BASE}/saved/${jobId}`, { 
@@ -195,12 +196,9 @@ const JobPortal = ({ isHomePage = false }) => {
         });
         setSavedJobIds(prev => new Set(prev).add(jobId));
       }
-    } catch (err) { 
-      console.error("Save lifecycle transactional failure state", err); 
-    }
+    } catch (err) { console.error(err); }
   };
 
-  // Structural Architecture Fix #11: Calculate metrics percentages across application horizons
   const getDeadlineInfo = (closedDate) => {
     if (!closedDate) return null;
     const target = new Date(closedDate);
@@ -215,13 +213,11 @@ const JobPortal = ({ isHomePage = false }) => {
     return { text: `${diffDays} days left`, class: "upcoming", percent: 25 };
   };
 
-  // Structural Architecture Fix #15: Engine handler to preserve structural browser local activity maps
   const trackRecentlyViewed = (job) => {
     if (!job || !job.publicId) return;
     try {
       const history = JSON.parse(localStorage.getItem("recentJobs") || "[]");
       const filtered = history.filter(item => item.publicId !== job.publicId);
-      // Major Architecture Fix #3: Ensure uniform fallback evaluation rules apply here
       const trackingMeta = {
         publicId: job.publicId,
         title: job.title,
@@ -232,10 +228,11 @@ const JobPortal = ({ isHomePage = false }) => {
       const updated = [trackingMeta, ...filtered].slice(0, 5);
       localStorage.setItem("recentJobs", JSON.stringify(updated));
     } catch (e) {
-      console.error("Failed to commit user telemetry history data blocks", e);
+      console.error(e);
     }
   };
 
+  // Debounce Engine
   useEffect(() => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
     debounceTimer.current = setTimeout(() => { fetchJobs(); }, 400);
@@ -247,7 +244,7 @@ const JobPortal = ({ isHomePage = false }) => {
       keyword: "",
       location: "",
       category: "",
-      jobType: "",
+      jobType: internshipMode ? "INTERNSHIP" : "",
       workMode: "",
       experienceLevel: "",
       minSalary: "",
@@ -264,12 +261,20 @@ const JobPortal = ({ isHomePage = false }) => {
   };
 
   const handleJobSelection = (job) => {
-    setSelectedJob(job);
-    trackRecentlyViewed(job);
-    setSearchParams(prev => {
-      const current = Object.fromEntries(prev.entries());
-      return { ...current, id: job.publicId };
-    }, { replace: true });
+    if (isHomePage) {
+      if (internshipMode) {
+        navigate(`/jobs?jobType=INTERNSHIP&id=${job.publicId}`);
+      } else {
+        navigate(`/jobs?id=${job.publicId}`);
+      }
+    } else {
+      setSelectedJob(job);
+      trackRecentlyViewed(job);
+      setSearchParams(prev => {
+        const current = Object.fromEntries(prev.entries());
+        return { ...current, id: job.publicId };
+      }, { replace: true });
+    }
   };
 
   const formatSalary = (s) => s ? (s / 100000).toFixed(1) : "N/A";

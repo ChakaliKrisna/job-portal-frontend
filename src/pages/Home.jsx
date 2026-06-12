@@ -1,113 +1,20 @@
 import React, { Suspense, lazy, useState, useEffect } from "react";
-import { FaArrowRight, FaBell, FaBuilding, FaUserCheck, FaBolt } from "react-icons/fa";
+import { 
+  FaArrowRight, FaBell, FaBuilding, FaBolt, 
+  FaLaptopCode, FaCheckCircle, FaUserTie, FaFileAlt
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Hero from "../components/Hero";
 import "../components/Styles/home.css";
 
-// Lazy loading sub-modules cleanly
-const JobPortal = lazy(() => import("../components/JobList").catch(() => ({ default: () => <MockJobs /> })));
-const InternshipCarousel = lazy(() => import("../components/Internship").catch(() => ({ default: () => <MockInternships /> })));
-const CompanyCarousel = lazy(() => import("../components/CompanySection").catch(() => ({ default: () => <MockCompanies /> })));
+// Lazy loading live modules tied to the backend database endpoints
+const JobPortal = lazy(() => import("../components/JobList"));
+const CompanyCarousel = lazy(() => import("../components/CompanySection"));
 
 const SectionLoader = () => (
   <div className="section-loader">
     <div className="spinner"></div>
     <p>Parsing Open Pipelines...</p>
-  </div>
-);
-
-// Fallback Layout Mocks using your precise UI/UX design specifications
-const MockJobs = () => {
-  const sampleJobs = [
-    { id: 1, title: "UI/UX Designer", company: "Accenture", initial: "A", location: "Ahmedabad", package: "₹7.0LPA", badge: "FULL TIME", mode: "ONSITE" },
-    { id: 2, title: "Senior Java Engineer", company: "TSAR IT PVT LTD", initial: "T", location: "Remote", package: "₹14.0LPA", badge: "FULL TIME", mode: "REMOTE" },
-    { id: 3, title: "Frontend Developer", company: "Stripe", initial: "S", location: "Bangalore", package: "₹12.5LPA", badge: "FULL TIME", mode: "HYBRID" }
-  ];
-
-  return (
-    <div className="modern-bento-grid">
-      {sampleJobs.map((job) => (
-        <div key={job.id} className="modern-job-card">
-          <div className="card-badge">{job.badge}</div>
-          <div className="card-body">
-            <div className="company-logo-sm">{job.initial}</div>
-            <h4>{job.title}</h4>
-            <p className="company-name">{job.company}</p>
-            <div className="card-meta">
-              <span>
-                <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 384 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M172.268 501.67C26.97 291.031 0 269.413 0 192 0 85.961 85.961 0 192 0s192 85.961 192 192c0 77.413-26.97 99.031-172.268 309.67-9.535 13.774-29.93 13.773-39.464 0zM192 272c44.183 0 80-35.817 80-80s-35.817-80-80-80-80 35.817-80 80 35.817 80 80 80z"></path>
-                </svg> {job.location}
-              </span>
-              <span>
-                <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 512 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M461.2 128H80c-8.84 0-16-7.16-16-16s7.16-16 16-16h384c8.84 0 16-7.16 16-16 0-26.51-21.49-48-48-48H64C28.65 32 0 60.65 0 96v320c0 35.35 28.65 64 64 64h397.2c28.02 0 50.8-21.53 50.8-48V176c0-26.47-22.78-48-50.8-48zM416 336c-17.67 0-32-14.33-32-32s14.33-32 32-32 32 14.33 32 32-14.33 32-32 32z"></path>
-                </svg> {job.package}
-              </span>
-            </div>
-          </div>
-          <div className="card-footer">
-            <span className="mode-pill">{job.mode}</span>
-            <button className="save-icon-btn">
-              <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 384 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                <path d="M336 0H48C21.49 0 0 21.49 0 48v464l192-112 192 112V48c0-26.51-21.49-48-48-48zm0 428.43l-144-84-144 84V54a6 6 0 0 1 6-6h276c3.314 0 6 2.683 6 5.996V428.43z"></path>
-              </svg>
-            </button>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-// Layout Mock tailored specifically for Internships matching the premium layout syntax
-const MockInternships = () => {
-  const sampleInternships = [
-    { id: 1, title: "Backend Architecture Intern", company: "Enterprise Solutions", initial: "E", location: "Hybrid", package: "₹25k/mo", badge: "INTERNSHIP", mode: "HYBRID" },
-    { id: 2, title: "Product Management Associate", company: "Google", initial: "G", location: "Bangalore", package: "Paid Track", badge: "INTERNSHIP", mode: "ONSITE" }
-  ];
-
-  return (
-    <div className="modern-bento-grid">
-      {sampleInternships.map((intern) => (
-        <div key={intern.id} className="modern-job-card internship-variant">
-          <div className="card-badge internship-badge">{intern.badge}</div>
-          <div className="card-body">
-            <div className="company-logo-sm intern-logo">{intern.initial}</div>
-            <h4>{intern.title}</h4>
-            <p className="company-name">{intern.company}</p>
-            <div className="card-meta">
-              <span>
-                <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 384 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M172.268 501.67C26.97 291.031 0 269.413 0 192 0 85.961 85.961 0 192 0s192 85.961 192 192c0 77.413-26.97 99.031-172.268 309.67-9.535 13.774-29.93 13.773-39.464 0zM192 272c44.183 0 80-35.817 80-80s-35.817-80-80-80-80 35.817-80 80 35.817 80 80 80z"></path>
-                </svg> {intern.location}
-              </span>
-              <span>
-                <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 512 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M461.2 128H80c-8.84 0-16-7.16-16-16s7.16-16 16-16h384c8.84 0 16-7.16 16-16 0-26.51-21.49-48-48-48H64C28.65 32 0 60.65 0 96v320c0 35.35 28.65 64 64 64h397.2c28.02 0 50.8-21.53 50.8-48V176c0-26.47-22.78-48-50.8-48zM416 336c-17.67 0-32-14.33-32-32s14.33-32 32-32 32 14.33 32 32-14.33 32-32 32z"></path>
-                </svg> {intern.package}
-              </span>
-            </div>
-          </div>
-          <div className="card-footer">
-            <span className="mode-pill">{intern.mode}</span>
-            <button className="save-icon-btn">
-              <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 384 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                <path d="M336 0H48C21.49 0 0 21.49 0 48v464l192-112 192 112V48c0-26.51-21.49-48-48-48zm0 428.43l-144-84-144 84V54a6 6 0 0 1 6-6h276c3.314 0 6 2.683 6 5.996V428.43z"></path>
-              </svg>
-            </button>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-const MockCompanies = () => (
-  <div className="company-logos-strip">
-    {["Google", "Microsoft", "Amazon", "Stripe", "TCS"].map((c) => (
-      <div key={c} className="logo-placeholder">{c}</div>
-    ))}
   </div>
 );
 
@@ -119,9 +26,20 @@ const Home = () => {
     setRole(localStorage.getItem("userRole"));
   }, []);
 
+  // Simplified to only include platform capabilities grid data
+  const valueFeatures = [
+    { title: "Resume Upload", text: "Match your technical portfolio parser dynamically.", icon: <FaFileAlt className="feat-ico" /> },
+    { title: "One-Click Apply", text: "Dispatch secure profile applications in a single action.", icon: <FaBolt className="feat-ico" /> },
+    { title: "Recruiter Dashboard", text: "Track candidate interaction pipelines step by step.", icon: <FaUserTie className="feat-ico" /> },
+    { title: "Email Notifications", text: "Receive automated alerts matching your selected stack.", icon: <FaBell className="feat-ico" /> },
+    { title: "Company Profiles", text: "Review internal operational data models natively.", icon: <FaBuilding className="feat-ico" /> }
+  ];
+
   return (
     <div className="home-wrapper">
       <main className="home-main">
+        
+        {/* SECTION 1: HERO CONTAINER (Handles Role-Based Routing Internally) */}
         {role === "RECRUITER" ? (
           <section className="recruiter-hero-dashboard">
             <div className="recruiter-hero-content">
@@ -136,7 +54,7 @@ const Home = () => {
           <Hero />
         )}
 
-        {/* WORKFLOW PIPELINE LAYER */}
+        {/* SECTION 2: SYSTEM WORKFLOW INSTRUCTIONS */}
         <section className="home-section">
           <div className="section-title-area">
             <h2>How It <span className="text-gradient">Works</span></h2>
@@ -161,7 +79,7 @@ const Home = () => {
           </div>
         </section>
 
-        {/* TRENDING JOBS SECTION */}
+        {/* SECTION 3: TRENDING FEATURED OPPORTUNITIES */}
         <section className="trending-jobs-bg">
           <div className="home-section">
             <div className="section-title-area">
@@ -174,49 +92,72 @@ const Home = () => {
           </div>
         </section>
 
-        {/* INTERNSHIPS SECTION */}
+        {/* SECTION 4: ACTIVE INTERNSHIPS (Using your JobPortal's explicit internshipMode prop) */}
         <section className="home-section">
           <div className="section-title-area">
-            <h2>Active <span className="text-gradient">Internship Tracks</span></h2>
-            <p>Kickstart application development experience with dedicated support</p>
+            <h2>Active <span className="text-gradient">Internships</span></h2>
+            <p>Gain industrial software deployment milestones alongside enterprise engineering leaders</p>
           </div>
           <Suspense fallback={<SectionLoader />}>
-            <InternshipCarousel />
+            <JobPortal 
+              isHomePage={true} 
+              internshipMode={true} 
+            />
           </Suspense>
         </section>
 
-        {/* BENTO STATISTICS & SYSTEM MATRICES */}
-        <section className="home-section">
-          <div className="stats-bento-container">
-            <div className="stat-box-bento blue-gradient">
-              <FaBuilding className="bento-icon" />
-              <h3>500+</h3>
-              <p>Verified Partners</p>
-            </div>
-            <div className="stat-box-bento purple-gradient">
-              <FaUserCheck className="bento-icon" />
-              <h3>12,000+</h3>
-              <p>Active Profiles</p>
-            </div>
-            <div className="stat-box-bento emerald-gradient">
-              <FaBolt className="bento-icon" />
-              <h3>48 Hours</h3>
-              <p>Guaranteed Feedback</p>
-            </div>
-          </div>
-        </section>
-
-        {/* COMPANY TRUST LAYER */}
+        {/* SECTION 5: FEATURED CORPORATE PARTNERS */}
         <section className="trending-jobs-bg padding-box">
-          <div className="home-section text-center">
-            <h3 className="partner-headline">Partnered with Industry Leaders</h3>
-            <Suspense fallback={<div className="loading-dots">...</div>}>
-              <CompanyCarousel />
-            </Suspense>
+          <div className="text-center">
+            <div className="home-section">
+              <div className="section-title-area">
+                <h2>Top Tier <span className="text-gradient">Companies</span></h2>
+                <p>Direct platform placement nodes established with ecosystem industry pioneers</p>
+              </div>
+              <Suspense fallback={<div className="loading-dots">...</div>}>
+                <CompanyCarousel />
+              </Suspense>
+            </div>
           </div>
         </section>
 
-        {/* NEWSLETTER PRE-FOOTER */}
+        {/* SECTION 6: INTEGRATED APPLICATION SUITE ARCHITECTURE */}
+        <section className="home-section platform-features-bg-wrapper">
+          <div className="section-title-area">
+            <h2>Platform <span className="text-gradient">Capabilities</span></h2>
+            <p>A modern ecosystem designed to optimize discovery pipelines</p>
+          </div>
+          <div className="platform-features-bento-grid">
+            {valueFeatures.map((feat, idx) => (
+              <div key={idx} className="feature-bento-item-card">
+                <div className="feat-header-row">
+                  {feat.icon}
+                  <h4>{feat.title}</h4>
+                </div>
+                <p>{feat.text}</p>
+                <div className="feat-check-badge"><FaCheckCircle /> Production Ready</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* SECTION 7: CALL TO ACTION (CTA) TRIGGER */}
+        <section className="home-section global-cta-banner-wrapper">
+          <div className="cta-banner-inner-content">
+            <h2>Ready to Land Your Dream Track?</h2>
+            <p>Join thousands of technical profiles parsing production dependencies daily across active teams.</p>
+            <div className="cta-action-button-group">
+              <button onClick={() => navigate("/jobs")} className="cta-primary-btn">
+                Browse System Jobs <FaArrowRight />
+              </button>
+              <button onClick={() => navigate("/profile")} className="cta-secondary-btn">
+                Complete Account Setup
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 8: SYSTEM NOTIFICATION STREAM */}
         <section className="modern-newsletter">
           <div className="newsletter-inner">
             <div className="news-text">
@@ -230,6 +171,7 @@ const Home = () => {
             </form>
           </div>
         </section>
+
       </main>
     </div>
   );
