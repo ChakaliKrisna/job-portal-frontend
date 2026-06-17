@@ -4,7 +4,7 @@ import Home from "./pages/Home";
 import JobPortal from "./components/JobList";
 import CompanySection from "./components/CompanySection";
 import InternshipsPage from "./components/Internship";
-import About from "./components/About";
+// import About from "./components/About";
 
 import Register from "./pages/Register";
 import Login from "./pages/Login";
