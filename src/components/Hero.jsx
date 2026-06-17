@@ -63,7 +63,7 @@ const Hero = () => {
         const totalCompanies = uniqueCompanyNames.size;
         
         // 3. Calculate applicants safely
-        const totalApplicants = jobsArray.reduce((sum, job) => sum + (job.applicantCount || 0), 0);
+        const totalApplicants = jobsArray.reduce((sum, job) => sum + (job.applicationsCount || 0), 0);
 
         setCalculatedStats({ totalJobs, totalOpenings, totalCompanies, totalApplicants });
         
@@ -231,11 +231,11 @@ const Hero = () => {
               <p>Hiring Companies</p>
             </div>
 
-            <div className="metric-bento-card card-glow-emerald">
+            {<div className="metric-bento-card card-glow-emerald">
               <div className="card-header-icon"><FaUserCheck /></div>
               <h3>{calculatedStats.totalApplicants || "1.8K"}</h3>
               <p>Job Seekers</p>
-            </div>
+            </div> }
 
             <div className="metric-bento-card card-glow-amber">
               <div className="card-header-icon"><FaBolt /></div>
