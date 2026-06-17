@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios"; // FIXED: Imported cleanly from 'axios' module
+import AuthDrawer from "../pages/AuthDrawer"; // Adjust the path based on your folder structure
 import {
   FaMapMarkerAlt,
   FaWallet,
@@ -162,6 +163,16 @@ const JobDetails = () => {
   const computedCompanyWebsite = company?.website || job.companyWebsite;
 
   const daysRemaining = getDaysRemaining(closedDate);
+  
+  const handleApplyClick = () => {
+    if (token) {
+      // If logged in, go straight to the apply screen
+      navigate(`/apply/${publicId}`);
+    } else {
+      // If NOT logged in, slide open your premium AuthDrawer immediately!
+      setIsAuthOpen(true);
+    }
+  };
 
   return (
     <div className="job-details-page-container">
@@ -228,31 +239,18 @@ const JobDetails = () => {
         {/* Core Actions Container */}
       {/* Core Actions Container */}
 <div className="hero-actions">
-  <button className="share-btn" onClick={handleShareJob}>
-    <FaShareAlt /> {copySuccess ? "Link Copied!" : "Share Job"}
-  </button>
-  
-  <button
-    className="apply-main-btn"
-    onClick={() => {
-      if (token) {
-        // User is logged in -> proceed to application page
-        navigate(`/apply/${publicId}`);
-      } else {
-        // User is not logged in -> Open the Auth Drawer in login mode
-        // Note: Replace 'setIsAuthDrawerOpen' with whatever state handler you use globally
-        if (typeof setIsAuthDrawerOpen === "function") {
-          setIsAuthDrawerOpen(true);
-        } else {
-          // Fallback if no drawer controller is in scope
-          navigate("/login", { state: { from: window.location.pathname } });
-        }
-      }
-    }}
-  >
-    Apply Now
-  </button>
-</div>
+          <button className="share-btn" onClick={handleShareJob}>
+            <FaShareAlt /> {copySuccess ? "Link Copied!" : "Share Job"}
+          </button>
+          
+          {/* UPDATED APPLY NOW BUTTON */}
+          <button
+            className="apply-main-btn"
+            onClick={handleApplyClick}
+          >
+            Apply Now
+          </button>
+        </div>
       </div>
 
       {/* Content Layout Grid */}
