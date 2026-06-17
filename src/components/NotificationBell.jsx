@@ -123,10 +123,14 @@ export default function NotificationDashboard() {
                                     <span className={`notif-tray-tag ${typeAttr.className}`}>
                                         {typeAttr.label}
                                     </span>
+                                    {/* UPDATED: Changed from toLocaleDateString to toLocaleString with time tokens */}
                                     <span className="notif-tray-time">
-                                        {new Date(notif.createdAt).toLocaleDateString(undefined, {
+                                        {new Date(notif.createdAt).toLocaleString(undefined, {
                                             month: 'short',
-                                            day: 'numeric'
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            hour12: true
                                         })}
                                     </span>
                                 </div>

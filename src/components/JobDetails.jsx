@@ -226,18 +226,33 @@ const JobDetails = () => {
         </div>
 
         {/* Core Actions Container */}
-        <div className="hero-actions">
-          <button className="share-btn" onClick={handleShareJob}>
-            <FaShareAlt /> {copySuccess ? "Link Copied!" : "Share Job"}
-          </button>
-          
-          <button
-            className="apply-main-btn"
-            onClick={() => token ? navigate(`/apply/${publicId}`) : navigate("/login")}
-          >
-            Apply Now
-          </button>
-        </div>
+      {/* Core Actions Container */}
+<div className="hero-actions">
+  <button className="share-btn" onClick={handleShareJob}>
+    <FaShareAlt /> {copySuccess ? "Link Copied!" : "Share Job"}
+  </button>
+  
+  <button
+    className="apply-main-btn"
+    onClick={() => {
+      if (token) {
+        // User is logged in -> proceed to application page
+        navigate(`/apply/${publicId}`);
+      } else {
+        // User is not logged in -> Open the Auth Drawer in login mode
+        // Note: Replace 'setIsAuthDrawerOpen' with whatever state handler you use globally
+        if (typeof setIsAuthDrawerOpen === "function") {
+          setIsAuthDrawerOpen(true);
+        } else {
+          // Fallback if no drawer controller is in scope
+          navigate("/login", { state: { from: window.location.pathname } });
+        }
+      }
+    }}
+  >
+    Apply Now
+  </button>
+</div>
       </div>
 
       {/* Content Layout Grid */}

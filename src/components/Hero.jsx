@@ -66,7 +66,7 @@ const Hero = () => {
           const totalCompanies = uniqueCompanyNames.size;
           
           // Calculate applicants safely
-          const totalApplicants = jobsArray.reduce((sum, job) => sum + (job.applicationsCount || 0), 0);
+          const totalApplicants = jobsArray.reduce((sum, job) => sum + (job.applicantCount || 0), 0);
 
           setCalculatedStats({ totalJobs, totalOpenings, totalCompanies, totalApplicants });
           
