@@ -93,7 +93,7 @@ body {
 }
 .cta-action-button-group { display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; }
 .cta-primary-btn { 
-  background: var(--accent); color: #000; border: none; padding: 0.8rem 1.5rem; 
+  background: #0b0f19; color: #c9bbbb; border: none; padding: 0.8rem 1.5rem; 
   border-radius: var(--radius); font-weight: 600; cursor: pointer;
 }
 .cta-secondary-btn { 
@@ -101,7 +101,7 @@ body {
   padding: 0.8rem 1.5rem; border-radius: var(--radius); cursor: pointer;
 }
 
-.modern-newsletter { background: #cfcfcf; color: #000; padding: 4rem; text-align: center; }
+.modern-newsletter { background: #0b0f19; color: #c6bebe; padding: 4rem; text-align: center; }
 .news-form { display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem; }
 .news-form input { 
   padding: 0.8rem 1rem; border-radius: var(--radius); border: none; 

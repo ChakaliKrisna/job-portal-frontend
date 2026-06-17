@@ -1,0 +1,384 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap');
+
+:root {
+  --bg-deep: #0a0b10;
+  --bg-surface: #12131a;
+  --bg-card: #171923;
+  --border-glow: #242736;
+  
+  --neon-indigo: #6366f1;
+  --neon-cyan: #06b6d4;
+  --neon-emerald: #10b981;
+  --neon-amber: #f59e0b;
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-dark: #64748b;
+}
+
+.rd-layout {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: var(--bg-deep);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+}
+
+.rd-main-content {
+  flex-grow: 1;
+  padding: 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* 1. Cyberpunk Header / Banner */
+.rd-welcome-banner {
+  background: linear-gradient(135deg, #131520 0%, #0a0b10 100%);
+  border: 1px solid var(--border-glow);
+  border-left: 4px solid var(--neon-indigo);
+  border-radius: 12px;
+  padding: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.banner-badge {
+  font-family: 'JetBrains Mono', monospace;
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--neon-indigo);
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  margin-bottom: 0.5rem;
+  display: inline-block;
+}
+
+.rd-welcome-banner h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.02em;
+}
+
+.rd-welcome-banner p {
+  color: var(--text-secondary);
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Status Indicator Pulse */
+.live-status-container {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(16, 185, 129, 0.05);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.live-status-tag {
+  color: var(--neon-emerald);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.live-pulse-ring {
+  position: relative;
+  display: flex;
+  height: 8px;
+  width: 8px;
+}
+
+.pulse-wave {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  border-radius: 50%;
+  background-color: var(--neon-emerald);
+  opacity: 0.6;
+  animation: wavePulse 2s infinite;
+}
+
+.pulse-dot {
+  border-radius: 50%;
+  height: 8px;
+  width: 8px;
+  background-color: var(--neon-emerald);
+}
+
+@keyframes wavePulse {
+  75%, 100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* Section Group Elements */
+.rd-section-title {
+  border-bottom: 1px solid var(--border-glow);
+  padding-bottom: 0.75rem;
+  margin-top: 1rem;
+}
+
+.rd-section-title h2 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.25rem 0;
+}
+
+.rd-section-title p {
+  font-size: 0.8rem;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+/* 2. System Status Grid Cards */
+.rd-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.rd-stat-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-glow);
+  border-radius: 12px;
+  padding: 1.5rem;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.rd-stat-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin: 0 0 0.5rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.icon-badge {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+/* Accent Indicators */
+.theme-indigo .icon-badge { background: rgba(99, 102, 241, 0.1); color: var(--neon-indigo); }
+.theme-indigo .progress-fill { background: var(--neon-indigo); }
+.theme-emerald .icon-badge { background: rgba(16, 185, 129, 0.1); color: var(--neon-emerald); }
+.theme-emerald .progress-fill { background: var(--neon-emerald); }
+.theme-blue .icon-badge { background: rgba(59, 130, 246, 0.1); color: var(--neon-cyan); }
+.theme-blue .progress-fill { background: var(--neon-cyan); }
+.theme-amber .icon-badge { background: rgba(245, 158, 11, 0.1); color: var(--neon-amber); }
+.theme-amber .progress-fill { background: var(--neon-amber); }
+
+.card-progress-bar {
+  height: 2px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 1px;
+  margin-top: 1rem;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 45%;
+}
+
+/* 3. Central Charts Layout Matrix */
+.rd-charts-matrix {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.rd-chart-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-glow);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.span-two-columns {
+  grid-column: span 2;
+}
+
+.panel-header {
+  margin-bottom: 1.25rem;
+}
+
+.panel-header h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+}
+
+.panel-header p {
+  font-size: 0.8rem;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.rd-chart-wrapper {
+  position: relative;
+  height: 240px;
+}
+
+/* 4. Macro System Interface */
+.rd-macro-console {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-glow);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.macro-card-main {
+  background: rgba(255, 255, 255, 0.01);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border-glow);
+}
+
+.macro-globe-icon {
+  color: var(--neon-cyan);
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+}
+
+.macro-meta-text h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 0.15rem 0;
+}
+
+.macro-meta-text p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.macro-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.macro-metric-tile {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.macro-metrics-row .macro-metric-tile:not(:last-child) {
+  border-right: 1px solid var(--border-glow);
+}
+
+.tile-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--text-dark);
+}
+
+.tile-icon { display: none; } /* Drop redundant icons for cleaner UI */
+
+.tile-body h3 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0 0 0.15rem 0;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.growth-tag {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* 5. Clean Loading Animation Minimalist Layer */
+.rd-loader-screen {
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.rd-spinner-wrapper {
+  width: 40px;
+  height: 40px;
+  position: relative;
+}
+
+.rd-spinner-ring {
+  width: 100%;
+  height: 100%;
+  border: 2px solid rgba(255, 255, 255, 0.05);
+  border-top-color: var(--neon-indigo);
+  border-radius: 50%;
+  animation: cleanSpin 0.8s linear infinite;
+}
+
+@keyframes cleanSpin {
+  100% { transform: rotate(360deg); }
+}
+
+.rd-loader-text {
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  color: var(--text-secondary);
+}
+
+/* Responsiveness adjustments */
+@media (max-width: 1024px) {
+  .rd-charts-matrix { grid-template-columns: 1fr; }
+  .span-two-columns { grid-column: auto; }
+  .macro-metrics-row { grid-template-columns: 1fr; }
+  .macro-metrics-row .macro-metric-tile:not(:last-child) { border-right: none; border-bottom: 1px solid var(--border-glow); }
+}

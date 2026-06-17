@@ -5,6 +5,9 @@ import CandidateCard from './CandidateCard';
 import ComparisonPanel from './ComparisonPanel';
 import CandidateModal from './CandidateModal';
 
+// Clean standard base routing path configuration to match Spring Boot @RequestMapping
+const BASE_URL = "/job-portal/applications";
+
 const SearchTalent = () => {
   const [filters, setFilters] = useState({
     keyword: '',
@@ -80,6 +83,9 @@ const SearchTalent = () => {
       if (filters.minScore > 0) params.append('minScore', filters.minScore);
       if (filters.status) params.append('status', filters.status);
       if (filters.skill) params.append('skill', filters.skill);
+      
+      // Note: Kept parameters below for the frontend UI form persistence.
+      // They pass to the request string seamlessly but are ignored safely on your backend filter mappings.
       if (filters.location) params.append('location', filters.location);
       if (filters.workMode) params.append('workMode', filters.workMode);
       if (filters.experience) params.append('experience', filters.experience);
@@ -88,7 +94,8 @@ const SearchTalent = () => {
       params.append('page', pageNumber.toString());
       params.append('size', pagination.pageSize.toString());
 
-      const res = await api.get(`/applications/filter?${params.toString()}`);
+      // FIXED: Switched path mapping structure to systematically mount via standard BASE_URL
+      const res = await api.get(`${BASE_URL}/filter?${params.toString()}`);
       
       // Standard page structural mapping
       if (res.data && res.data.content) {
@@ -114,7 +121,8 @@ const SearchTalent = () => {
   const handleFetchMissingSkills = async (applicationId) => {
     setAnalyzingId(applicationId);
     try {
-      const res = await api.get(`/applications/${applicationId}/missing-skills`);
+      // FIXED: Prefixed endpoint path string with standard BASE_URL context mapping matching Real Problem 2
+      const res = await api.get(`${BASE_URL}/${applicationId}/missing-skills`);
       setMissingSkills(prev => ({ ...prev, [applicationId]: res.data || [] }));
     } catch (error) {
       showToast("Could not compute structural database profile skill deficiency updates.");
@@ -170,7 +178,7 @@ const SearchTalent = () => {
         </div>
       </div>
 
-      {/* 7. Executive Recruiter Candidate Analytics Strip */}
+      {/* Executive Recruiter Candidate Analytics Strip */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[
           { label: "Total Candidates", val: analytics.total, color: "text-blue-600" },
@@ -201,7 +209,7 @@ const SearchTalent = () => {
 
       {/* Results Dynamic Output Engine Matrix Section */}
       {loading ? (
-        /* 4. Elegant Tailwind Skeleton Loading Cards Track Grid */
+        /* Elegant Tailwind Skeleton Loading Cards Track Grid */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, idx) => (
             <div key={idx} className="bg-white p-5 rounded-xl border border-gray-200 shadow-xs flex flex-col animate-pulse space-y-4">
@@ -236,7 +244,7 @@ const SearchTalent = () => {
             ))}
           </div>
 
-          {/* 5. Production Pagination Controls Interface Footer */}
+          {/* Production Pagination Controls Interface Footer */}
           {pagination.totalPages > 1 && (
             <div className="flex justify-between items-center mt-8 pt-4 border-t border-gray-200 text-xs">
               <span className="text-gray-500 font-medium">
@@ -262,7 +270,7 @@ const SearchTalent = () => {
           )}
         </>
       ) : (
-        /* 11. Clean UI Empty States Feedback Panel block */
+        /* Clean UI Empty States Feedback Panel block */
         <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-300 max-w-xl mx-auto mt-6 flex flex-col items-center p-6">
           <span className="text-2xl mb-2">🔍</span>
           <h4 className="text-sm font-bold text-gray-700">No candidates found</h4>

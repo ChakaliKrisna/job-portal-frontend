@@ -8,7 +8,7 @@ import {
 } from "react-icons/fa";
 import "../components/Styles/dashboard.css";
 
-const API_BASE = "http://localhost:8080";
+const API_BASE = "https://job-portal-backend-365l.onrender.com";
 
 const UserDashboard = () => {
   const [profile, setProfile] = useState(null);

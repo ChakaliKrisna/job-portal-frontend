@@ -180,3 +180,42 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+/* Container sizing rule to keep logo elements uniform */
+.logo-img-container {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #eef2f6;
+}
+
+/* Ensure branding logos fit comfortably without clipping abnormally */
+.company-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 4px;
+}
+
+/* Style for metadata chips added underneath the title line */
+.company-meta-pills {
+  display: flex;
+  gap: 8px;
+  margin: 6px 0 10px 0;
+  flex-wrap: wrap;
+}
+
+.company-meta-pills .meta-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #64748b;
+  background-color: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 4px;
+}

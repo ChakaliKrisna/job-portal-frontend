@@ -1133,4 +1133,474 @@ input:focus, select:focus, textarea:focus {
   border: none;
   cursor: pointer;
   box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+}/* ==========================================================================
+   MJ SMART MODAL & CONFIGURATION STEP LAYOUT
+   ========================================================================== */
+
+:root {
+  --mj-primary: #2563eb;
+  --mj-primary-hover: #1d4ed8;
+  --mj-success: #10b981;
+  --mj-warning: #f59e0b;
+  --mj-danger: #ef4444;
+  --mj-bg-main: #f8fafc;
+  --mj-bg-card: #ffffff;
+  --mj-border: #e2e8f0;
+  --mj-text-dark: #0f172a;
+  --mj-text-muted: #64748b;
+  --mj-radius: 12px;
+  --mj-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+/* Overlay & Wrapper Frame */
+.mj-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.mj-smart-modal {
+  background: var(--mj-bg-main);
+  width: 100%;
+  max-width: 1150px;
+  height: 85vh;
+  border-radius: var(--mj-radius);
+  box-shadow: var(--mj-shadow);
+  display: flex;
+  overflow: hidden;
+  border: 1px solid var(--mj-border);
+}
+
+/* Master Grid Structure split with Assistant Hub Sidebar */
+.mj-modal-main-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--mj-bg-card);
+}
+
+.mj-modal-form {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Header Area styling */
+.modal-header-pro {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--mj-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--mj-bg-card);
+}
+
+.header-title-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.header-title-group .icon-badge {
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--mj-primary);
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.header-title-group h3 {
+  margin: 0 0 2px 0;
+  font-size: 1.25rem;
+  color: var(--mj-text-dark);
+  font-weight: 600;
+}
+
+.header-title-group p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--mj-text-muted);
+}
+
+.close-x {
+  background: none;
+  border: none;
+  font-size: 1.75rem;
+  color: var(--mj-text-muted);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.close-x:hover {
+  color: var(--mj-danger);
+}
+
+/* ==========================================================================
+   SEQUENTIAL FLOW CONTAINER & STEP CARDS
+   ========================================================================== */
+
+.form-grid-scroll.sequential-flow-layout {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  background: var(--mj-bg-main);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Individual Card Styling */
+.mj-form-step-card {
+  background: var(--mj-bg-card);
+  border: 1px solid var(--mj-border);
+  border-radius: var(--mj-radius);
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.step-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 20px;
+  border-bottom: 1px dashed var(--mj-border);
+  padding-bottom: 14px;
+}
+
+.step-numeric-badge {
+  background: var(--mj-text-dark);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step-card-header h4 {
+  margin: 0 0 2px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--mj-text-dark);
+}
+
+.step-card-header p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--mj-text-muted);
+}
+
+/* Form Input Control Layout Groups */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px 20px;
+}
+
+.form-grid-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-group.full-width {
+  grid-column: span 2;
+}
+
+.input-group label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--mj-text-dark);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hint-icon {
+  color: var(--mj-warning);
+  font-size: 0.8rem;
+}
+
+/* Text & Select Input Fields Box Modeling */
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-with-icon .field-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--mj-text-muted);
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+
+.input-with-icon input,
+.input-with-icon select,
+.spec-textarea-group textarea {
+  width: 100%;
+  padding: 10px 14px 10px 38px;
+  border: 1px solid var(--mj-border);
+  border-radius: 8px;
+  background: var(--mj-bg-card);
+  font-size: 0.9rem;
+  color: var(--mj-text-dark);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.spec-textarea-group textarea {
+  padding: 12px;
+  resize: vertical;
+}
+
+.input-with-icon input:focus,
+.input-with-icon select:focus,
+.spec-textarea-group textarea:focus {
+  outline: none;
+  border-color: var(--mj-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* AI Magic Writing Button Configuration */
+.label-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.ai-gen-btn-pro {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: transform 0.1s, opacity 0.2s;
+}
+.ai-gen-btn-pro:hover {
+  opacity: 0.95;
+}
+.ai-gen-btn-pro:active {
+  transform: scale(0.98);
+}
+
+/* ==========================================================================
+   SIDEBAR ASSISTANT DOCK
+   ========================================================================== */
+
+.mj-form-guide.structured-dock {
+  width: 280px;
+  background: var(--mj-bg-card);
+  border-left: 1px solid var(--mj-border);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.dock-title-row h4 {
+  margin: 0 0 20px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--mj-text-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tip-box {
+  background: var(--mj-bg-main);
+  border: 1px solid var(--mj-border);
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 12px;
+}
+
+.tip-box-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.tip-box h5 {
+  margin: 0 0 4px 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--mj-text-dark);
+}
+
+.tip-box p {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--mj-text-muted);
+}
+
+/* Vertical mini visual workflow tracker */
+.workflow-diagram-map {
+  margin-top: auto;
+  border-top: 1px solid var(--mj-border);
+  padding-top: 20px;
+}
+
+.workflow-diagram-map h5 {
+  margin: 0 0 12px 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--mj-text-dark);
+}
+
+.mini-pipeline-tracker {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.tracker-node {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--mj-border);
+  color: var(--mj-text-muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tracker-node.done {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--mj-success);
+}
+
+.tracker-node.active {
+  background: var(--mj-primary);
+  color: #fff;
+}
+
+.tracker-line {
+  flex: 1;
+  height: 2px;
+  background: var(--mj-border);
+}
+
+.tracker-line.done {
+  background: var(--mj-success);
+}
+
+.tracker-label-sub {
+  font-size: 0.7rem;
+  color: var(--mj-text-muted);
+  display: block;
+}
+
+/* ==========================================================================
+   FOOTER MODAL ACTIONS PRO
+   ========================================================================== */
+
+.modal-actions-pro {
+  padding: 16px 24px;
+  border-top: 1px solid var(--mj-border);
+  background: var(--mj-bg-card);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-cancel {
+  background: transparent;
+  border: 1px solid var(--mj-border);
+  color: var(--mj-text-muted);
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.btn-cancel:hover {
+  background: var(--mj-bg-main);
+  color: var(--mj-text-dark);
+}
+
+.btn-submit-pro {
+  background: var(--mj-primary);
+  border: none;
+  color: white;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.btn-submit-pro:hover {
+  background: var(--mj-primary-hover);
+  box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);
+}
+
+/* Animations helper */
+.animated-zoom-in {
+  animation: modalZoomIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modalZoomIn {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Responsive Scaling Constraints */
+@media (max-width: 900px) {
+  .mj-smart-modal {
+    flex-direction: column;
+    height: 95vh;
+  }
+  .mj-form-guide.structured-dock {
+    display: none; /* Hide assistance tracking on tablets/mobile view */
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .input-group.full-width {
+    grid-column: span 1;
+  }
 }

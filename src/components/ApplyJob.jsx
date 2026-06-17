@@ -9,9 +9,8 @@ import {
 } from "react-icons/fa";
 import axios from "axios";
 import "../../src/components/Appyjob.css";
-// src\components\Appyjob.css;
 
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8080";
+const API_BASE = process.env.REACT_APP_API_URL || "https://job-portal-backend-365l.onrender.com";
 
 const ApplyJob = () => {
   const { jobId } = useParams();
@@ -60,7 +59,7 @@ const ApplyJob = () => {
         const headers = { Authorization: `Bearer ${token}` };
         const [profRes, missRes, jobRes, compRes, applyCheck] = await Promise.all([
           axios.get(`${API_BASE}/api/users/student/profile`, { headers }),
-          axios.get(`${API_BASE}/job-portal/applications/jobs/${jobId}/missing-skills`, { headers }),
+          axios.get(`${API_BASE}/job-portal/applications/job/${jobId}/missing-skills`, { headers }),
           axios.get(`${API_BASE}/job-portal/jobs/${jobId}`, { headers }),
           axios.get(`${API_BASE}/api/users/student/profile/completion`, { headers }),
           axios.get(`${API_BASE}/job-portal/applications/check/${jobId}`, { headers })
@@ -241,6 +240,9 @@ const ApplyJob = () => {
 
   const liveLetterLength = formData.coverLetter.length;
 
+  // SAFE COMPILATION STRINGS FOR ENTERPRISE NAMES TO AVOID OBJECT CRASHES
+  const resolvedCompanyName = jobDetails?.companyName || jobDetails?.company?.name || "Target Enterprise Hub";
+
   if (loading) return (
     <div className="modern-loader-container">
       <FaSpinner className="spin-icon" />
@@ -253,7 +255,7 @@ const ApplyJob = () => {
       <div className="success-card">
         <div className="confetti-icon"><FaRocket /></div>
         <h1>Application Dispatched Successfully!</h1>
-        <p>Your verified credentials profile matrix has been pushed onto <strong>{jobDetails?.companyName || jobDetails?.company}</strong>.</p>
+        <p>Your verified credentials profile matrix has been pushed onto <strong>{resolvedCompanyName}</strong>.</p>
         <div className="success-actions">
           <button className="btn-primary" onClick={() => navigate("/applications")}>Track Application Status</button>
           <button className="btn-secondary" onClick={() => navigate("/jobs")}>Explore Other Profiles</button>
@@ -468,15 +470,18 @@ const ApplyJob = () => {
             </div>
           </div>
 
-          {/* IMPROVED CONTENT: Enterprise Snapshot Dossier Card */}
+          {/* Enterprise Snapshot Dossier Card */}
           <div className="intel-card job-snapshot-summary-card">
             <div className="intel-card-title"><FaBuilding className="color-slate" /> Enterprise Snapshot Dossier</div>
             
-            {/* Enhanced Corporate Header Info Layout */}
             <div className="snapshot-corporate-header-container">
               <div className="corporate-avatar-box">
-                {jobDetails?.companyLogo ? (
-                  <img src={jobDetails.companyLogo} alt={jobDetails?.companyName || "Company logo"} className="corporate-card-img" />
+                {(jobDetails?.company?.logoUrl || jobDetails?.companyLogo) ? (
+                  <img 
+                    src={jobDetails?.company?.logoUrl || jobDetails?.companyLogo} 
+                    alt={resolvedCompanyName} 
+                    className="corporate-card-img" 
+                  />
                 ) : (
                   <FaBuilding className="fallback-corp-icon" />
                 )}
@@ -484,30 +489,41 @@ const ApplyJob = () => {
               <div className="corporate-meta-text-rail">
                 <h4 
                   className="company-link-header"
-                  onClick={() => jobDetails?.companyPublicId && navigate(`/companies/${jobDetails.companyPublicId}`)}
+                  onClick={() => {
+                    const compId = jobDetails?.company?.publicId || jobDetails?.companyPublicId;
+                    if (compId) navigate(`/companies/${compId}`);
+                  }}
                 >
-                  {jobDetails?.companyName || jobDetails?.company || "Target Enterprise Hub"}
+                  {resolvedCompanyName}
                 </h4>
-                <p className="location-lbl"><FaMapMarkerAlt /> {jobDetails?.companyLocation || jobDetails?.location || "Global Field Operations"}</p>
+                <p className="location-lbl">
+                  <FaMapMarkerAlt /> {jobDetails?.company?.location || jobDetails?.location || "Global Field Operations"}
+                </p>
               </div>
             </div>
 
-            {/* Corporate Actions Stack Link Layout */}
             <div className="snapshot-corporate-actions-panel">
               <button 
                 className="sidebar-view-profile-btn"
-                onClick={() => jobDetails?.companyPublicId && navigate(`/companies/${jobDetails.companyPublicId}`)}
+                onClick={() => {
+                  const compId = jobDetails?.company?.publicId || jobDetails?.companyPublicId;
+                  if (compId) navigate(`/companies/${compId}`);
+                }}
               >
                 View Company Profile
               </button>
-              {jobDetails?.companyWebsite && (
-                <a href={jobDetails.companyWebsite} target="_blank" rel="noreferrer" className="company-external-site-link-btn">
+              {(jobDetails?.company?.website || jobDetails?.companyWebsite) && (
+                <a 
+                  href={jobDetails?.company?.website || jobDetails?.companyWebsite} 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="company-external-site-link-btn"
+                >
                   Visit Website <FaGlobe size={11} />
                 </a>
               )}
             </div>
 
-            {/* Category Mapping Badges */}
             <div className="snapshot-metadata-chips-row">
               {jobDetails?.category && (
                 <span className="snapshot-meta-badge category-badge-pill">
@@ -517,7 +533,6 @@ const ApplyJob = () => {
               <span className="snapshot-meta-badge">💼 {jobDetails?.workMode}</span>
             </div>
 
-            {/* Urgency Metrics Data Grid */}
             <div className="snapshot-data-grid">
               <div className="snapshot-data-cell bg-indigo-tint">
                 <FaUsers />
@@ -538,12 +553,13 @@ const ApplyJob = () => {
               )}
             </div>
 
-            {/* Rich Recruiter Contact Mapping Widget */}
             {jobDetails?.recruiter && (
               <div className="snapshot-recruiter-footer-panel">
                 <span className="panel-label">Hiring Partner Directory</span>
                 <div className="recruiter-mini-strip">
-                  <div className="recruiter-initial-circle">{jobDetails.recruiter.name?.charAt(0).toUpperCase()}</div>
+                  <div className="recruiter-initial-circle">
+                    {jobDetails.recruiter.name?.charAt(0).toUpperCase()}
+                  </div>
                   <div className="recruiter-meta">
                     <span className="recruiter-name-text">{jobDetails.recruiter.name}</span>
                     <span className="recruiter-assignment-sub">Acquisition Manager &bull; Vetting Team</span>
@@ -562,16 +578,20 @@ const ApplyJob = () => {
             <div className="intel-card similar-recommendations-card">
               <div className="intel-card-title"><FaRocket className="color-indigo" /> Similar Opportunities</div>
               <div className="similar-stack-rail">
-                {similarJobs.slice(0, 3).map((simJob) => (
-                  <div key={simJob.publicId} className="sidebar-mini-job-card" onClick={() => navigate(`/job/${simJob.publicId}`)}>
-                    <div className="mini-card-top">
-                      <h5>{simJob.title}</h5>
-                      <span className="mini-mode-tag">{simJob.workMode}</span>
+                {similarJobs.slice(0, 3).map((simJob) => {
+                  // SAFE UNWRAP FOR SIDEBAR COMPONENT NAMES TO PREVENT CRASHES
+                  const safeSimCompanyName = simJob?.companyName || simJob?.company?.name || "Verified Enterprise Provider";
+                  return (
+                    <div key={simJob.publicId} className="sidebar-mini-job-card" onClick={() => navigate(`/job/${simJob.publicId}`)}>
+                      <div className="mini-card-top">
+                        <h5>{simJob.title}</h5>
+                        <span className="mini-mode-tag">{simJob.workMode}</span>
+                      </div>
+                      <p className="mini-company-name">{safeSimCompanyName}</p>
+                      <p className="mini-location-meta">📍 {simJob.location}</p>
                     </div>
-                    <p className="mini-company-name">{simJob.companyName || "Verified Enterprise Provider"}</p>
-                    <p className="mini-location-meta">📍 {simJob.location}</p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -580,7 +600,7 @@ const ApplyJob = () => {
 
       {/* CONFIRMATION MODAL */}
       {showConfirm && (
-        <div className="modal-backdrop-layer">
+       <div className="modal-backdrop-layer">
           <div className="confirmation-modal-container">
             <button className="close-modal-top-btn" onClick={() => setShowConfirm(false)}><FaTimes /></button>
             <div className="modal-header-graphic-area">
@@ -620,5 +640,4 @@ const ApplyJob = () => {
     </div>
   );
 };
-
 export default ApplyJob;

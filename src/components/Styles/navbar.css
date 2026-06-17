@@ -1,3 +1,8 @@
+
+
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap');
+
 :root {
   --primary-gradient: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   --accent-glow: rgba(37, 99, 235, 0.15);
@@ -502,3 +507,163 @@
     border: none;
     font-size: 22;
   }}
+  /* Font Import - Plus Jakarta Sans for an ultra-premium tech vibe */
+
+/* ==========================================================================
+   CARREERSETU PREMIUM LOGO STYLES (Anti-Underline & Tech Aesthetics)
+   ========================================================================== */
+
+/* Structural Container */
+.brand-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 2px;
+  user-select: none;
+  text-decoration: none !important; /* Strips underline from container */
+}
+
+/* Force-Kill All Link Underlines (Fixes React-Router default behaviors) */
+.brand-wrapper a,
+.brand-wrapper a:hover,
+.brand-modern,
+.brand-modern:link,
+.brand-modern:visited,
+.brand-modern:hover,
+.brand-modern:active {
+  text-decoration: none !important;
+  outline: none;
+  border: none;
+  box-shadow: none;
+}
+
+/* Primary Brand Text */
+.brand-modern {
+  font-family: 'Plus Jakarta Sans', -apple-system, system-ui, sans-serif;
+  font-weight: 800; /* Ultra-bold */
+  font-size: 25px;
+  letter-spacing: -0.6px;
+  color: #f8fafc; /* Crisp, premium white */
+  line-height: 1.1;
+  display: inline-flex;
+  align-items: center;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Linear Gradient for "Setu" */
+.brand-accent {
+  background: linear-gradient(135deg, #2563eb 0%, #a855f7 100%); /* Blue to Royal Purple */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+  margin-left: 1px;
+}
+
+/* Premium Cinematic Tagline */
+.brand-tagline {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 8.5px;
+  color: #94a3b8; /* Balanced steel grey */
+  letter-spacing: 2px; /* Wide character breathing room */
+  text-transform: uppercase;
+  font-weight: 700;
+  line-height: 1;
+  margin-top: 2px;
+  margin-left: 1px; /* Optical line-up with "Career" */
+}
+
+/* Clean micro-lift interactive state */
+.brand-wrapper:hover .brand-modern {
+  transform: translateY(-0.5px);
+}
+:root {
+  /* Dynamic branding theme engine constants */
+  --logo-accent-primary: #2563eb;    /* Deep, authoritative modern cobalt blue */
+  --logo-accent-secondary: #06b6d4;  /* Vibrant tech-teal */
+  --text-primary-dark: #0f172a;      /* High contrast slate text */
+  --text-muted-gray: #64748b;        /* Subtitle gray */
+}
+
+/* Brand Wrapper Flex Assembly */
+.brand-wrapper {
+  display: flex;
+  align-items: center;
+  user-select: none;
+}
+
+.brand-modern {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.brand-modern:hover {
+  opacity: 0.92;
+}
+
+/* SVG Container Dimensions */
+.logo-vector-mark {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(37, 99, 235, 0.04);
+  border-radius: 10px;
+  padding: 2px;
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.08);
+}
+
+.vector-svg-logo {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0px 2px 4px rgba(37, 99, 235, 0.15));
+}
+
+/* Typography Blocks for Logo Text Group */
+.brand-text-group {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.brand-name-main {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  color: var(--text-primary-dark);
+  line-height: 1.1;
+}
+
+.brand-name-sub {
+  color: var(--logo-accent-primary);
+  background: linear-gradient(135deg, var(--logo-accent-primary), var(--logo-accent-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand-text-group .brand-tagline {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-muted-gray);
+  letter-spacing: -0.01em;
+  margin-top: 1px;
+}
+
+/* Small screen fallback rules to hide secondary lines if tight */
+@media (max-width: 480px) {
+  .brand-text-group .brand-tagline {
+    display: none;
+  }
+  .brand-name-main {
+    font-size: 1.2rem;
+  }
+  .logo-vector-mark {
+    width: 36px;
+    height: 36px;
+  }
+}

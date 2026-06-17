@@ -83,7 +83,7 @@ const CandidateModal = ({ candidate, missingSkills, onClose }) => {
             <span className="font-bold text-gray-500 block mb-1.5 uppercase text-[10px]">Resume Document Live View</span>
             <div className="w-full h-64 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
               <iframe 
-                src={`http://localhost:8080${candidate.resumeUrl}#toolbar=0`} 
+                src={`https://job-portal-backend-365l.onrender.com${candidate.resumeUrl}#toolbar=0`} 
                 title="Resume Preview" 
                 className="w-full h-full object-cover"
               />
@@ -93,7 +93,7 @@ const CandidateModal = ({ candidate, missingSkills, onClose }) => {
           <div className="pt-4 border-t border-gray-100 flex justify-end gap-2">
             <button onClick={onClose} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-bold transition text-xs uppercase">Close View</button>
             <a 
-              href={`http://localhost:8080${candidate.resumeUrl}`} 
+              href={`https://job-portal-backend-365l.onrender.com${candidate.resumeUrl}`} 
               target="_blank" 
               rel="noreferrer" 
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition text-xs shadow-sm uppercase tracking-wide"

@@ -7,7 +7,7 @@ export default function NotificationDashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    const BASE_URL = 'http://localhost:8080/job-portal';
+    const BASE_URL = 'https://job-portal-backend-365l.onrender.com/job-portal';
 
     const getAuthHeaders = () => ({
         headers: {

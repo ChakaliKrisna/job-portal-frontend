@@ -34,10 +34,9 @@ const CompanyDetails = () => {
   const fetchCompanyJobs = async (id) => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/job-portal/jobs/company/${id}`
+        `https://job-portal-backend-365l.onrender.com/job-portal/jobs/company/${id}`
       );
       
-      // FIXED HERE: Destructure and normalize the Spring Page "content" array
       let rawJobsArray = [];
       if (response.data && Array.isArray(response.data.content)) {
         rawJobsArray = response.data.content;
@@ -49,33 +48,33 @@ const CompanyDetails = () => {
 
       setAllCompanyJobs(rawJobsArray);
 
-      // Extract Company Meta Information dynamically from the first job entry if missing
+      // Extract Company Meta Information dynamically from the first job entry if root metadata route failed
       if (rawJobsArray.length > 0) {
         const referenceEntry = rawJobsArray[0];
         setCompany(prevCompany => ({
-          name: referenceEntry.companyName || prevCompany?.name || "TCS",
-          logo: referenceEntry.companyLogo || prevCompany?.logo,
-          location: referenceEntry.companyLocation || prevCompany?.location || referenceEntry.location,
-          website: referenceEntry.companyWebsite || prevCompany?.website,
-          description: prevCompany?.description || referenceEntry.description.split("\n\n")[0],
-          size: prevCompany?.size || "10000+ Players"
+          name: prevCompany?.name || prevCompany?.companyName || referenceEntry.companyName || "Top Corporate Partner",
+          logo: prevCompany?.logoUrl || prevCompany?.logo || prevCompany?.companyLogo || referenceEntry.companyLogo,
+          location: prevCompany?.location || referenceEntry.companyLocation || referenceEntry.location || "Global Operations",
+          website: prevCompany?.website || referenceEntry.companyWebsite,
+          description: prevCompany?.description || (referenceEntry.description ? referenceEntry.description.split("\n\n")[0] : "Corporate details index pending upload."),
+          size: prevCompany?.companySize || prevCompany?.size || "10,000+ Employees"
         }));
       }
 
-      // 3 & 4. Metrics Analytics Pipeline
-      const totalVacancies = rawJobsArray.reduce((sum, j) => sum + (j.openings || 0), 0);
+      // Metrics Analytics Pipeline (Fallback to 1 vacancy per job listing if field omitted)
+      const totalVacancies = rawJobsArray.reduce((sum, j) => sum + (j.openings || 1), 0);
       const totalApplications = rawJobsArray.reduce((sum, j) => sum + (j.applicationsCount || 0), 0);
 
-      // 8. Unique Technology Extraction 
+      // Unique Technology Extraction 
       const techSet = new Set();
       rawJobsArray.forEach(j => j.skillsRequired?.forEach(s => techSet.add(s)));
       const technologiesUsed = Array.from(techSet);
 
-      // 9. Premium Highlight Processing
+      // Premium Highlight Processing (High paying roles)
       const sortedJobsBySalary = [...rawJobsArray].sort((a, b) => (b.salary || 0) - (a.salary || 0));
       const featuredJob = sortedJobsBySalary.length > 0 ? sortedJobsBySalary[0] : null;
 
-      // 10. Recruiter De-duplication Matrix
+      // Recruiter De-duplication Matrix
       const recruiterMap = new Map();
       rawJobsArray.forEach(j => {
         if (j.recruiter?.email) {
@@ -92,7 +91,7 @@ const CompanyDetails = () => {
         uniqueRecruiters
       });
 
-      // 12. Preview Feed Array Split (Max 4 Roles)
+      // Show up to 4 roles initially in preview component
       const initialPreview = rawJobsArray.slice(0, 4);
       setCompanyJobsPreview(initialPreview);
       setFilteredJobs(initialPreview);
@@ -110,14 +109,16 @@ const CompanyDetails = () => {
         // Attempt loading company root metadata profile wrapper
         try {
           const companyResponse = await axios.get(
-            `http://localhost:8080/job-portal/company/${companyPublicId}`
+            `https://job-portal-backend-365l.onrender.com/job-portal/company/${companyPublicId}`
           );
-          if (companyResponse.data) setCompany(companyResponse.data);
+          if (companyResponse.data) {
+            setCompany(companyResponse.data);
+          }
         } catch (e) {
-          console.warn("Dedicated company route missing, deriving metadata from jobs payload.");
+          console.warn("Dedicated company route missing or blank parameters, deriving metadata from jobs payload.");
         }
 
-        // Fetch positions list (which handles the pagination extraction)
+        // Fetch positions list
         await fetchCompanyJobs(companyPublicId);
         setError(null);
       } catch (err) {
@@ -151,18 +152,23 @@ const CompanyDetails = () => {
   const calculateDaysLeft = (closedDateString) => {
     if (!closedDateString) return null;
     const difference = new Date(closedDateString).getTime() - new Date().getTime();
-    const days = Math.ceil(difference / (1000 * 60 * 60 * 24));
-    return days;
+    return Math.ceil(difference / (1000 * 60 * 60 * 24));
   };
 
   if (loading) return <div className="modern-loading-container"><div className="modern-spinner"></div></div>;
   if (error) return <div className="modern-container"><div className="modern-error-banner">{error}</div></div>;
 
+  // REPAIR MAP LOGIC FOR CLEAN IMAGE RESOLUTION
+  const resolvedLogoUrl = company?.logoUrl || company?.logo || company?.companyLogo;
+  const resolvedCompanyName = company?.name || company?.companyName || "Corporate Partner";
+  const resolvedLocation = company?.location || "Global Operations";
+  const resolvedCompanySize = company?.companySize || company?.size || "10,000+ Employees";
+
   return (
     <div className="modern-container">
       {company && (
         <>
-          {/* LinkedIn Header Template Canvas Section */}
+          {/* Header Section */}
           <div className="company-profile-hub">
             <div className="company-hero-banner">
               {company.bannerUrl ? (
@@ -174,21 +180,21 @@ const CompanyDetails = () => {
 
             <div className="profile-identity-strip">
               <div className="identity-left-group">
-                {/* SAFE FALLBACK LOGO SYSTEM REPAIR */}
-                {company.logo || company.companyLogo ? (
+                {/* FIXED LOGO FALLBACK SYSTEM */}
+                {resolvedLogoUrl ? (
                   <img 
-                    src={company.logo || company.companyLogo} 
-                    alt={`${company.name} Brand Identity`} 
+                    src={resolvedLogoUrl} 
+                    alt={`${resolvedCompanyName} Brand Identity`} 
                     className="company-avatar-frame" 
                   />
                 ) : (
                   <div className="company-avatar-fallback"><FaBuilding /></div>
                 )}
                 <div className="identity-text">
-                  <h1 className="company-brand-title">{company.name || company.companyName}</h1>
+                  <h1 className="company-brand-title">{resolvedCompanyName}</h1>
                   <p className="company-sub-meta">
-                    <FaMapMarkerAlt /> {company.location || "Global Operations"} &bull; 
-                    <span className="ms-1 text-primary fw-medium"> {company.companySize || company.size || "10,000+"} Employees</span>
+                    <FaMapMarkerAlt /> {resolvedLocation} &bull; 
+                    <span className="ms-1 text-primary fw-medium"> {resolvedCompanySize} Employees</span>
                   </p>
                 </div>
               </div>
@@ -200,7 +206,7 @@ const CompanyDetails = () => {
               )}
             </div>
 
-            {/* Metrics Analytics Engine Board */}
+            {/* Metrics Dashboard */}
             <div className="analytics-dashboard-grid">
               <div className="analytics-card">
                 <span className="analytics-num text-indigo">{allCompanyJobs.length}</span>
@@ -240,7 +246,7 @@ const CompanyDetails = () => {
                   </div>
                 </section>
 
-                {/* Featured Highest Paying Assignment Card */}
+                {/* Featured Opportunity Card */}
                 {analytics.featuredJob && (
                   <section className="profile-info-block featured-job-section">
                     <div className="featured-ribbon"><FaTrophy /> Premium Opportunity</div>
@@ -281,7 +287,7 @@ const CompanyDetails = () => {
                         <div className="recruiter-avatar-circle">HR</div>
                         <div className="recruiter-meta-details">
                           <p className="recruiter-profile-name">Talent Acquisition Team</p>
-                          <p className="recruiter-profile-email"><FaEnvelope /> recruitment@tcs.com</p>
+                          <p className="recruiter-profile-email"><FaEnvelope /> recruitment@company.com</p>
                         </div>
                       </div>
                     )}
@@ -300,7 +306,7 @@ const CompanyDetails = () => {
             </div>
           </div>
 
-          {/* --- Open Openings Output Pipeline Display Feed --- */}
+          {/* Active Job Postings Display List */}
           <section className="recommendations-section">
             <div className="section-header-row">
               <div className="section-title-area">
@@ -349,7 +355,7 @@ const CompanyDetails = () => {
                           <span>₹{job.salary ? (job.salary / 100000).toFixed(1) : "N/A"} LPA</span>
                         </div>
                         <div className="detail-meta-row">
-                          <span><FaBriefcase /> {job.experienceLevel?.replace('_', ' ')}</span>
+                          <span><FaBriefcase /> {job.experienceLevel ? job.experienceLevel.replace('_', ' ') : "Entry Level"}</span>
                           <span><FaMapMarkerAlt /> {job.location}</span>
                         </div>
                       </div>

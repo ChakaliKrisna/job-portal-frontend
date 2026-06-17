@@ -29,7 +29,7 @@ function Register() {
     setMessage({ type: "", text: "" });
 
     try {
-      const response = await axios.post("http://localhost:8080/auth/register", {
+      const response = await axios.post("https://job-portal-backend-365l.onrender.com/auth/register", {
         email,
         password,
         name,

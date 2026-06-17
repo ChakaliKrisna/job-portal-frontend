@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import {
@@ -11,8 +11,7 @@ import {
   FaBriefcase,
   FaBuilding,
   FaMapMarkerAlt,
-  FaChevronDown,
-  FaGraduationCap
+  FaChevronDown
 } from "react-icons/fa";
 import AuthDrawer from "../pages/AuthDrawer";
 import "./Styles/navbar.css";
@@ -29,8 +28,6 @@ const Navbar = () => {
   const [showProfile, setShowProfile] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
-
-  // Modern tracking for active elements to improve mobile toggles
   const [activeDropdown, setActiveDropdown] = useState(null); 
 
   const [user, setUser] = useState({
@@ -49,7 +46,7 @@ const Navbar = () => {
     });
   }, [isAuthOpen]);
 
-  // Read URL search parameters to keep inputs synced globally
+  // Read URL search parameters
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     setSearchQuery(params.get("keyword") || "");
@@ -61,7 +58,7 @@ const Navbar = () => {
     if (user.isLoggedIn && user.role === "STUDENT") {
       const token = localStorage.getItem("token");
       axios
-        .get("http://localhost:8080/job-portal/notifications", {
+        .get("https://job-portal-backend-365l.onrender.com/job-portal/notifications", {
           headers: { Authorization: `Bearer ${token}` }
         })
         .then((res) => setNotifications(res.data))
@@ -86,11 +83,7 @@ const Navbar = () => {
   };
 
   const toggleDropdown = (menuName) => {
-    if (activeDropdown === menuName) {
-      setActiveDropdown(null);
-    } else {
-      setActiveDropdown(menuName);
-    }
+    setActiveDropdown(activeDropdown === menuName ? null : menuName);
   };
 
   return (
@@ -98,12 +91,37 @@ const Navbar = () => {
       <nav className="glass-nav">
         <div className="nav-container-fluid">
           
-          {/* BRAND LOGO */}
-          <Link to="/" className="brand-modern" onClick={() => setIsMobile(false)}>
-            Hunter<span className="brand-dot">.</span>
-          </Link>
-
-          {/* ADVANCED INTEGRATED SEARCH BAR */}
+          {/* BRAND LOGO - TRANSFORMED WITH CUSTOM VECTOR LOGO AND TEXT */}
+         <div className="brand-wrapper">
+  <Link to="/" className="brand-modern" onClick={() => setIsMobile(false)}>
+    <div className="logo-vector-mark">
+      <svg viewBox="0 0 100 100" className="vector-svg-logo" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="csGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="var(--logo-accent-secondary)" />
+            <stop offset="100%" stopColor="var(--logo-accent-primary)" />
+          </linearGradient>
+        </defs>
+        {/* Sleek, continuous geometric ribbon forming an upward trending C + S track */}
+        <path 
+          d="M 25 70 C 20 50, 35 30, 55 30 C 70 30, 78 42, 75 55 C 72 68, 55 70, 45 65 L 75 35" 
+          fill="none" 
+          stroke="url(#csGrad)" 
+          strokeWidth="10" 
+          strokeLinecap="round" 
+          strokeLinejoin="round"
+        />
+        {/* Forward momentum accent rocket dot */}
+        <circle cx="75" cy="35" r="5" fill="#ffffff" />
+      </svg>
+    </div>
+    <div className="brand-text-group">
+      <span className="brand-name-main">Career<span className="brand-name-sub">Setu</span></span>
+      <span className="brand-tagline">Your Next Move Starts Here</span>
+    </div>
+  </Link>
+</div>
+          {/* INTEGRATED SEARCH BAR */}
           <form className="modern-search-composite" onSubmit={handleSearch}>
             <div className="search-segment">
               <FaSearch className="segment-icon search-focus-icon" />
@@ -131,7 +149,6 @@ const Navbar = () => {
 
           {/* NAVIGATION LINKS */}
           <ul className={`modern-menu-links ${isMobile ? "mobile-active" : ""}`}>
-            
             {/* JOBS DROP-DOWN */}
             <li className={`has-mega-dropdown ${activeDropdown === "jobs" ? "forced-open" : ""}`}>
               <span className="modern-nav-trigger" onClick={() => toggleDropdown("jobs")}>
@@ -199,11 +216,10 @@ const Navbar = () => {
             <li><Link to="/courses" className="modern-nav-trigger" onClick={() => setIsMobile(false)}>Courses</Link></li>
           </ul>
 
-          {/* RIGHT CONTROLS */}
+          {/* RIGHT UTILITY HUB */}
           <div className="utility-action-hub">
             {user.isLoggedIn ? (
               <div className="auth-user-dashboard-controls">
-                
                 {/* NOTIFICATIONS */}
                 {user.role === "STUDENT" && (
                   <div 
@@ -278,7 +294,6 @@ const Navbar = () => {
                     </div>
                   )}
                 </div>
-
               </div>
             ) : (
               <div className="modern-auth-trigger-group">
@@ -287,7 +302,7 @@ const Navbar = () => {
               </div>
             )}
 
-            <button className="mobile-hamburger-trigger" onClick={() => setIsMobile(!isMobile)} aria-label="Toggle structural layout">
+            <button className="mobile-hamburger-trigger" onClick={() => setIsMobile(!isMobile)} aria-label="Toggle navigation menu">
               {isMobile ? <FaTimes /> : <FaBars />}
             </button>
           </div>

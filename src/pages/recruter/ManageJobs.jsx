@@ -32,7 +32,7 @@ export default function ManageJobs() {
     minSalary: 0
   });
 
-  const API_BASE_URL = "http://localhost:8080/job-portal/jobs";
+  const API_BASE_URL = "https://job-portal-backend-365l.onrender.com/job-portal/jobs";
 
   const isOwner = useCallback((job) => {
     if (!job || !job.recruiter || !currentUserEmail) return false;
@@ -247,81 +247,153 @@ const fetchJobs = useCallback(async () => {
           </footer>
         </section>
 
-        {/* Detailed Pane */}
         <section className="mj-detail-pane">
-          {selectedJob ? (
-            <div className="mj-detail-scroll fade-in">
-              <div className="mj-detail-top">
-                <div className="mj-brand-header">
-                   <div className="mj-company-avatar"><FaBuilding /></div>
-                   <div className="mj-main-titles">
-                      <span className="mj-category-tag">{selectedJob.jobType?.replace('_', ' ') || "N/A"}</span>
-                      <h2>{selectedJob.title}</h2>
-                      <h4>{!selectedJob.company || selectedJob.company === "N/A" ? "Company Confidential" : selectedJob.company}</h4>
-                   </div>
-                </div>
-                
-                <div className="mj-detail-actions">
-                  {isOwner(selectedJob) ? (
-                    <>
-                      <button className="mj-btn-icon edit" title="Edit Job"><FaEdit /></button>
-                      <button className="mj-btn-icon delete" title="Delete Job"><FaTrash /></button>
-                    </>
-                  ) : (
-                    <div className="mj-view-only-badge"><FaLock /> Global View</div>
-                  )}
-                </div>
-              </div>
-
-              <div className="mj-analytics-grid">
-                <div className="mj-analytic-card">
-                   <span>Openings</span>
-                   <h3>{selectedJob.openings || 1}</h3>
-                </div>
-                <div className="mj-analytic-card">
-                   <span>Experience</span>
-                   <h3>{selectedJob.experienceLevel || "Any"}</h3>
-                </div>
-                <div className="mj-analytic-card">
-                   <span>Work Mode</span>
-                   <h3>{selectedJob.workMode || "Onsite"}</h3>
-                </div>
-              </div>
-
-              <div className="mj-section">
-                <h5>Required Skills</h5>
-                <div className="mj-pill-box">
-                 {selectedJob?.skillsRequired?.map((skill, i) => (
-  <span key={i}>{skill}</span>
-)) }: <span className="mj-text-light">No skills listed</span>
-                </div>
-              </div>
-
-              <div className="mj-section">
-                <h5>Job Intelligence</h5>
-                <ul className="mj-intel-list">
-                  <li><FaUserTie /> <strong>Recruiter:</strong> {selectedJob.recruiter?.name || "Independent"}</li>
-                  <li><FaMapMarkerAlt /> <strong>Location:</strong> {selectedJob.location}</li>
-                  <li><FaCalendarAlt /> <strong>Posted:</strong> {selectedJob.postedDate ? new Date(selectedJob.postedDate).toLocaleDateString() : "N/A"}</li>
-                  <li><FaClock /> <strong>Deadline:</strong> {selectedJob.closingDate || "No Set Date"}</li>
-                  <li><FaUserGraduate /> <strong>Education:</strong> {selectedJob.education || "Graduate"}</li>
-                </ul>
-              </div>
-
-              <div className="mj-section">
-                <h5>Job Description</h5>
-                <p className="mj-description-text">
-                    {selectedJob.description || `We are looking for a ${selectedJob.title} in ${selectedJob.location}.`}
-                </p>
-              </div>
+  {selectedJob ? (
+    <div className="mj-detail-scroll fade-in">
+      
+      {/* 1. BRAND HEADER & STATUS BADGES */}
+      <div className="mj-detail-top">
+        <div className="mj-brand-header">
+          <div className="mj-company-avatar">
+            <FaBuilding />
+          </div>
+          <div className="mj-main-titles">
+            <div className="mj-badge-row" style={{ display: 'flex', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
+              {/* Maps backend JobType Enum safely */}
+              {selectedJob.jobType && (
+                <span className="mj-category-tag">
+                  {typeof selectedJob.jobType === 'string' 
+                    ? selectedJob.jobType.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) 
+                    : "N/A"}
+                </span>
+              )}
+              {/* Dynamic status badge (OPEN, CLOSED, DRAFT, PAUSED) */}
+              {selectedJob.status && (
+                <span className={`mj-status-badge ${String(selectedJob.status).toLowerCase()}`}>
+                  {selectedJob.status}
+                </span>
+              )}
             </div>
+            <h2>{selectedJob.title || "Untitled Position"}</h2>
+            {/* Matches backend nested Company object structure */}
+            <h4>{selectedJob.company?.name || "Company Confidential"}</h4>
+          </div>
+        </div>
+        
+        {/* ACTION BUTTONS (Owner vs Global View Check) */}
+        <div className="mj-detail-actions">
+          {typeof isOwner === 'function' && isOwner(selectedJob) ? (
+            <>
+              <button className="mj-btn-icon edit" title="Edit Job"><FaEdit /></button>
+              <button className="mj-btn-icon delete" title="Delete Job"><FaTrash /></button>
+            </>
           ) : (
-            <div className="mj-empty-state">
-              <FaChartLine size={50} />
-              <p>Select a job from the list to view full details.</p>
-            </div>
+            <div className="mj-view-only-badge"><FaLock /> Global View</div>
           )}
-        </section>
+        </div>
+      </div>
+
+      {/* 2. ANALYTICS GRID */}
+      <div className="mj-analytics-grid">
+        <div className="mj-analytic-card">
+          <span>Openings</span>
+          <h3>{selectedJob.openings ?? 1}</h3>
+        </div>
+        <div className="mj-analytic-card">
+          <span>Experience</span>
+          <h3>
+            {selectedJob.experienceLevel && typeof selectedJob.experienceLevel === 'string'
+              ? selectedJob.experienceLevel.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) 
+              : "Any"}
+          </h3>
+        </div>
+        <div className="mj-analytic-card">
+          <span>Work Mode</span>
+          <h3>
+            {selectedJob.workMode && typeof selectedJob.workMode === 'string'
+              ? selectedJob.workMode.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) 
+              : "Onsite"}
+          </h3>
+        </div>
+        <div className="mj-analytic-card">
+          <span>Applicants</span>
+          <h3>{selectedJob.applicantsCount ?? 0}</h3>
+        </div>
+      </div>
+
+      {/* 3. REQUIRED SKILLS SECTION */}
+      <div className="mj-section">
+        <h5>Required Skills</h5>
+        <div className="mj-pill-box">
+          {Array.isArray(selectedJob.skillsRequired) && selectedJob.skillsRequired.length > 0 ? (
+            selectedJob.skillsRequired.map((skillObj, i) => (
+              <span key={skillObj?.id || i} className="mj-skill-pill">
+                {skillObj?.skill || (typeof skillObj === 'string' ? skillObj : "Unknown Skill")}
+              </span>
+            ))
+          ) : (
+            <span className="mj-text-light">No specific skills listed</span>
+          )}
+        </div>
+      </div>
+
+      {/* 4. JOB INTELLIGENCE METADATA */}
+      <div className="mj-section">
+        <h5>Job Intelligence</h5>
+        <ul className="mj-intel-list">
+          <li>
+            <FaTags /> <strong>Category:</strong>{" "}
+            {selectedJob.category && typeof selectedJob.category === 'string'
+              ? selectedJob.category.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) 
+              : "General"}
+          </li>
+          <li>
+            <FaDollarSign /> <strong>Salary:</strong>{" "}
+            {selectedJob.salary !== null && selectedJob.salary !== undefined && !isNaN(selectedJob.salary)
+              ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(selectedJob.salary)
+              : "Not Disclosed"}
+          </li>
+          <li>
+            <FaUserTie /> <strong>Recruiter:</strong> {selectedJob.recruiter?.name || "Independent"}
+          </li>
+          <li>
+            <FaMapMarkerAlt /> <strong>Location:</strong> {selectedJob.location || "Remote / Unspecified"}
+          </li>
+          <li>
+            <FaCalendarAlt /> <strong>Posted:</strong>{" "}
+            {selectedJob.postedDate && !isNaN(Date.parse(selectedJob.postedDate))
+              ? new Date(selectedJob.postedDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) 
+              : "N/A"}
+          </li>
+          <li>
+            <FaClock /> <strong>Deadline:</strong>{" "}
+            {selectedJob.closingDate && !isNaN(Date.parse(selectedJob.closingDate))
+              ? new Date(selectedJob.closingDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) 
+              : "No Set Date"}
+          </li>
+          <li>
+            <FaUserGraduate /> <strong>Education:</strong> {selectedJob.education || "Not Specified"}
+          </li>
+        </ul>
+      </div>
+
+      {/* 5. JOB DESCRIPTION TEXT */}
+      <div className="mj-section">
+        <h5>Job Description</h5>
+        <p className="mj-description-text">
+          {selectedJob.description || `We are looking for a qualified ${selectedJob.title || 'professional'} to join our team in ${selectedJob.location || 'our office'}.`}
+        </p>
+      </div>
+
+    </div>
+  ) : (
+    /* EMPTY STATE CONTAINER */
+    <div className="mj-empty-state">
+      <FaChartLine size={50} />
+      <p>Select a job from the list to view full details.</p>
+    </div>
+  )}
+</section>
       </main>
     </div>
   );

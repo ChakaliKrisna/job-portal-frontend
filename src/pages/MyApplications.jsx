@@ -21,7 +21,7 @@ const JobSeekerDashboard = () => {
 
   const fetchSavedJobs = useCallback(async () => {
     try {
-      const res = await axios.get("http://localhost:8080/job-portal/saved", {
+      const res = await axios.get("https://job-portal-backend-365l.onrender.com/job-portal/saved", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSavedJobs(Array.isArray(res.data) ? res.data : []);
@@ -33,7 +33,7 @@ const JobSeekerDashboard = () => {
   const fetchApplications = useCallback(async () => {
     try {
       const res = await axios.get(
-        "http://localhost:8080/job-portal/applications/my?page=0&size=10",
+        "https://job-portal-backend-365l.onrender.com/job-portal/applications/my?page=0&size=10",
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setApplications(Array.isArray(res.data?.content) ? res.data.content : []);
@@ -45,7 +45,7 @@ const JobSeekerDashboard = () => {
   const unsaveJob = useCallback(async (jobId) => {
     setSavedJobs(prev => prev.filter(j => j.publicId !== jobId));
     try {
-      await axios.delete(`http://localhost:8080/job-portal/saved/${jobId}`, {
+      await axios.delete(`https://job-portal-backend-365l.onrender.com/job-portal/saved/${jobId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
     } catch (err) {
@@ -240,19 +240,35 @@ const EmptyState = ({ icon, message }) => (
 );
 
 // Reuse your MissingSkills Component here...
-const MissingSkills = ({ applicationId }) => {
+const MissingSkills = ({ jobId }) => {
   const [skills, setSkills] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    axios.get(`http://localhost:8080/job-portal/applications/${applicationId}/missing-skills`, {
-        headers: { Authorization: `Bearer ${token}` },
+    if (!jobId) return;
+
+    axios
+      .get(
+        `https://job-portal-backend-365l.onrender.com/job-portal/applications/job/${jobId}/missing-skills`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then((res) => {
+        setSkills(Array.isArray(res.data) ? res.data : []);
       })
-      .then((res) => setSkills(Array.isArray(res.data) ? res.data : []))
-      .catch(() => setSkills([]))
-      .finally(() => setLoading(false));
-  }, [applicationId, token]);
+      .catch((err) => {
+        console.error("Missing skills error:", err);
+        setSkills([]);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [jobId, token]);
 
   if (loading) return <div className="animate-pulse h-4 w-20 bg-slate-200 rounded"></div>;
 

@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FaTimes, FaEnvelope, FaLock, FaUser, FaBriefcase, FaBuilding } from "react-icons/fa";
-import "./Styles/authDrawer.css";
+import { 
+  FaTimes, FaEnvelope, FaLock, FaUser, 
+  FaBriefcase, FaBuilding, FaArrowLeft, FaKey 
+} from "react-icons/fa";
+import "../components/Styles/authDrawer.css";
 
-const AuthDrawer = ({ isOpen, onClose, initialMode }) => {
-  const [isLogin, setIsLogin] = useState(initialMode === "login");
+const API = import.meta.env.VITE_API_URL || "https://job-portal-backend-365l.onrender.com";
+
+const AuthDrawer = ({ isOpen, onClose, initialMode = "login" }) => {
+  const [currentView, setCurrentView] = useState(initialMode); // 'login', 'register', 'forgot'
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
 
@@ -17,175 +22,215 @@ const AuthDrawer = ({ isOpen, onClose, initialMode }) => {
   });
 
   useEffect(() => {
-    setIsLogin(initialMode === "login");
+    setCurrentView(initialMode);
     setMessage({ type: "", text: "" });
-    // Reset form when opening/switching
-    setFormData({
-      email: "",
-      password: "",
-      name: "",
-      role: "STUDENT",
-      companyName: "",
-    });
+    setFormData({ email: "", password: "", name: "", role: "STUDENT", companyName: "" });
   }, [initialMode, isOpen]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleAuthSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage({ type: "", text: "" });
 
-    const url = isLogin
-      ? "http://localhost:8080/auth/login"
-      : "http://localhost:8080/auth/register";
+    if (currentView === "register") {
+      if (formData.password.length < 8) {
+        setMessage({ type: "error", text: "Password must contain at least 8 characters" });
+        setLoading(false);
+        return;
+      }
+      if (formData.role === "RECRUITER" && !formData.companyName.trim()) {
+        setMessage({ type: "error", text: "Company name is required" });
+        setLoading(false);
+        return;
+      }
+    }
+
+    const url = currentView === "login" ? `${API}/auth/login` : `${API}/auth/register`;
 
     try {
       const res = await axios.post(url, formData);
 
-      if (isLogin) {
-        const { token, accessToken, jwt, role, name, username } = res.data;
-        const authToken = token || accessToken || jwt;
-        const userRole = role || "STUDENT";
-        const displayName = name || username || "User";
+      if (currentView === "login") {
+        const { token, role, name, email, publicId } = res.data;
+        
+        // 1. Commit credentials to system storage
+        localStorage.setItem("token", token);
+        localStorage.setItem("userName", name);
+        localStorage.setItem("email", email);
+        localStorage.setItem("publicId", publicId);
+        localStorage.setItem("role", role);
 
-        if (authToken) {
-          localStorage.setItem("token", authToken);
-          localStorage.setItem("userName", displayName);
-          localStorage.setItem("role", userRole.toLowerCase());
+        setMessage({ type: "success", text: "Authenticated successfully. Diverting access pathway..." });
+        
+        // 2. Safely normalize role values coming back from Spring Boot
+        const isRecruiter = role === "ROLE_RECRUITER" || role === "RECRUITER";
+        const targetRoute = isRecruiter ? "/recruiter-dashboard" : "/";
 
-          setMessage({ type: "success", text: "Login successful! Redirecting..." });
-
-          setTimeout(() => {
-            window.location.href = userRole.toLowerCase().includes("recruiter") 
-              ? "/recruiter-dashboard" 
-              : "/";
-          }, 1200);
-        }
-      } else {
-        setMessage({ type: "success", text: "Account created! You can now sign in." });
         setTimeout(() => {
-          setIsLogin(true);
-          setMessage({ type: "", text: "" });
-        }, 2500);
+          handleClose(); // Close drawer matrix cleanly
+          
+          // 3. FIXED: Hard location assignment forces the global routing tree 
+          // to reload and read the new token/role instantly without timing bugs.
+          window.location.href = targetRoute;
+        }, 1200);
+      } else {
+        // IGNORED EMAIL VERIFICATION: Swapped out email verification note for instant profile initialization response
+        setMessage({ type: "success", text: "Profile initialized successfully! Switching to sign in panel..." });
+        setTimeout(() => { 
+          setCurrentView("login"); 
+          setMessage({ type: "", text: "" }); 
+        }, 3000);
       }
     } catch (err) {
-      const errorMsg = err.response?.data?.message || "Something went wrong. Please try again.";
-      setMessage({ type: "error", text: errorMsg });
+      setMessage({ type: "error", text: err.response?.data?.message || "Authentication gateway error." });
     } finally {
       setLoading(false);
     }
   };
 
+  // HANDLER CHANGED: Dead-ended forgotten verification pipeline with UI warning triggers
+  const handleForgotSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage({ type: "", text: "" });
+
+    setTimeout(() => {
+      setMessage({ type: "error", text: "Identity recovery server down. Feature Coming Soon!" });
+      setLoading(false);
+    }, 600);
+  };
+
+  const handleClose = () => {
+    onClose();
+    setTimeout(() => { 
+      setCurrentView(initialMode); 
+      setMessage({ type: "", text: "" }); 
+    }, 400);
+  };
+
   return (
     <>
-      <div className={`drawer-overlay ${isOpen ? "show" : ""}`} onClick={onClose}></div>
-      <div className={`auth-drawer ${isOpen ? "open" : ""}`}>
-        <button className="close-btn" onClick={onClose} aria-label="Close">
+      <div className={`premium-overlay ${isOpen ? "active" : ""}`} onClick={handleClose}></div>
+      <div className={`premium-drawer ${isOpen ? "active" : ""}`}>
+        <button className="premium-close-btn" onClick={handleClose} aria-label="Close panel">
           <FaTimes />
         </button>
 
-        <div className="drawer-header">
-          <h2>{isLogin ? "Welcome Back" : "Join Hunter"}</h2>
-          <p>{isLogin ? "Sign in to your account" : "Create an account to get started"}</p>
-        </div>
-
-        {message.text && (
-          <div className={`auth-alert ${message.type}`}>
-            {message.text}
+        {/* Dynamic Structural Switcher Tabs */}
+        {currentView !== "forgot" && (
+          <div className="matrix-tab-navigation">
+            <button 
+              type="button"
+              className={`matrix-tab ${currentView === "login" ? "active" : ""}`} 
+              onClick={() => { setCurrentView("login"); setMessage({ type: "", text: "" }); }}
+            >
+              Sign In
+            </button>
+            <button 
+              type="button"
+              className={`matrix-tab ${currentView === "register" ? "active" : ""}`} 
+              onClick={() => { setCurrentView("register"); setMessage({ type: "", text: "" }); }}
+            >
+              Register
+            </button>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          {!isLogin && (
-            <>
-              <div className="input-group">
-                <div className="input-box">
-                  <FaUser className="input-icon" />
-                  <input
-                    name="name"
-                    type="text"
-                    placeholder="Full Name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                    minLength="2"
-                  />
-                </div>
-              </div>
+        <div key={currentView} className="premium-inner-motion">
+          <div className="premium-header">
+            {currentView === "login" && (
+              <>
+                <h2>Welcome back</h2>
+                <p>Provide credentials to securely cross the enterprise gateway</p>
+              </>
+            )}
+            {currentView === "register" && (
+              <>
+                <h2>Create account</h2>
+                <p>Formulate your hunter profile matrix to track global metrics</p>
+              </>
+            )}
+            {currentView === "forgot" && (
+              <>
+                <div className="premium-icon-halo"><FaKey /></div>
+                <h2>Recover identity</h2>
+                <p style={{ color: "#ff4d4d", fontWeight: "bold" }}>System Notice: Recovery Protocols Offline (Coming Soon)</p>
+              </>
+            )}
+          </div>
 
-              <div className="input-group">
-                <div className="input-box">
-                  <FaBriefcase className="input-icon" />
-                  <select name="role" onChange={handleChange} value={formData.role} className="role-select">
-                    <option value="STUDENT">I am a Student / Seeker</option>
-                    <option value="RECRUITER">I am a Recruiter</option>
-                  </select>
-                </div>
-              </div>
+          {message.text && <div className={`premium-alert ${message.type}`}><span>{message.text}</span></div>}
 
-              {formData.role === "RECRUITER" && (
-                <div className="input-group animated-field">
-                  <div className="input-box">
-                    <FaBuilding className="input-icon" />
-                    <input
-                      name="companyName"
-                      type="text"
-                      placeholder="Company Name"
-                      value={formData.companyName}
-                      onChange={handleChange}
-                      required
-                      minLength="2"
-                    />
+          {currentView === "forgot" ? (
+            <form onSubmit={handleForgotSubmit} className="premium-form">
+              <div className="premium-input-wrapper">
+                <FaEnvelope className="wrapper-icon" />
+                <input name="email" type="email" placeholder=" " value={formData.email} onChange={handleChange} required disabled />
+                <label className="floating-label">Registered Email</label>
+              </div>
+              <button type="submit" className="premium-submit-btn" style={{ opacity: 0.6, cursor: "not-allowed" }} disabled={loading}>
+                {loading ? <span className="premium-spinner"></span> : <span>Dispatch Reset System (Disabled)</span>}
+              </button>
+              <button type="button" className="premium-back-action" onClick={() => { setCurrentView("login"); setMessage({ type: "", text: "" }); }}>
+                <FaArrowLeft /> Standard Sign In Gateway
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleAuthSubmit} className="premium-form">
+              {currentView === "register" && (
+                <>
+                  <div className="premium-input-wrapper">
+                    <FaUser className="wrapper-icon" />
+                    <input name="name" type="text" placeholder=" " value={formData.name} onChange={handleChange} required minLength="2" />
+                    <label className="floating-label">Full Name</label>
                   </div>
-                </div>
+
+                  <div className="premium-input-wrapper">
+                    <FaBriefcase className="wrapper-icon" />
+                    <select name="role" onChange={handleChange} value={formData.role}>
+                      <option value="STUDENT">Student / Seeker Architecture</option>
+                      <option value="RECRUITER">Enterprise Recruiter Suite</option>
+                    </select>
+                    <label className="floating-label">Profile Context</label>
+                  </div>
+
+                  {formData.role === "RECRUITER" && (
+                    <div className="premium-input-wrapper">
+                      <FaBuilding className="wrapper-icon" />
+                      <input name="companyName" type="text" placeholder=" " value={formData.companyName} onChange={handleChange} required />
+                      <label className="floating-label">Company Entity Name</label>
+                    </div>
+                  )}
+                </>
               )}
-            </>
+
+              <div className="premium-input-wrapper">
+                <FaEnvelope className="wrapper-icon" />
+                <input name="email" type="email" placeholder=" " value={formData.email} onChange={handleChange} required />
+                <label className="floating-label">Email Address</label>
+              </div>
+
+              <div className="premium-input-wrapper">
+                <FaLock className="wrapper-icon" />
+                <input name="password" type="password" placeholder=" " value={formData.password} onChange={handleChange} required />
+                <label className="floating-label">Secure Access Key</label>
+              </div>
+
+              {currentView === "login" && (
+                <button type="button" className="premium-link-btn" onClick={() => { setCurrentView("forgot"); setMessage({ type: "error", text: "Notice: Recover Identity features are temporarily disabled." }); }}>
+                  Forgot entry password?
+                </button>
+              )}
+
+              <button type="submit" className="premium-submit-btn" disabled={loading}>
+                {loading ? <span className="premium-spinner"></span> : (currentView === "login" ? <span>Authenticate Profile</span> : <span>Initialize Account</span>)}
+              </button>
+            </form>
           )}
-
-          <div className="input-group">
-            <div className="input-box">
-              <FaEnvelope className="input-icon" />
-              <input
-                name="email"
-                type="email"
-                placeholder="Email Address"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="input-group">
-            <div className="input-box">
-              <FaLock className="input-icon" />
-              <input
-                name="password"
-                type="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                minLength="6"
-              />
-            </div>
-          </div>
-
-          <button type="submit" className="submit-btn" disabled={loading}>
-            {loading ? <span className="loader"></span> : (isLogin ? "Sign In" : "Create Account")}
-          </button>
-        </form>
-
-        <div className="drawer-footer">
-          <p>
-            {isLogin ? "Don't have an account?" : "Already have an account?"}
-            <button className="toggle-auth" onClick={() => setIsLogin(!isLogin)}>
-              {isLogin ? "Register Now" : "Login here"}
-            </button>
-          </p>
         </div>
       </div>
     </>

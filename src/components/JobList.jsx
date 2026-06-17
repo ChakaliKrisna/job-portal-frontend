@@ -10,7 +10,7 @@ import {
 } from "react-icons/fa";
 import "../components/Styles/joblist.css";
 
-const API_BASE = "http://localhost:8080/job-portal";
+const API_BASE = "https://job-portal-backend-365l.onrender.com/job-portal";
 
 const JobPortal = ({ 
   isHomePage = false, 
@@ -336,46 +336,94 @@ const JobPortal = ({
         </div>
 
         <div className="home-jobs-grid">
-          {loading ? (
-            [1, 2, 3, 4, 5, 6].map(i => <div key={i} className="skeleton-card" />)
-          ) : error ? (
-            <div className="error-card">{error}</div>
-          ) : jobs.length === 0 ? (
-            <EmptyState />
-          ) : (
-            jobs.map(job => {
-              // Major Architecture Fix #3: Standardize mapping validation variables across environments
-              const mappedCompany = job.company || job.companyName || "Enterprise Partner";
-              return (
-                <div key={job.publicId} className="modern-job-card" onClick={() => {
-                  navigate(`/jobs?id=${job.publicId}`);
-                }}>
-                  <div className="card-badge">{job.jobType?.replace('_', ' ')}</div>
-                  <div className="card-body">
-                    {/* Major Architecture Fix #4: Corporate verification lookup modules layout rendering */}
-                    {job.companyLogo ? (
-                      <img src={job.companyLogo} alt="" className="company-logo-img-sm" onError={(e) => { e.target.style.display = 'none'; }} />
-                    ) : (
-                      <div className="company-logo-sm">{mappedCompany.charAt(0)}</div>
-                    )}
-                    <h4>{job.title}</h4>
-                    <p className="company-name">{mappedCompany}</p>
-                    <div className="card-meta">
-                       <span><FaMapMarkerAlt /> {job.location}</span>
-                       <span><FaWallet /> ₹{formatSalary(job.salary)}LPA</span>
-                    </div>
-                  </div>
-                  <div className="card-footer">
-                    <span className="mode-pill">{job.workMode}</span>
-                    <button onClick={(e) => toggleSave(e, job.publicId)} className="save-icon-btn">
-                       {savedJobIds.has(job.publicId) ? <FaBookmark color="#4f46e5"/> : <FaRegBookmark />}
-                    </button>
-                  </div>
-                </div>
-              );
-            })
-          )}
+  {loading ? (
+    [1, 2, 3, 4, 5, 6].map(i => (
+      <div key={i} className="skeleton-card" />
+    ))
+  ) : error ? (
+    <div className="error-card">{error}</div>
+  ) : jobs.length === 0 ? (
+    <EmptyState />
+  ) : (
+    jobs.map(job => {
+      // Normalize company safely
+      const rawCompany =
+        job.company ||
+        job.companyName ||
+        job.companyDetails ||
+        "Enterprise Partner";
+
+      const mappedCompany =
+        typeof rawCompany === "string"
+          ? rawCompany
+          : rawCompany?.name ||
+            rawCompany?.companyName ||
+            "Enterprise Partner";
+
+      const companyInitial =
+        typeof mappedCompany === "string" && mappedCompany.length > 0
+          ? mappedCompany.charAt(0).toUpperCase()
+          : "E";
+
+      return (
+        <div
+          key={job.publicId}
+          className="modern-job-card"
+          onClick={() => navigate(`/jobs?id=${job.publicId}`)}
+        >
+          <div className="card-badge">
+            {job.jobType?.replace("_", " ")}
+          </div>
+
+          <div className="card-body">
+            {/* Company logo / fallback */}
+            {job.companyLogo ? (
+              <img
+                src={job.companyLogo}
+                alt="company logo"
+                className="company-logo-img-sm"
+                onError={e => {
+                  e.currentTarget.style.display = "none";
+                }}
+              />
+            ) : (
+              <div className="company-logo-sm">
+                {companyInitial}
+              </div>
+            )}
+
+            <h4>{job.title}</h4>
+            <p className="company-name">{mappedCompany}</p>
+
+            <div className="card-meta">
+              <span>
+                <FaMapMarkerAlt /> {job.location}
+              </span>
+              <span>
+                <FaWallet /> ₹{formatSalary(job.salary)} LPA
+              </span>
+            </div>
+          </div>
+
+          <div className="card-footer">
+            <span className="mode-pill">{job.workMode}</span>
+
+            <button
+              onClick={e => toggleSave(e, job.publicId)}
+              className="save-icon-btn"
+            >
+              {savedJobIds.has(job.publicId) ? (
+                <FaBookmark color="#4f46e5" />
+              ) : (
+                <FaRegBookmark />
+              )}
+            </button>
+          </div>
         </div>
+      );
+    })
+  )}
+</div>
       </section>
     );
   }

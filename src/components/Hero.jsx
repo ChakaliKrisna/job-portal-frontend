@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   FaSearch, FaMapMarkerAlt, FaBolt, FaBuilding, 
@@ -8,7 +8,7 @@ import {
 import axios from "axios";
 import "./Styles/hero.css";
 
-const API_BASE = "http://localhost:8080/job-portal";
+const API_BASE = import.meta.env.VITE_API_URL || "https://job-portal-backend-365l.onrender.com/job-portal";
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -17,8 +17,6 @@ const Hero = () => {
   const [location, setLocation] = useState("");
   const [remote, setRemote] = useState(false);
   const [displayText, setDisplayText] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
   
   const [calculatedStats, setCalculatedStats] = useState({
     totalJobs: 0,
@@ -28,63 +26,90 @@ const Hero = () => {
   });
   const [latestJob, setLatestJob] = useState(null);
 
-  const phrases = ["Greatness.", "Innovation.", "Your Future."];
+  // Human-focused typewriter phrases
+  const phrases = ["your career.", "your future in tech.", "your potential."];
   const frontendSkillsList = ["Java", "Spring Boot", "React", "AWS", "Docker", "PostgreSQL", "Tailwind"];
 
+  // Polished category chips for better readability
   const categoryChips = [
-    { label: "Software", value: "SOFTWARE_DEVELOPMENT", icon: <FaLaptopCode /> },
-    { label: "AI/ML", value: "AI_ML", icon: <FaBrain /> },
-    { label: "UI/UX", value: "UI_UX", icon: <FaPalette /> },
-    { label: "Cyber Security", value: "CYBER_SECURITY", icon: <FaShieldAlt /> },
-    { label: "Cloud Engine", value: "CLOUD_COMPUTING", icon: <FaCloud /> }
+    { label: "Software Development", value: "SOFTWARE_DEVELOPMENT", icon: <FaLaptopCode /> },
+    { label: "AI & Machine Learning", value: "AI_ML", icon: <FaBrain /> },
+    { label: "UI/UX Design", value: "UI_UX", icon: <FaPalette /> },
+    { label: "Cybersecurity", value: "CYBER_SECURITY", icon: <FaShieldAlt /> },
+    { label: "Cloud Computing", value: "CLOUD_COMPUTING", icon: <FaCloud /> }
   ];
 
+  // Fetch metrics safely from Spring Boot
   useEffect(() => {
-    const fetchAndCalculateMetrics = async () => {
-      try {
-        const res = await axios.get(`${API_BASE}/jobs?sort=postedDate,desc&size=50`);
-        let jobsArray = [];
+  const fetchAndCalculateMetrics = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/jobs?sort=postedDate,desc&size=50`);
+      let jobsArray = [];
+      
+      if (res.data && Array.isArray(res.data.content)) {
+        jobsArray = res.data.content;
+      } else if (Array.isArray(res.data)) {
+        jobsArray = res.data;
+      }
+
+      if (jobsArray.length > 0) {
+        const totalJobs = jobsArray.length;
         
-        if (res.data && Array.isArray(res.data.content)) jobsArray = res.data.content;
-        else if (Array.isArray(res.data)) jobsArray = res.data;
+        // 1. Calculate openings safely (if 'openings' isn't explicitly sent, default to 1 per listing)
+        const totalOpenings = jobsArray.reduce((sum, job) => sum + (job.openings || 1), 0);
+        
+        // 2. FIX: Map using 'companyName' since 'companyPublicId' is absent in payload
+        const uniqueCompanyNames = new Set(jobsArray.map(job => job.companyName).filter(Boolean));
+        const totalCompanies = uniqueCompanyNames.size;
+        
+        // 3. Calculate applicants safely
+        const totalApplicants = jobsArray.reduce((sum, job) => sum + (job.applicantCount || 0), 0);
 
-        if (jobsArray.length > 0) {
-          const totalJobs = jobsArray.length;
-          const totalOpenings = jobsArray.reduce((sum, job) => sum + (job.openings || 0), 0);
-          const uniqueCompanyIds = new Set(jobsArray.map(job => job.companyPublicId).filter(Boolean));
-          const totalCompanies = uniqueCompanyIds.size;
-          const totalApplicants = jobsArray.reduce((sum, job) => sum + (job.applicationsCount || 0), 0);
-
-          setCalculatedStats({ totalJobs, totalOpenings, totalCompanies, totalApplicants });
-          const recentJob = jobsArray[0];
-          setLatestJob({ title: recentJob.title, companyName: recentJob.companyName || "Verified Enterprise" });
-        }
-      } catch (err) { console.error("Error fetching metrics:", err); }
-    };
-    fetchAndCalculateMetrics();
-  }, []);
-
-  useEffect(() => {
-    let i = 0, j = 0;
-    let currentPhrase = [];
-    let isDeleting = false;
-
-    function type() {
-      const fullPhrase = phrases[i];
-      if (isDeleting) currentPhrase.pop();
-      else currentPhrase.push(fullPhrase[j]);
-      setDisplayText(currentPhrase.join(""));
-
-      if (!isDeleting && currentPhrase.length === fullPhrase.length) setTimeout(() => (isDeleting = true), 2000);
-      else if (isDeleting && currentPhrase.length === 0) {
-        isDeleting = false;
-        i = (i + 1) % phrases.length;
-        j = 0;
-      } else j = isDeleting ? j : j + 1;
-      setTimeout(type, isDeleting ? 80 : 150);
+        setCalculatedStats({ totalJobs, totalOpenings, totalCompanies, totalApplicants });
+        
+        const recentJob = jobsArray[0];
+        setLatestJob({ title: recentJob.title, companyName: recentJob.companyName || "Top Company" });
+      }
+    } catch (err) { 
+      console.error("Error fetching metrics:", err); 
     }
-    const timer = setTimeout(type, 500);
-    return () => clearTimeout(timer);
+  };
+  fetchAndCalculateMetrics();
+}, []);
+  // Strict-Mode Stable Typewriter Loop
+  useEffect(() => {
+    let phraseIdx = 0;
+    let charIdx = 0;
+    let isDeleting = false;
+    let timeoutId = null;
+
+    const tick = () => {
+      const currentFullText = phrases[phraseIdx];
+      
+      if (isDeleting) {
+        setDisplayText(currentFullText.substring(0, charIdx - 1));
+        charIdx--;
+      } else {
+        setDisplayText(currentFullText.substring(0, charIdx + 1));
+        charIdx++;
+      }
+
+      let typeSpeed = isDeleting ? 60 : 120;
+
+      if (!isDeleting && charIdx === currentFullText.length) {
+        typeSpeed = 2000; // Pause at full word
+        isDeleting = true;
+      } else if (isDeleting && charIdx === 0) {
+        isDeleting = false;
+        phraseIdx = (phraseIdx + 1) % phrases.length;
+        typeSpeed = 400; // Pause before typing next word
+      }
+
+      timeoutId = setTimeout(tick, typeSpeed);
+    };
+
+    timeoutId = setTimeout(tick, 500);
+    return () => clearTimeout(timeoutId);
   }, []);
 
   const handleSearch = (e) => {
@@ -95,59 +120,144 @@ const Hero = () => {
   };
 
   return (
-    <section className="hero-wrap">
-      <div className="hero-container">
+    <section className="modern-hero-wrap">
+      {/* Abstract Glowing Background Orbs */}
+      <div className="hero-glow-orb orb-1"></div>
+      <div className="hero-glow-orb orb-2"></div>
+
+      <div className="modern-hero-container">
         
-        {/* Left Side Content */}
-        <div className="hero-content">
-          <h1>Find Your Dream Job.<br />Build Your Future.</h1>
-          <p className="subheadline">
-            Launch your career with top companies. Get directly connected 
-            with engineering leads through our dynamic platform.
+        {/* Left Interactive Panel */}
+        <div className="hero-content-deck">
+          <div className="context-tagline">
+            <span className="pulse-dot"></span>
+            Accelerating <span className="typewriter-text">{displayText}</span>
+          </div>
+
+          <h1 className="hero-main-title">
+            Find your dream job. <br />
+            <span className="gradient-text">Start your tech career today.</span>
+          </h1>
+          
+          <p className="hero-subheadline">
+            Skip long queues. Connect directly with recruiters and top companies 
+            hiring for roles that match your technical expertise and career goals.
           </p>
 
-          <form className="search-pill" onSubmit={handleSearch}>
-            <div className="search-input-group">
-              <FaSearch className="search-icon" />
-              <input type="text" placeholder="Job title, skills..." value={query} onChange={(e) => setQuery(e.target.value)} />
+          {/* Upgraded Premium Pill Search Architecture */}
+          <form className="premium-search-pill" onSubmit={handleSearch}>
+            <div className="search-field-segment">
+              <FaSearch className="pill-segment-icon" />
+              <input 
+                type="text" 
+                placeholder="Search jobs, skills, or companies..." 
+                value={query} 
+                onChange={(e) => setQuery(e.target.value)} 
+              />
             </div>
-            <div className="divider" />
-            <div className="search-input-group">
-              <FaMapMarkerAlt className="search-icon" />
-              <input type="text" placeholder="City or State" value={location} onChange={(e) => setLocation(e.target.value)} />
+            
+            <div className="pill-segment-divider" />
+            
+            <div className="search-field-segment">
+              <FaMapMarkerAlt className="pill-segment-icon" />
+              <input 
+                type="text" 
+                placeholder="Location (city or remote)" 
+                value={location} 
+                onChange={(e) => setLocation(e.target.value)} 
+              />
             </div>
-            <button type="submit" className="search-btn">Find Roles</button>
+
+            <div className="pill-segment-divider" />
+
+            {/* Added Remote Interactive Toggle Module */}
+            <div className="remote-toggle-module">
+              <label className="switch-container">
+                <input 
+                  type="checkbox" 
+                  checked={remote} 
+                  onChange={(e) => setRemote(e.target.checked)} 
+                />
+                <span className="toggle-slider"></span>
+              </label>
+              <span className="toggle-label">Remote Only</span>
+            </div>
+            
+            <button type="submit" className="pill-submit-action">
+              <span>Search Jobs</span>
+              <FaArrowRight size={13} />
+            </button>
           </form>
 
-          <div className="category-chips-row">
+          {/* Quick Filter Navigation chips */}
+          <div className="hero-category-chips-deck">
             {categoryChips.map((chip) => (
-              <div key={chip.value} className="category-chip" onClick={() => navigate(`/jobs?category=${chip.value}`)}>
-                {chip.icon} {chip.label}
-              </div>
+              <button 
+                type="button"
+                key={chip.value} 
+                className="modern-category-chip" 
+                onClick={() => navigate(`/jobs?category=${chip.value}`)}
+              >
+                {chip.icon}
+                <span>{chip.label}</span>
+              </button>
             ))}
           </div>
 
-          <div className="trusted-by">
-            <span>Trusted by:</span>
-            <div className="brand-list">TCS | Infosys | Wipro | Accenture</div>
+          {/* Trending Stack Horizontal Micro Marquee */}
+          <div className="trending-stack-row">
+            <span className="stack-label">Popular Skills:</span>
+            <div className="stack-tags-wrapper">
+              {frontendSkillsList.map((skill) => (
+                <span key={skill} className="stack-mini-tag">{skill}</span>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Right Side Visual (Bento Grid) */}
-        <div className="hero-visual">
-          <div className="stats-grid">
-            <div className="stat-card"><h3>{calculatedStats.totalOpenings}</h3><p>Open Jobs</p></div>
-            <div className="stat-card"><h3>{calculatedStats.totalCompanies}</h3><p>Active Firms</p></div>
-            <div className="stat-card"><h3>{calculatedStats.totalApplicants}</h3><p>Applications</p></div>
-            <div className="stat-card"><h3>{calculatedStats.totalJobs}</h3><p>Active Streams</p></div>
+        {/* Right Dashboard Visualization Block */}
+        <div className="hero-visual-deck">
+          <div className="bento-metrics-grid">
+            
+            <div className="metric-bento-card card-glow-blue">
+              <div className="card-header-icon"><FaBriefcase /></div>
+              <h3>{calculatedStats.totalOpenings || "120+"}</h3>
+              <p>Available Jobs</p>
+            </div>
+
+            <div className="metric-bento-card card-glow-purple">
+              <div className="card-header-icon"><FaBuilding /></div>
+              <h3>{calculatedStats.totalCompanies || "45"}</h3>
+              <p>Hiring Companies</p>
+            </div>
+
+            <div className="metric-bento-card card-glow-emerald">
+              <div className="card-header-icon"><FaUserCheck /></div>
+              <h3>{calculatedStats.totalApplicants || "1.8K"}</h3>
+              <p>Job Seekers</p>
+            </div>
+
+            <div className="metric-bento-card card-glow-amber">
+              <div className="card-header-icon"><FaBolt /></div>
+              <h3>{calculatedStats.totalJobs || "8"}</h3>
+              <p>Active Listings</p>
+            </div>
+
           </div>
 
+          {/* Dynamic Realtime Streaming Alerts Module */}
           {latestJob && (
-            <div className="glass-card floating-alert">
-              <FaBolt className="alert-icon" />
-              <div>
-                <strong>New Job Posted</strong>
-                <p>{latestJob.title} at {latestJob.companyName}</p>
+            <div className="glass-stream-alert-card">
+              <div className="alert-pulse-icon-halo">
+                <FaBolt />
+              </div>
+              <div className="alert-stream-details">
+                <div className="stream-badge-row">
+                  <span className="live-pill">Just Posted</span>
+                  <span className="time-stamp">Just now</span>
+                </div>
+                <h4>{latestJob.title}</h4>
+                <p>by {latestJob.companyName}</p>
               </div>
             </div>
           )}

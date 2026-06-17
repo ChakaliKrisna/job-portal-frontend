@@ -29,7 +29,7 @@ const RecruiterMyApplications = () => {
     const [currentPage, setCurrentPage] = useState(0);
     const pageSize = 5;
 
-    const BASE_URL = 'http://localhost:8080/job-portal';
+    const BASE_URL = 'https://job-portal-backend-365l.onrender.com/job-portal';
 
     const getAuthHeaders = () => ({
         headers: { 
@@ -63,7 +63,6 @@ const RecruiterMyApplications = () => {
     const fetchApplicationsForJob = async (jobPublicId) => {
         setLoading(true);
         try {
-            // Dynamically calls your filter endpoint if filters are active, else gets standard list
             const hasFilters = filters.keyword || filters.minScore > 0 || filters.status || filters.skill;
             let url = `${BASE_URL}/applications/job/${jobPublicId}?page=0&size=100`;
             
@@ -117,14 +116,12 @@ const RecruiterMyApplications = () => {
         }
     };
 
-    // UI Formatting Helpers for Match Score Visualizer Indices
     const getMatchScoreTier = (score) => {
         if (score >= 90) return { label: 'Excellent Match', color: 'text-emerald-700 bg-emerald-50 border-emerald-200', bar: 'bg-emerald-500' };
         if (score >= 70) return { label: 'Good Match', color: 'text-blue-700 bg-blue-50 border-blue-200', bar: 'bg-blue-500' };
         return { label: 'Low Match', color: 'text-amber-700 bg-amber-50 border-amber-200', bar: 'bg-amber-500' };
     };
 
-    // Derived Analytics Logic Metrics Calculations
     const computeAnalytics = () => {
         const total = applications.length;
         const shortlisted = applications.filter(a => a.status === 'SHORTLISTED' || a.status === 'INTERVIEW').length;
@@ -135,15 +132,13 @@ const RecruiterMyApplications = () => {
 
     const stats = computeAnalytics();
 
-    // Frontend Matrix Sorting Logic
     const sortedApplications = [...applications].sort((a, b) => {
         if (sortBy === 'highestScore') return b.matchScore - a.matchScore;
         if (sortBy === 'latestApplied') return new Date(b.appliedAt || b.appliedDate) - new Date(a.appliedAt || a.appliedDate);
-        if (sortBy === 'alphabetical') return a.candidateName.localeCompare(b.candidateName);
+        if (sortBy === 'alphabetical') return (a.candidateName || '').localeCompare(b.candidateName || '');
         return 0;
     });
 
-    // Pagination Segment slices
     const pageCount = Math.ceil(sortedApplications.length / pageSize);
     const displayedApplications = sortedApplications.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
 
@@ -165,7 +160,7 @@ const RecruiterMyApplications = () => {
                         <option value="">-- Choose Job Pipeline --</option>
                         {jobs.map(job => (
                             <option key={job.publicId} value={job.publicId}>
-                                {job.title} ({job.company || 'Active Context'})
+                                {job.title} ({job.company?.name || 'Active Context'})
                             </option>
                         ))}
                     </select>
@@ -174,7 +169,7 @@ const RecruiterMyApplications = () => {
 
             {selectedJob && (
                 <>
-                    {/* Live Recruiter Analytics Panel Matrix Dashboard */}
+                    {/* Live Recruiter Analytics Panel */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs">
                             <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Applicants</span>
@@ -204,7 +199,7 @@ const RecruiterMyApplications = () => {
                         </div>
                     </div>
 
-                    {/* Integrated Filters and Sorting Bars */}
+                    {/* Filters and Sorting Layout */}
                     <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
                         <div>
                             <label className="block text-[11px] font-bold text-gray-500 mb-1 uppercase tracking-tight">Keyword</label>
@@ -242,7 +237,7 @@ const RecruiterMyApplications = () => {
                 </>
             )}
 
-            {/* Applications Matrix Matrix Grid/Table */}
+            {/* Applications Table Data Area */}
             {loading ? (
                 <div className="text-center py-12 text-gray-500 font-medium animate-pulse">Querying relational position tables...</div>
             ) : displayedApplications.length > 0 ? (
@@ -264,9 +259,9 @@ const RecruiterMyApplications = () => {
                                     <tr key={app.applicationId} className="hover:bg-gray-50/60 transition">
                                         <td className="px-6 py-4">
                                             <div className="font-semibold text-gray-900 text-sm">{app.candidateName}</div>
-                                            <div className="text-xs text-gray-500 font-mono mt-0.5">{app.email}</div>
+                                            <div className="text-xs text-gray-500 font-mono mt-0.5">{app.candidateEmail || app.email}</div>
                                             <div className="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-tight">
-                                                Registry Log: {new Date(app.appliedAt || app.appliedDate).toLocaleDateString()}
+                                                Registry Log: {new Date(app.appliedAt || app.appliedDate || Date.now()).toLocaleDateString()}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
@@ -288,18 +283,22 @@ const RecruiterMyApplications = () => {
                                                 onChange={(e) => handleStatusChange(app.applicationId, e.target.value)}
                                                 className="border border-gray-300 rounded-lg p-1.5 text-xs font-semibold bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition cursor-pointer shadow-xs"
                                             >
-                                                {APPLICATION_STATUSES.map(status => (
+                                                ={APPLICATION_STATUSES.map(status => (
                                                     <option key={status.value} value={status.value}>{status.label}</option>
                                                 ))}
                                             </select>
                                         </td>
                                         <td className="px-6 py-4 max-w-xs">
                                             <div className="flex flex-wrap gap-1 mb-2">
-                                                {app.skills?.map((skill, index) => (
-                                                    <span key={index} className="bg-slate-100 border border-slate-200 text-slate-700 text-[10px] px-2 py-0.5 rounded-md font-medium tracking-tight">
-                                                        {skill}
-                                                    </span>
-                                                )) || <span className="text-xs text-gray-400 italic">None cataloged</span>}
+                                                {/* Safely check if skill is an object or primitive string */}
+                                                {app.skills?.map((skillItem, index) => {
+                                                    const skillName = typeof skillItem === 'object' ? skillItem.skill : skillItem;
+                                                    return (
+                                                        <span key={index} className="bg-slate-100 border border-slate-200 text-slate-700 text-[10px] px-2 py-0.5 rounded-md font-medium tracking-tight">
+                                                            {skillName}
+                                                        </span>
+                                                    );
+                                                }) || <span className="text-xs text-gray-400 italic">None cataloged</span>}
                                             </div>
                                             
                                             {missingSkills[app.applicationId] ? (
@@ -317,7 +316,7 @@ const RecruiterMyApplications = () => {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                                             <a 
-                                                href={`http://localhost:8080${app.resumeUrl}`} 
+                                                href={app.resumeUrl?.startsWith('http') ? app.resumeUrl : `https://job-portal-backend-365l.onrender.com${app.resumeUrl}`} 
                                                 target="_blank" 
                                                 rel="noopener noreferrer"
                                                 className="inline-flex items-center text-[11px] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-md border border-blue-100 transition tracking-tight"
@@ -331,7 +330,7 @@ const RecruiterMyApplications = () => {
                         </tbody>
                     </table>
 
-                    {/* Pagination Interface Controls Footer */}
+                    {/* Pagination Interface Footer */}
                     {pageCount > 1 && (
                         <div className="bg-gray-50 px-6 py-3 flex items-center justify-between border-t border-gray-200">
                             <span className="text-xs text-gray-500">Showing page {currentPage + 1} of {pageCount} ({sortedApplications.length} records parsed)</span>

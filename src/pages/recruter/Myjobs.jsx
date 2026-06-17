@@ -36,7 +36,7 @@ export default function MyJobs() {
     sortBy: "postedDate,desc"
   });
 
-  const API = "http://localhost:8080/job-portal/jobs";
+  const API = "https://job-portal-backend-365l.onrender.com/job-portal/jobs";
 
   // --- FIXED FETCH LOGIC ---
   const fetchJobs = useCallback(async () => {
@@ -459,8 +459,11 @@ const validateAndSubmit = async (e) => {
 
       {/* MODAL REMAINS THE SAME */}
 {isModalOpen && (
-  <div className="mj-modal-overlay">
-    <div className="mj-smart-modal animated-zoom-in">
+ <div className="mj-modal-overlay">
+  <div className="mj-smart-modal animated-zoom-in configuration-layout-active">
+    
+    {/* LEFT SIDE: MODAL MAIN CORE */}
+    <div className="mj-modal-main-body">
       <form className="mj-modal-form" onSubmit={validateAndSubmit}>
         
         {/* Sticky Header */}
@@ -468,184 +471,297 @@ const validateAndSubmit = async (e) => {
           <div className="header-title-group">
             <div className="icon-badge"><FaPlus /></div>
             <div>
-              <h3>{formData.publicId ? "Update Opportunity" : "Launch New Role"}</h3>
-              <p>Post your requirements to the talent pool.</p>
+              <h3>{formData.publicId ? "Modify Existing Opportunity" : "Launch Core Architecture Role"}</h3>
+              <p>Configure requirements, target constraints, and deployment scope.</p>
             </div>
           </div>
           <button type="button" className="close-x" onClick={() => setIsModalOpen(false)}>&times;</button>
         </div>
 
-        <div className="form-grid-scroll">
-          {/* Section 1: General Information */}
-          <div className="form-section-label">General Information</div>
-          <div className="form-grid">
-            <div className="input-group full-width">
-              <label>Job Title <FaLightbulb className="hint-icon" /></label>
-              <div className="input-with-icon">
-                <FaUserTie className="field-icon" />
-                <input 
-                  name="title" 
-                  list="job-titles" 
-                  placeholder="Select or type role..." 
-                  value={formData.title} 
-                  onChange={handleFormChange} 
-                  required 
-                />
-              </div>
-              <datalist id="job-titles">
-                {Object.keys(skillMapping).map(role => <option key={role} value={role} />)}
-              </datalist>
-            </div>
-
-            <div className="input-group">
-              <label>Category</label>
-              <div className="input-with-icon">
-                <FaLayerGroup className="field-icon" />
-                <select name="category" value={formData.category} onChange={handleFormChange} required>
-                  <option value="" disabled>Select a category</option>
-                  {CATEGORY_OPTIONS.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
+        {/* Scrollable Container structured step-by-step */}
+        <div className="form-grid-scroll sequential-flow-layout">
+          
+          {/* STEP 1: POSITION CLASSIFICATION */}
+          <div className="mj-form-step-card">
+            <div className="step-card-header">
+              <span className="step-numeric-badge">01</span>
+              <div>
+                <h4>Position Classification</h4>
+                <p>Define the core identity, field sector, and global compensation rate.</p>
               </div>
             </div>
-
-            <div className="input-group">
-              <label>Annual Salary (LPA)</label>
-              <div className="input-with-icon">
-                <FaMoneyBillWave className="field-icon" />
-                <input name="salary" type="number" placeholder="e.g. 12" value={formData.salary} onChange={handleFormChange} required />
+            
+            <div className="step-card-body form-grid">
+              <div className="input-group full-width">
+                <label>Job Title <FaLightbulb className="hint-icon" /></label>
+                <div className="input-with-icon">
+                  <FaUserTie className="field-icon" />
+                  <input 
+                    name="title" 
+                    list="job-titles" 
+                    placeholder="Select or type role..." 
+                    value={formData.title || ""} 
+                    onChange={handleFormChange} 
+                    required 
+                  />
+                </div>
+                <datalist id="job-titles">
+                  {Object.keys(skillMapping || {}).map(role => <option key={role} value={role} />)}
+                </datalist>
               </div>
-            </div>
-          </div>
 
-          {/* Section 2: Logistics & Deadlines (ENHANCED) */}
-          <div className="form-section-label">Configuration & Logistics</div>
-          <div className="form-grid">
-            <div className="input-group">
-              <label>Job Type</label>
-              <div className="input-with-icon">
-                <FaBriefcase className="field-icon" />
-                <select name="jobType" value={formData.jobType} onChange={handleFormChange} required>
-                  <option value="">Select Type</option>
-                  <option value="FULL_TIME">Full Time</option>
-                  <option value="PART_TIME">Part Time</option>
-                  <option value="INTERNSHIP">Internship</option>
-                  <option value="CONTRACT">Contract</option>
-                </select>
+              <div className="input-group">
+                <label>Category Space</label>
+                <div className="input-with-icon">
+                  <FaLayerGroup className="field-icon" />
+                  <select name="category" value={formData.category || ""} onChange={handleFormChange} required>
+                    <option value="" disabled>Select sector category</option>
+                    {CATEGORY_OPTIONS.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
-            </div>
 
-            <div className="input-group">
-              <label>Experience Level</label>
-              <div className="input-with-icon">
-                <FaGraduationCap className="field-icon" />
-                <select name="experienceLevel" value={formData.experienceLevel} onChange={handleFormChange} required>
-                  <option value="ALL">All Levels</option>
-              <option value="FRESHER">Fresher</option>
-              <option value="INTERMEDIATE">Intermediate</option>
-              <option value="SENIOR">Senior</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="input-group">
-              <label>Work Mode</label>
-              <div className="input-with-icon">
-                <FaLaptopHouse className="field-icon" />
-                <select name="workMode" value={formData.workMode} onChange={handleFormChange}>
-                  <option value="REMOTE">Remote</option>
-                  <option value="ONSITE">Onsite</option>
-                  <option value="HYBRID">Hybrid</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="input-group">
-              <label>Location</label>
-              <div className="input-with-icon">
-                <FaMapMarkerAlt className="field-icon" />
-                <input name="location" placeholder="City or Remote" value={formData.location} onChange={handleFormChange} required />
-              </div>
-            </div>
-
-            <div className="input-group">
-              <label>Application Deadline</label>
-              <div className="input-with-icon">
-                <FaCalendarAlt className="field-icon" />
-                <input 
-  name="closingDate"   // ✅ CORRECT
-  type="date" 
-  min={today} 
-  value={formData.closingDate} 
-  onChange={handleFormChange} 
-  required 
-/>
-              </div>
-            </div>
-
-            <div className="input-group">
-              <label>Openings</label>
-              <div className="input-with-icon">
-                <FaUsers className="field-icon" />
-                <input name="openings" type="number" value={formData.openings} onChange={handleFormChange} />
+              <div className="input-group">
+                <label>Gross Annual Compensation (Rs)</label>
+                <div className="input-with-icon">
+                  <FaMoneyBillWave className="field-icon" />
+                  <input 
+                    name="salary" 
+                    type="number" 
+                    placeholder="e.g. 115000" 
+                    value={formData.salary || ""} 
+                    onChange={handleFormChange} 
+                    required 
+                  />
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Section 3: Requirements */}
-          <div className="form-section-label">Detailed Requirements</div>
-          <div className="input-group full-width">
-  <label>Skills Required (Separate by comma)</label>
-  <div className="input-with-icon">
-    <FaCode className="field-icon" />
-    <input
-      name="skillsRequired"
-      placeholder="e.g. Java, React, Spring Boot"
-      // Show as string: converts ["A", "B"] to "A, B" or just shows "A, "
-      value={Array.isArray(formData.skillsRequired) 
-        ? formData.skillsRequired.join(", ") 
-        : formData.skillsRequired}
-      onChange={handleFormChange}
-    />
-  </div>
-</div>
-          <div className="input-group full-width">
-            <div className="label-flex">
-              <label>Job Description</label>
-              <button type="button" className="ai-gen-btn-pro" onClick={generateDescription}>
-                <FaMagic /> Smart Draft
-              </button>
+          {/* STEP 2: LOGISTICS & WORKING MODE */}
+          <div className="mj-form-step-card">
+            <div className="step-card-header">
+              <span className="step-numeric-badge">02</span>
+              <div>
+                <h4>Deployment Logistics</h4>
+                <p>Specify the operational structure, baseline experience profiles, and working location styles.</p>
+              </div>
             </div>
-            <textarea name="description" rows="5" value={formData.description} onChange={handleFormChange} required />
+            
+            <div className="step-card-body form-grid">
+              <div className="input-group">
+                <label>Engagement Class</label>
+                <div className="input-with-icon">
+                  <FaBriefcase className="field-icon" />
+                  <select name="jobType" value={formData.jobType || ""} onChange={handleFormChange} required>
+                    <option value="" disabled>Select engagement type</option>
+                    <option value="FULL_TIME">Full Time</option>
+                    <option value="PART_TIME">Part Time</option>
+                    <option value="INTERNSHIP">Internship</option>
+                    <option value="CONTRACT">Contract</option>
+                    <option value="FREELANCE">Freelance</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="input-group">
+                <label>Experience Matrix</label>
+                <div className="input-with-icon">
+                  <FaGraduationCap className="field-icon" />
+                  <select name="experienceLevel" value={formData.experienceLevel || ""} onChange={handleFormChange} required>
+                    <option value="" disabled>Select targeted scope</option>
+                    <option value="FRESHER">Fresher (Entry Level)</option>
+                    <option value="INTERMEDIATE">Intermediate (Mid Core)</option>
+                    <option value="SENIOR">Senior (Lead / Principal)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="input-group">
+                <label>Operational Model</label>
+                <div className="input-with-icon">
+                  <FaLaptopHouse className="field-icon" />
+                  <select name="workMode" value={formData.workMode || ""} onChange={handleFormChange} required>
+                    <option value="" disabled>Select work mode</option>
+                    <option value="REMOTE">Remote Isolation</option>
+                    <option value="ONSITE">Onsite Presence</option>
+                    <option value="HYBRID">Hybrid Integration</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="input-group">
+                <label>Target Hub Location</label>
+                <div className="input-with-icon">
+                  <FaMapMarkerAlt className="field-icon" />
+                  <input name="location" placeholder="City name or Global Remote" value={formData.location || ""} onChange={handleFormChange} required />
+                </div>
+              </div>
+            </div>
           </div>
+
+          {/* STEP 3: PIPELINE MANAGEMENT & STATUS */}
+          <div className="mj-form-step-card">
+            <div className="step-card-header">
+              <span className="step-numeric-badge">03</span>
+              <div>
+                <h4>Pipeline Thresholds & Context</h4>
+                <p>Define resource boundaries, termination metrics, and the baseline visibility status.</p>
+              </div>
+            </div>
+            
+            <div className="step-card-body form-grid">
+              <div className="input-group">
+                <label>Closing Deadline</label>
+                <div className="input-with-icon">
+                  <FaCalendarAlt className="field-icon" />
+                  <input 
+                    name="closingDate"   
+                    type="date" 
+                    min={today} 
+                    value={formData.closingDate || ""} 
+                    onChange={handleFormChange} 
+                    required 
+                  />
+                </div>
+              </div>
+
+              <div className="input-group">
+                <label>Allocated Headcount Slots</label>
+                <div className="input-with-icon">
+                  <FaUsers className="field-icon" />
+                  <input 
+                    name="openings" 
+                    type="number" 
+                    min="1"
+                    placeholder="1"
+                    value={formData.openings ?? 1} 
+                    onChange={handleFormChange} 
+                  />
+                </div>
+              </div>
+
+              <div className="input-group">
+                <label>Initial Listing Status</label>
+                <div className="input-with-icon">
+                  <FaBriefcase className="field-icon" />
+                  <select name="status" value={formData.status || "OPEN"} onChange={handleFormChange} required>
+                    <option value="OPEN">Open (Live & Accepting)</option>
+                    <option value="DRAFT">Draft (Internal Preparation)</option>
+                    <option value="PAUSED">Paused (Temporary Freeze)</option>
+                    <option value="CLOSED">Closed (Archived Listing)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="input-group">
+                <label>Educational Benchmark</label>
+                <div className="input-with-icon">
+                  <FaUserGraduate className="field-icon" />
+                  <input 
+                    name="education" 
+                    placeholder="e.g. B.S./M.S. in Computer Science" 
+                    value={formData.education || ""} 
+                    onChange={handleFormChange} 
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* STEP 4: DETAILED PROFILE & ACQUISITION MATRICES */}
+          <div className="mj-form-step-card">
+            <div className="step-card-header">
+              <span className="step-numeric-badge">04</span>
+              <div>
+                <h4>Requirements Specification</h4>
+                <p>Provide tech-stack requirements and context configurations for candidate parsing.</p>
+              </div>
+            </div>
+            
+            <div className="step-card-body form-grid-stack">
+              <div className="input-group full-width">
+                <label>Technical Core Skills (Comma Separated)</label>
+                <div className="input-with-icon">
+                  <FaCode className="field-icon" />
+                  <input
+                    name="skillsRequired"
+                    placeholder="e.g. Java, Spring Boot, PostgreSQL, AWS"
+                    value={
+                      Array.isArray(formData.skillsRequired)
+                        ? formData.skillsRequired.map(s => typeof s === 'object' ? s.skill : s).join(", ")
+                        : formData.skillsRequired || ""
+                    }
+                    onChange={handleFormChange}
+                  />
+                </div>
+              </div>
+
+              <div className="input-group full-width spec-textarea-group">
+                <div className="label-flex">
+                  <label>Comprehensive Description Dossier</label>
+                  <button type="button" className="ai-gen-btn-pro" onClick={generateDescription}>
+                    <FaMagic /> Compose with AI Smart Draft
+                  </button>
+                </div>
+                <textarea name="description" rows="6" placeholder="Detail operational targets, expectations, benefits packages..." value={formData.description || ""} onChange={handleFormChange} required />
+              </div>
+            </div>
+          </div>
+
         </div>
 
-        {/* Footer Actions */}
+        {/* Footer Actions Panel */}
         <div className="modal-actions-pro">
-          <button type="button" className="btn-cancel" onClick={() => setIsModalOpen(false)}>Discard</button>
+          <button type="button" className="btn-cancel" onClick={() => setIsModalOpen(false)}>Discard Scope</button>
           <button type="submit" className="btn-submit-pro">
-            {formData.publicId ? "Update Listing" : "Publish Listing"}
+            {formData.publicId ? "Commit Changes" : "Deploy Opportunity"}
           </button>
         </div>
       </form>
+    </div>
 
-      {/* Guide Sidebar */}
-      <aside className="mj-form-guide">
-        <div className="guide-content">
-          <h4>Smart Tools</h4>
-          <div className="tip-box">
-            <FaLightbulb color="#fbbf24" />
-            <p><strong>Auto-Skills:</strong> Selecting a role automatically drafts the top required skills.</p>
-          </div>
-          <div className="tip-box">
-            <FaMagic color="#10b981" />
-            <p><strong>AI Writer:</strong> Use Smart Draft to generate a professional JD based on your title.</p>
+    {/* RIGHT SIDEBAR GUIDE */}
+    <aside className="mj-form-guide structured-dock">
+      <div className="guide-content">
+        <div className="dock-title-row">
+          <h4>Assistant Hub</h4>
+        </div>
+        
+        <div className="tip-box">
+          <FaLightbulb color="#fbbf24" className="tip-box-icon" />
+          <div>
+            <h5>Dynamic Profiles</h5>
+            <p>Selecting a template title automatically applies optimized technical tags below.</p>
           </div>
         </div>
-      </aside>
-    </div>
+        
+        <div className="tip-box">
+          <FaMagic color="#10b981" className="tip-box-icon" />
+          <div>
+            <h5>AI Generation Engine</h5>
+            <p>Click "Smart Draft" to construct a contextual responsibilities summary via metadata properties.</p>
+          </div>
+        </div>
+
+        <div className="workflow-diagram-map">
+          <h5>Deployment Route</h5>
+          <div className="mini-pipeline-tracker">
+            <div className="tracker-node done">1</div>
+            <div className="tracker-line done"></div>
+            <div className="tracker-node active">2</div>
+            <div className="tracker-line"></div>
+            <div className="tracker-node">3</div>
+          </div>
+          <small className="tracker-label-sub">Configuration Ready to Publish</small>
+        </div>
+      </div>
+    </aside>
+
   </div>
+</div>
 )}  </div>
   );
 }

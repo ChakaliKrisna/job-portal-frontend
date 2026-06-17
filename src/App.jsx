@@ -27,13 +27,19 @@ import RecruiterMyApplications from "./pages/recruter/RecruiterMyApplications";
 import SearchTalent from "./pages/recruter/Searchtalent";
 import CompanyProfile from "./pages/recruter/CompanyProfile";
 import CompanyCarousel  from "./components/CompanySection";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
   const role = localStorage.getItem("role");
   const token = localStorage.getItem("token");
+const isRecruiter =
+  role === "ROLE_RECRUITER" ||
+  role === "RECRUITER";
 
-  const isRecruiter = role === "role_recruiter";
-  const isStudent = role === "role_student";
+const isStudent =
+  role === "ROLE_STUDENT" ||
+  role === "STUDENT";
 
   return (
     <>
@@ -214,10 +220,16 @@ function App() {
           path="*"
           element={<Navigate to="/" replace />}
         />
-        <Route path="/" element={<CompanyCarousel />} />
+        {/* <Route path="/" element={<CompanyCarousel />} /> */}
         
         {/* DYNAMIC COMPANY ROUTE LINKED HERE */}
         <Route path="/company/:companyPublicId" element={<CompanyDetails />} />
+        <Route
+  path="/forgot-password"
+  element={<ForgotPassword />}
+
+/>
+<Route path="/reset-password" element={<ResetPassword />} />
 
       </Routes>
     </>

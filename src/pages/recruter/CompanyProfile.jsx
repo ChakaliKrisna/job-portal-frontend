@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 // Central Configuration
-const BASE_URL = "http://localhost:8080";
+const BASE_URL = "https://job-portal-backend-365l.onrender.com";
 const TOKEN = localStorage.getItem('token'); 
 
 const CompanyProfile = () => {
@@ -92,7 +92,11 @@ const CompanyProfile = () => {
       setSaving(true); 
       setError(null);
 
-      // FIX VERIFIED: Removed dangling quote break in the header initialization block
+      // STRING LENGTH VALIDATION LAYER: Prevent logo URLs from fracturing database schemas
+      if (formData.logoUrl && formData.logoUrl.length >= 256) {
+        throw new Error(`Brand Asset URL length overflow (${formData.logoUrl.length} characters). Must be less than 256 characters.`);
+      }
+
       const response = await fetch(`${BASE_URL}/job-portal/company/update`, {
         method: 'PUT',
         headers: {
@@ -265,12 +269,20 @@ const CompanyProfile = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Custom Brand Image Asset URL</label>
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">Custom Brand Image Asset URL</label>
+                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md transition ${formData.logoUrl?.length >= 256 ? 'bg-rose-100 text-rose-700 animate-pulse' : 'bg-slate-100 text-slate-500'}`}>
+                  {formData.logoUrl?.length || 0}/255
+                </span>
+              </div>
               <input
                 type="url" name="logoUrl" value={formData.logoUrl} onChange={handleInputChange}
                 placeholder="https://domain.com/logo.png"
-                className="w-full px-4 py-2.5 border border-slate-200 bg-slate-50/50 focus:bg-white rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:outline-none transition-all text-sm font-medium"
+                className={`w-full px-4 py-2.5 border rounded-xl focus:ring-4 focus:outline-none transition-all text-sm font-medium ${formData.logoUrl?.length >= 256 ? 'border-rose-400 bg-rose-50/30 focus:ring-rose-500/10 focus:border-rose-500' : 'border-slate-200 bg-slate-50/50 focus:bg-white focus:ring-indigo-500/10 focus:border-indigo-500'}`}
               />
+              {formData.logoUrl?.length >= 256 && (
+                <p className="text-[11px] text-rose-600 font-semibold mt-1">Error: Input string signature exceeds the 255 system limit.</p>
+              )}
             </div>
 
             <div>
@@ -330,7 +342,7 @@ const CompanyProfile = () => {
               Discard Changes
             </button>
             <button
-              type="submit" disabled={saving}
+              type="submit" disabled={saving || formData.logoUrl?.length >= 256}
               className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-sm font-semibold shadow-md shadow-indigo-600/10 transition"
             >
               {saving ? 'Synchronizing...' : 'Save Hub Configuration'}
@@ -467,7 +479,8 @@ const CompanyProfile = () => {
                         </div>
                         <span className="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded-full border border-emerald-100/60 uppercase">Active</span>
                       </div>
-                    )) || (
+                    ))}
+                    {(!company?.recruiters || company.recruiters.length === 0) && (
                       <div className="py-3 text-sm text-slate-400 italic text-center">Primary Workspace Administrative Node Only</div>
                     )}
                   </div>

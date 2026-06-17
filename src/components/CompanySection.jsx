@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import axios from "axios";
-import { FaBuilding, FaArrowRight } from "react-icons/fa";
+import { FaBuilding, FaArrowRight, FaCalendarAlt, FaUsers } from "react-icons/fa";
 
 // Import Swiper styling assets directly
 import "swiper/css";
@@ -22,7 +22,7 @@ const CompanyCarousel = () => {
     const fetchCompanies = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://localhost:8080/job-portal/company");
+        const response = await axios.get("https://job-portal-backend-365l.onrender.com/job-portal/company");
         
         // Handle array normalization safely depending on backend payload structure
         if (Array.isArray(response.data)) {
@@ -82,6 +82,15 @@ const CompanyCarousel = () => {
           // Identify the targeting key (prefers publicId as used by your details page layout)
           const corporateTargetId = company.publicId || company.id;
           
+          // RESOLVED: Safely fall back to backend's logoUrl property
+          const resolvedLogo = company.logoUrl || company.logo || company.companyLogo;
+          
+          // UI ENHANCEMENT: Safeguard layout heights by handling text truncation
+          const rawDescription = company.description || company.desc || "";
+          const truncatedDescription = rawDescription.length > 120 
+            ? `${rawDescription.substring(0, 115)}...` 
+            : rawDescription || "Explore career possibilities and structural milestones.";
+
           return (
             <SwiperSlide key={corporateTargetId}>
               <div
@@ -89,13 +98,23 @@ const CompanyCarousel = () => {
                 onClick={() => navigate(`/company/${corporateTargetId}`)}
               >
                 <div className="company-card-upper">
-                  {company.logo || company.companyLogo ? (
-                    <img 
-                      src={company.logo || company.companyLogo} 
-                      alt={`${company.name} identity`} 
-                      className="company-logo" 
-                      loading="lazy"
-                    />
+                  {resolvedLogo ? (
+                    <div className="logo-img-container">
+                      <img 
+                        src={resolvedLogo} 
+                        alt={`${company.name || 'Company'} Identity`} 
+                        className="company-logo" 
+                        loading="lazy"
+                        onError={(e) => {
+                          // Fallback if image URL returns 404 or broken resource link
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                      <div className="company-logo-fallback" style={{ display: 'none' }}>
+                        <FaBuilding />
+                      </div>
+                    </div>
                   ) : (
                     <div className="company-logo-fallback">
                       <FaBuilding />
@@ -105,14 +124,31 @@ const CompanyCarousel = () => {
                 </div>
 
                 <div className="company-card-body">
-                  <h4>{company.name || company.companyName}</h4>
+                  <h4>{company.name || company.companyName || "Anonymous Enterprise"}</h4>
+                  
+                  {/* UI ENHANCEMENT: Optional inline metadata chips */}
+                  <div className="company-meta-pills">
+                    {company.companySize && (
+                      <span className="meta-pill">
+                        <FaUsers /> {company.companySize}
+                      </span>
+                    )}
+                    {company.foundedYear && (
+                      <span className="meta-pill">
+                        <FaCalendarAlt /> Est. {company.foundedYear}
+                      </span>
+                    )}
+                  </div>
+
                   <p className="company-card-desc">
-                    {company.description || company.desc || "Explore career possibilities and structural milestones."}
+                    {truncatedDescription}
                   </p>
                 </div>
 
                 <div className="company-card-footer">
-                  <span className="location-tag">{company.location || "Multiple Locations"}</span>
+                  <span className="location-tag">
+                    📍 {company.location && company.location.trim() !== "" ? company.location : "Global"}
+                  </span>
                   <div className="action-arrow-indicator">
                     <FaArrowRight />
                   </div>
