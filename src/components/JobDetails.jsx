@@ -35,6 +35,7 @@ const JobDetails = () => {
   // States for recommendations
   const [moreCompanyJobs, setMoreCompanyJobs] = useState([]);
   const [similarJobs, setSimilarJobs] = useState([]);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   const token = localStorage.getItem("token");
 
