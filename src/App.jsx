@@ -65,7 +65,7 @@ const isStudent =
 
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/about" element={<About />} />
+        {/* <Route path="/about" element={<About />} /> */}
 
         <Route path="/jobs" element={<JobPortal />} />
 
