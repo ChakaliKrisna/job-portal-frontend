@@ -7,7 +7,9 @@ import {
 } from "react-icons/fa";
 import "../components/Styles/authDrawer.css";
 
-const API = import.meta.env.VITE_API_URL || "https://job-portal-backend-365l.onrender.com";
+// 1. FIXED: Added sanitization check to dynamically clean trailing slashes from the API path
+const RAW_API = import.meta.env.VITE_API_URL || "https://job-portal-backend-365l.onrender.com";
+const API = RAW_API.endsWith("/") ? RAW_API.slice(0, -1) : RAW_API;
 
 const INITIAL_FORM_STATE = {
   email: "",
@@ -107,6 +109,7 @@ const AuthDrawer = ({ isOpen, onClose, initialMode = "login" }) => {
       }
     }
 
+    // 2. Safely references sanitized API base without duplicate slashes
     const url = currentView === "login" ? `${API}/auth/login` : `${API}/auth/register`;
 
     try {

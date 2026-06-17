@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   FaSearch, FaMapMarkerAlt, FaBolt, FaBuilding, 
@@ -8,7 +8,9 @@ import {
 import axios from "axios";
 import "./Styles/hero.css";
 
-const API_BASE = import.meta.env.VITE_API_URL || "https://job-portal-backend-365l.onrender.com/job-portal";
+// 1. Normalize backend string declaration safely to strip trailing slashes automatically
+const RAW_API = import.meta.env.VITE_API_URL || "https://job-portal-backend-365l.onrender.com";
+const API_BASE = RAW_API.endsWith("/") ? RAW_API.slice(0, -1) : RAW_API;
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -41,41 +43,43 @@ const Hero = () => {
 
   // Fetch metrics safely from Spring Boot
   useEffect(() => {
-  const fetchAndCalculateMetrics = async () => {
-    try {
-      const res = await axios.get(`${API_BASE}/jobs?sort=postedDate,desc&size=50`);
-      let jobsArray = [];
-      
-      if (res.data && Array.isArray(res.data.content)) {
-        jobsArray = res.data.content;
-      } else if (Array.isArray(res.data)) {
-        jobsArray = res.data;
-      }
+    const fetchAndCalculateMetrics = async () => {
+      try {
+        // 2. FIXED: Applied secure base target context structure cleanly
+        const res = await axios.get(`${API_BASE}/job-portal/jobs?sort=postedDate,desc&size=50`);
+        let jobsArray = [];
+        
+        if (res.data && Array.isArray(res.data.content)) {
+          jobsArray = res.data.content;
+        } else if (Array.isArray(res.data)) {
+          jobsArray = res.data;
+        }
 
-      if (jobsArray.length > 0) {
-        const totalJobs = jobsArray.length;
-        
-        // 1. Calculate openings safely (if 'openings' isn't explicitly sent, default to 1 per listing)
-        const totalOpenings = jobsArray.reduce((sum, job) => sum + (job.openings || 1), 0);
-        
-        // 2. FIX: Map using 'companyName' since 'companyPublicId' is absent in payload
-        const uniqueCompanyNames = new Set(jobsArray.map(job => job.companyName).filter(Boolean));
-        const totalCompanies = uniqueCompanyNames.size;
-        
-        // 3. Calculate applicants safely
-        const totalApplicants = jobsArray.reduce((sum, job) => sum + (job.applicationsCount || 0), 0);
+        if (jobsArray.length > 0) {
+          const totalJobs = jobsArray.length;
+          
+          // Calculate openings safely
+          const totalOpenings = jobsArray.reduce((sum, job) => sum + (job.openings || 1), 0);
+          
+          // Map unique companies securely
+          const uniqueCompanyNames = new Set(jobsArray.map(job => job.companyName).filter(Boolean));
+          const totalCompanies = uniqueCompanyNames.size;
+          
+          // Calculate applicants safely
+          const totalApplicants = jobsArray.reduce((sum, job) => sum + (job.applicationsCount || 0), 0);
 
-        setCalculatedStats({ totalJobs, totalOpenings, totalCompanies, totalApplicants });
-        
-        const recentJob = jobsArray[0];
-        setLatestJob({ title: recentJob.title, companyName: recentJob.companyName || "Top Company" });
+          setCalculatedStats({ totalJobs, totalOpenings, totalCompanies, totalApplicants });
+          
+          const recentJob = jobsArray[0];
+          setLatestJob({ title: recentJob.title, companyName: recentJob.companyName || "Top Company" });
+        }
+      } catch (err) { 
+        console.error("Error fetching metrics from endpoint gateway:", err); 
       }
-    } catch (err) { 
-      console.error("Error fetching metrics:", err); 
-    }
-  };
-  fetchAndCalculateMetrics();
-}, []);
+    };
+    fetchAndCalculateMetrics();
+  }, []);
+
   // Strict-Mode Stable Typewriter Loop
   useEffect(() => {
     let phraseIdx = 0;
@@ -97,12 +101,12 @@ const Hero = () => {
       let typeSpeed = isDeleting ? 60 : 120;
 
       if (!isDeleting && charIdx === currentFullText.length) {
-        typeSpeed = 2000; // Pause at full word
+        typeSpeed = 2000; 
         isDeleting = true;
       } else if (isDeleting && charIdx === 0) {
         isDeleting = false;
         phraseIdx = (phraseIdx + 1) % phrases.length;
-        typeSpeed = 400; // Pause before typing next word
+        typeSpeed = 400; 
       }
 
       timeoutId = setTimeout(tick, typeSpeed);
@@ -121,12 +125,10 @@ const Hero = () => {
 
   return (
     <section className="modern-hero-wrap">
-      {/* Abstract Glowing Background Orbs */}
       <div className="hero-glow-orb orb-1"></div>
       <div className="hero-glow-orb orb-2"></div>
 
       <div className="modern-hero-container">
-        
         {/* Left Interactive Panel */}
         <div className="hero-content-deck">
           <div className="context-tagline">
@@ -144,7 +146,6 @@ const Hero = () => {
             hiring for roles that match your technical expertise and career goals.
           </p>
 
-          {/* Upgraded Premium Pill Search Architecture */}
           <form className="premium-search-pill" onSubmit={handleSearch}>
             <div className="search-field-segment">
               <FaSearch className="pill-segment-icon" />
@@ -170,7 +171,6 @@ const Hero = () => {
 
             <div className="pill-segment-divider" />
 
-            {/* Added Remote Interactive Toggle Module */}
             <div className="remote-toggle-module">
               <label className="switch-container">
                 <input 
@@ -189,7 +189,6 @@ const Hero = () => {
             </button>
           </form>
 
-          {/* Quick Filter Navigation chips */}
           <div className="hero-category-chips-deck">
             {categoryChips.map((chip) => (
               <button 
@@ -204,7 +203,6 @@ const Hero = () => {
             ))}
           </div>
 
-          {/* Trending Stack Horizontal Micro Marquee */}
           <div className="trending-stack-row">
             <span className="stack-label">Popular Skills:</span>
             <div className="stack-tags-wrapper">
@@ -231,11 +229,11 @@ const Hero = () => {
               <p>Hiring Companies</p>
             </div>
 
-            {<div className="metric-bento-card card-glow-emerald">
+            <div className="metric-bento-card card-glow-emerald">
               <div className="card-header-icon"><FaUserCheck /></div>
               <h3>{calculatedStats.totalApplicants || "1.8K"}</h3>
               <p>Job Seekers</p>
-            </div> }
+            </div>
 
             <div className="metric-bento-card card-glow-amber">
               <div className="card-header-icon"><FaBolt /></div>
@@ -245,7 +243,6 @@ const Hero = () => {
 
           </div>
 
-          {/* Dynamic Realtime Streaming Alerts Module */}
           {latestJob && (
             <div className="glass-stream-alert-card">
               <div className="alert-pulse-icon-halo">
