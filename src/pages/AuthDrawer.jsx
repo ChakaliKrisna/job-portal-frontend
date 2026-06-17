@@ -9,38 +9,42 @@ import "../components/Styles/authDrawer.css";
 
 const API = import.meta.env.VITE_API_URL || "https://job-portal-backend-365l.onrender.com";
 
+const INITIAL_FORM_STATE = {
+  email: "",
+  password: "",
+  name: "",
+  role: "STUDENT",
+  companyName: "",
+  gstNumber: "", 
+};
+
 const AuthDrawer = ({ isOpen, onClose, initialMode = "login" }) => {
-  const [currentView, setCurrentView] = useState(initialMode); // 'login', 'register', 'forgot'
+  const [currentView, setCurrentView] = useState(initialMode);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
 
-  // Pure Visual Enhanced UI States (Kept isolated from core backend schema)
+  // Pure Visual Enhanced UI States
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState({ score: 0, text: "Too Short", color: "#ff4d4d" });
 
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    name: "",
-    role: "STUDENT",
-    companyName: "",
-    gstNumber: "", 
-  });
+  const [formData, setFormData] = useState(INITIAL_FORM_STATE);
 
+  // Synchronize drawer structure cleanly upon structural mounts
   useEffect(() => {
     setCurrentView(initialMode);
     setMessage({ type: "", text: "" });
-    setFormData({ email: "", password: "", name: "", role: "STUDENT", companyName: "", gstNumber: "" });
+    setFormData(INITIAL_FORM_STATE);
     setShowPassword(false);
     setPasswordStrength({ score: 0, text: "Too Short", color: "#ff4d4d" });
   }, [initialMode, isOpen]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
-    if (e.target.name === "password") {
-      evaluatePasswordStrength(e.target.value);
+    if (name === "password") {
+      evaluatePasswordStrength(value);
     }
   };
 
@@ -111,7 +115,10 @@ const AuthDrawer = ({ isOpen, onClose, initialMode = "login" }) => {
       if (currentView === "login") {
         const { token, role, name, email, publicId } = res.data;
         
-        // 1. Commit credentials to system storage
+        // Scrub residual session metrics before saving new data context
+        localStorage.clear();
+
+        // Commit credentials to system storage
         localStorage.setItem("token", token);
         localStorage.setItem("userName", name);
         localStorage.setItem("email", email);
@@ -120,24 +127,20 @@ const AuthDrawer = ({ isOpen, onClose, initialMode = "login" }) => {
 
         setMessage({ type: "success", text: "Authenticated successfully. Diverting access pathway..." });
         
-        // 2. Safely normalize role values coming back from Spring Boot
+        // Safely normalize role values coming back from Spring Boot
         const isRecruiter = role === "ROLE_RECRUITER" || role === "RECRUITER";
         const targetRoute = isRecruiter ? "/recruiter-dashboard" : "/";
 
         setTimeout(() => {
-          handleClose(); // Close drawer matrix cleanly
-          
-          // 3. FIXED: Hard location assignment forces the global routing tree 
-          // to reload and read the new token/role instantly without timing bugs.
+          handleClose(); 
           window.location.href = targetRoute;
         }, 1200);
       } else {
-        // IGNORED EMAIL VERIFICATION: Swapped out email verification note for instant profile initialization response
         setMessage({ type: "success", text: "Profile initialized successfully! Switching to sign in panel..." });
         setTimeout(() => { 
           setCurrentView("login"); 
           setMessage({ type: "", text: "" }); 
-        }, 3000);
+        }, 2500);
       }
     } catch (err) {
       setMessage({ type: "error", text: err.response?.data?.message || "Authentication gateway error." });
@@ -173,7 +176,6 @@ const AuthDrawer = ({ isOpen, onClose, initialMode = "login" }) => {
           <FaTimes />
         </button>
 
-        {/* Dynamic Structural Switcher Tabs */}
         {currentView !== "forgot" && (
           <div className="matrix-tab-navigation">
             <button 
@@ -251,7 +253,6 @@ const AuthDrawer = ({ isOpen, onClose, initialMode = "login" }) => {
                     <label className="floating-label">Profile Context</label>
                   </div>
 
-                  {/* Recruiter-only form wrapper block */}
                   {formData.role === "RECRUITER" && (
                     <>
                       <div className="premium-input-wrapper">
@@ -286,7 +287,6 @@ const AuthDrawer = ({ isOpen, onClose, initialMode = "login" }) => {
                 <label className="floating-label">Email Address</label>
               </div>
 
-              {/* 👁️ Enhanced UI Feature: Password Toggle Layer */}
               <div className="premium-input-wrapper">
                 <FaLock className="wrapper-icon" />
                 <input 
@@ -308,7 +308,6 @@ const AuthDrawer = ({ isOpen, onClose, initialMode = "login" }) => {
                 </button>
               </div>
 
-              {/* 📊 Enhanced UI Feature: Password Strength Track Bar */}
               {currentView === "register" && formData.password && (
                 <div className="password-metrics-box">
                   <div className="metrics-meta">
@@ -329,7 +328,6 @@ const AuthDrawer = ({ isOpen, onClose, initialMode = "login" }) => {
 
               {currentView === "login" && (
                 <div className="form-utils-row">
-                  {/* 🔘 Enhanced UI Feature: Remember Me Layout */}
                   <label className="remember-me-container">
                     <input 
                       type="checkbox" 
@@ -350,37 +348,18 @@ const AuthDrawer = ({ isOpen, onClose, initialMode = "login" }) => {
                 {loading ? <span className="premium-spinner"></span> : (currentView === "login" ? <span>Authenticate Profile</span> : <span>Initialize Account</span>)}
               </button>
 
-              {/* 🌐 Enhanced UI Feature: External Social Redirect Channels */}
               <div className="social-divider">
                 <span>Or cross reference gateway with</span>
               </div>
 
               <div className="social-auth-grid">
-                <a 
-                  href="mailto:manyamkrishna925@gmail.com?subject=Job%20Portal%20Gateway%20Authentication" 
-                  className="social-btn google"
-                  style={{ textDecoration: 'none' }}
-                >
+                <a href="mailto:manyamkrishna925@gmail.com?subject=Job%20Portal%20Gateway%20Authentication" className="social-btn google" style={{ textDecoration: 'none' }}>
                   <FaGoogle /> <span>Google</span>
                 </a>
-                
-                <a 
-                  href="https://www.linkedin.com/in/chakali-krishna-2bb6992a6/" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="social-btn linkedin"
-                  style={{ textDecoration: 'none' }}
-                >
+                <a href="https://www.linkedin.com/in/chakali-krishna-2bb6992a6/" target="_blank" rel="noopener noreferrer" className="social-btn linkedin" style={{ textDecoration: 'none' }}>
                   <FaLinkedin /> <span>LinkedIn</span>
                 </a>
-                
-                <a 
-                  href="https://github.com/ChakaliKrisna" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="social-btn github"
-                  style={{ textDecoration: 'none' }}
-                >
+                <a href="https://github.com/ChakaliKrisna" target="_blank" rel="noopener noreferrer" className="social-btn github" style={{ textDecoration: 'none' }}>
                   <FaGithub /> <span>GitHub</span>
                 </a>
               </div>

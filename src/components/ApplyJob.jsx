@@ -1,5 +1,5 @@
 // FIX: Added useMemo explicitly to the core React hook imports
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { 
   FaCheckCircle, FaCloudUploadAlt, FaFilePdf, FaBriefcase, FaMapMarkerAlt, 
@@ -50,9 +50,23 @@ const ApplyJob = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // --- Dynamic Auth Verification Interceptor ---
+  useEffect(() => {
+    if (!token) {
+      // Set operational state flags in session/state before pushing backward 
+      // to let the target landing layout know it should invoke the AuthDrawer automatically
+      sessionStorage.setItem("triggerAuthDrawerMode", "login");
+      sessionStorage.setItem("authRedirectNotification", "Please login as a Candidate to access job applications.");
+      
+      // Route user back cleanly to jobs board view without exposing broken data fields
+      return navigate("/jobs", { replace: true });
+    }
+  }, [token, navigate]);
+
   // --- Initialization & LocalStorage Draft Reload ---
   useEffect(() => {
-    if (!token) return navigate("/login");
+    // Structural Guard against unauthorized api invocation leaks
+    if (!token) return;
 
     const fetchAllData = async () => {
       try {
@@ -107,6 +121,7 @@ const ApplyJob = () => {
         setLoading(false);
       }
     };
+    
     fetchAllData();
   }, [jobId, token, navigate]);
 
@@ -242,6 +257,9 @@ const ApplyJob = () => {
 
   // SAFE COMPILATION STRINGS FOR ENTERPRISE NAMES TO AVOID OBJECT CRASHES
   const resolvedCompanyName = jobDetails?.companyName || jobDetails?.company?.name || "Target Enterprise Hub";
+
+  // Immediate layout shield while authentication verification intercepts
+  if (!token) return null;
 
   if (loading) return (
     <div className="modern-loader-container">
@@ -579,7 +597,6 @@ const ApplyJob = () => {
               <div className="intel-card-title"><FaRocket className="color-indigo" /> Similar Opportunities</div>
               <div className="similar-stack-rail">
                 {similarJobs.slice(0, 3).map((simJob) => {
-                  // SAFE UNWRAP FOR SIDEBAR COMPONENT NAMES TO PREVENT CRASHES
                   const safeSimCompanyName = simJob?.companyName || simJob?.company?.name || "Verified Enterprise Provider";
                   return (
                     <div key={simJob.publicId} className="sidebar-mini-job-card" onClick={() => navigate(`/job/${simJob.publicId}`)}>
@@ -640,4 +657,5 @@ const ApplyJob = () => {
     </div>
   );
 };
+
 export default ApplyJob;
