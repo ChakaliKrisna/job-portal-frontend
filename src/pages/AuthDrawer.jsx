@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { 
   FaTimes, FaEnvelope, FaLock, FaUser, 
-  FaBriefcase, FaBuilding, FaArrowLeft, FaKey 
+  FaBriefcase, FaBuilding, FaArrowLeft, FaKey,
+  FaEye, FaEyeSlash, FaGoogle, FaLinkedin, FaGithub
 } from "react-icons/fa";
 import "../components/Styles/authDrawer.css";
 
@@ -13,22 +14,59 @@ const AuthDrawer = ({ isOpen, onClose, initialMode = "login" }) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
 
+  // Pure Visual Enhanced UI States (Kept isolated from core backend schema)
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState({ score: 0, text: "Too Short", color: "#ff4d4d" });
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     name: "",
     role: "STUDENT",
     companyName: "",
+    gstNumber: "", 
   });
 
   useEffect(() => {
     setCurrentView(initialMode);
     setMessage({ type: "", text: "" });
-    setFormData({ email: "", password: "", name: "", role: "STUDENT", companyName: "" });
+    setFormData({ email: "", password: "", name: "", role: "STUDENT", companyName: "", gstNumber: "" });
+    setShowPassword(false);
+    setPasswordStrength({ score: 0, text: "Too Short", color: "#ff4d4d" });
   }, [initialMode, isOpen]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+
+    if (e.target.name === "password") {
+      evaluatePasswordStrength(e.target.value);
+    }
+  };
+
+  const evaluatePasswordStrength = (password) => {
+    if (!password) {
+      setPasswordStrength({ score: 0, text: "Empty", color: "transparent" });
+      return;
+    }
+    let score = 0;
+    if (password.length >= 8) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[a-z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+
+    let text = "Weak 🟥";
+    let color = "#ff4d4d";
+
+    if (score >= 4 && password.length >= 8) {
+      text = "Strong 🟩";
+      color = "#00e676";
+    } else if (score >= 2 && password.length >= 6) {
+      text = "Medium 🟨";
+      color = "#ffb300";
+    }
+    setPasswordStrength({ score, text, color });
   };
 
   const handleAuthSubmit = async (e) => {
@@ -42,10 +80,26 @@ const AuthDrawer = ({ isOpen, onClose, initialMode = "login" }) => {
         setLoading(false);
         return;
       }
-      if (formData.role === "RECRUITER" && !formData.companyName.trim()) {
-        setMessage({ type: "error", text: "Company name is required" });
-        setLoading(false);
-        return;
+
+      // Isolate recruiter validation checks completely
+      if (formData.role === "RECRUITER") {
+        if (!formData.companyName.trim()) {
+          setMessage({ type: "error", text: "Company name is required" });
+          setLoading(false);
+          return;
+        }
+
+        const validGstTokens = ["TSAR-IT-99X", "CORP-VALID-2026", "GST-STATIC-77"];
+        const cleanGstInput = formData.gstNumber?.trim().toUpperCase();
+
+        if (!cleanGstInput || !validGstTokens.includes(cleanGstInput)) {
+          setMessage({ 
+            type: "error", 
+            text: "Invalid Corporate Authorization Access Key / GST Registration Token." 
+          });
+          setLoading(false);
+          return;
+        }
       }
     }
 
@@ -92,7 +146,6 @@ const AuthDrawer = ({ isOpen, onClose, initialMode = "login" }) => {
     }
   };
 
-  // HANDLER CHANGED: Dead-ended forgotten verification pipeline with UI warning triggers
   const handleForgotSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -198,12 +251,31 @@ const AuthDrawer = ({ isOpen, onClose, initialMode = "login" }) => {
                     <label className="floating-label">Profile Context</label>
                   </div>
 
+                  {/* Recruiter-only form wrapper block */}
                   {formData.role === "RECRUITER" && (
-                    <div className="premium-input-wrapper">
-                      <FaBuilding className="wrapper-icon" />
-                      <input name="companyName" type="text" placeholder=" " value={formData.companyName} onChange={handleChange} required />
-                      <label className="floating-label">Company Entity Name</label>
-                    </div>
+                    <>
+                      <div className="premium-input-wrapper">
+                        <FaBuilding className="wrapper-icon" />
+                        <input name="companyName" type="text" placeholder=" " value={formData.companyName} onChange={handleChange} required />
+                        <label className="floating-label">Company Entity Name</label>
+                      </div>
+
+                      <div className="premium-input-wrapper enterprise-secure-gateway">
+                        <FaKey className="wrapper-icon" style={{ color: "#ffb300" }} />
+                        <input 
+                          name="gstNumber" 
+                          type="text" 
+                          placeholder=" " 
+                          value={formData.gstNumber || ""} 
+                          onChange={handleChange} 
+                          required 
+                          style={{ borderBottomColor: formData.gstNumber ? "#ffb300" : "" }}
+                        />
+                        <label className="floating-label" style={{ color: formData.gstNumber ? "#ffb300" : "" }}>
+                          Enterprise Gateway Key / GST Token
+                        </label>
+                      </div>
+                    </>
                   )}
                 </>
               )}
@@ -214,21 +286,104 @@ const AuthDrawer = ({ isOpen, onClose, initialMode = "login" }) => {
                 <label className="floating-label">Email Address</label>
               </div>
 
+              {/* 👁️ Enhanced UI Feature: Password Toggle Layer */}
               <div className="premium-input-wrapper">
                 <FaLock className="wrapper-icon" />
-                <input name="password" type="password" placeholder=" " value={formData.password} onChange={handleChange} required />
+                <input 
+                  name="password" 
+                  type={showPassword ? "text" : "password"} 
+                  placeholder=" " 
+                  value={formData.password} 
+                  onChange={handleChange} 
+                  required 
+                />
                 <label className="floating-label">Secure Access Key</label>
+                <button 
+                  type="button" 
+                  className="password-toggle-eye" 
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label="Toggle password visibility"
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
               </div>
 
+              {/* 📊 Enhanced UI Feature: Password Strength Track Bar */}
+              {currentView === "register" && formData.password && (
+                <div className="password-metrics-box">
+                  <div className="metrics-meta">
+                    <span>Cryptographic Strength:</span>
+                    <span style={{ color: passwordStrength.color, fontWeight: "bold" }}>{passwordStrength.text}</span>
+                  </div>
+                  <div className="metrics-bar-track">
+                    <div 
+                      className="metrics-bar-fill" 
+                      style={{ 
+                        width: `${(passwordStrength.score / 5) * 100}%`, 
+                        backgroundColor: passwordStrength.color 
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              )}
+
               {currentView === "login" && (
-                <button type="button" className="premium-link-btn" onClick={() => { setCurrentView("forgot"); setMessage({ type: "error", text: "Notice: Recover Identity features are temporarily disabled." }); }}>
-                  Forgot entry password?
-                </button>
+                <div className="form-utils-row">
+                  {/* 🔘 Enhanced UI Feature: Remember Me Layout */}
+                  <label className="remember-me-container">
+                    <input 
+                      type="checkbox" 
+                      checked={rememberMe} 
+                      onChange={(e) => setRememberMe(e.target.checked)} 
+                    />
+                    <span className="custom-checkmark"></span>
+                    Keep access active
+                  </label>
+                  
+                  <button type="button" className="premium-link-btn" onClick={() => { setCurrentView("forgot"); setMessage({ type: "error", text: "Notice: Recover Identity features are temporarily disabled." }); }}>
+                    Forgot entry password?
+                  </button>
+                </div>
               )}
 
               <button type="submit" className="premium-submit-btn" disabled={loading}>
                 {loading ? <span className="premium-spinner"></span> : (currentView === "login" ? <span>Authenticate Profile</span> : <span>Initialize Account</span>)}
               </button>
+
+              {/* 🌐 Enhanced UI Feature: External Social Redirect Channels */}
+              <div className="social-divider">
+                <span>Or cross reference gateway with</span>
+              </div>
+
+              <div className="social-auth-grid">
+                <a 
+                  href="mailto:manyamkrishna925@gmail.com?subject=Job%20Portal%20Gateway%20Authentication" 
+                  className="social-btn google"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <FaGoogle /> <span>Google</span>
+                </a>
+                
+                <a 
+                  href="https://www.linkedin.com/in/chakali-krishna-2bb6992a6/" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="social-btn linkedin"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <FaLinkedin /> <span>LinkedIn</span>
+                </a>
+                
+                <a 
+                  href="https://github.com/ChakaliKrisna" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="social-btn github"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <FaGithub /> <span>GitHub</span>
+                </a>
+              </div>
             </form>
           )}
         </div>

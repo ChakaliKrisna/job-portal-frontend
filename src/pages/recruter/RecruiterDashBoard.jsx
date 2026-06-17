@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import RecruiterNavbar from "../../components/recruter/RecruterNavbar";
 import api from "../../api/api";
 import "../../pages/recruter/RecruiterDashBoard.css";
@@ -16,7 +16,6 @@ import {
 } from "react-icons/fa";
 
 import { Bar, Pie } from "react-chartjs-2";
-
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -36,7 +35,7 @@ ChartJS.register(
   Legend
 );
 
-const RecruiterDashboard = () => {
+export default function RecruiterDashboard() {
   const [loading, setLoading] = useState(true);
 
   const [stats, setStats] = useState({
@@ -56,79 +55,89 @@ const RecruiterDashboard = () => {
     activeJobs: 0
   });
 
-  useEffect(() => {
-    fetchDashboard();
-  }, []);
-
-  const fetchDashboard = async () => {
+  const fetchDashboardData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.get("/job-portal/applications/dashboard/analytics");
-      const platformRes = await api.get("/job-portal/applications/dashboard/platform-overview");
+      const [analyticsRes, platformRes] = await Promise.all([
+        api.get("/job-portal/applications/dashboard/analytics"),
+        api.get("/job-portal/applications/dashboard/platform-overview")
+      ]);
 
-      if (res.data) setStats(res.data);
+      if (analyticsRes.data) setStats(analyticsRes.data);
       if (platformRes.data) setPlatformStats(platformRes.data);
     } catch (err) {
       console.error("Dashboard engine failed initialization:", err);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const chartOptions = {
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
+
+  // MEMOIZED CHART LAYOUT SYSTEMS (Prevents raw frame component canvas leaks)
+  const baseChartOptions = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
         position: "bottom",
-        labels: { 
-          boxWidth: 8, 
+        labels: {
+          boxWidth: 8,
           usePointStyle: true,
-          font: { family: "Inter, sans-serif", size: 12, weight: "500" }, 
+          font: { family: "Inter, sans-serif", size: 12, weight: "500" },
           padding: 20,
           color: "#64748b"
         },
       },
     },
-  };
+  }), []);
 
-  const pipelinePieData = {
+  const barChartOptions = useMemo(() => ({
+    ...baseChartOptions,
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: { color: "#f1f5f9", drawTicks: false },
+        border: { dash: [5, 5] },
+        ticks: { font: { size: 11, family: "Inter" }, color: "#94a3b8", precision: 0 }
+      },
+      x: {
+        grid: { display: false },
+        ticks: { font: { size: 11, family: "Inter", weight: "500" }, color: "#64748b" }
+      }
+    }
+  }), [baseChartOptions]);
+
+  const pipelinePieData = useMemo(() => ({
     labels: ["Applications", "Shortlisted", "Interviews"],
     datasets: [
       {
-        data: [stats.totalApplications, stats.shortlisted, stats.interviews],
+        data: [stats.totalApplications ?? 0, stats.shortlisted ?? 0, stats.interviews ?? 0],
         backgroundColor: ["#3b82f6", "#10b981", "#f59e0b"],
         hoverOffset: 4,
         borderWidth: 0,
       },
     ],
-  };
+  }), [stats]);
 
-  const userCompositionBarData = {
+  const userCompositionBarData = useMemo(() => ({
     labels: ["Total Users", "Students", "Recruiters"],
     datasets: [
       {
         label: "Registered Accounts",
-        data: [platformStats.totalUsers, platformStats.totalStudents, platformStats.totalRecruiters],
-        backgroundColor: "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)",
+        data: [platformStats.totalUsers ?? 0, platformStats.totalStudents ?? 0, platformStats.totalRecruiters ?? 0],
         backgroundColor: "#6366f1",
         hoverBackgroundColor: "#4f46e5",
         borderRadius: 8,
         barThickness: 32,
       },
     ],
-  };
+  }), [platformStats]);
 
   if (loading) {
-    return (
-      <div className="rd-loader-screen">
-        <div className="rd-spinner-wrapper">
-          <div className="rd-spinner-ring"></div>
-          <div className="rd-spinner-dot"></div>
-        </div>
-        <p className="rd-loader-text">Compiling Macro Intelligence Workspace...</p>
-      </div>
-    );
+    return <LoaderScreen />;
   }
 
   return (
@@ -137,38 +146,24 @@ const RecruiterDashboard = () => {
 
       <main className="rd-main-content">
         
-        {/* BANNER HEADER */}
-        <div className="rd-welcome-banner">
-          <div className="banner-left">
-            <div className="banner-badge">
-              <FaDatabase /> Workspace Operations
-            </div>
-            <h1>Recruiter Analytics Dashboard</h1>
-            <p>Real-time hiring metrics, core pipeline indicators, and global platform telemetry tracking.</p>
-          </div>
-          <div className="live-status-container">
-            <span className="live-pulse-ring">
-              <span className="pulse-wave"></span>
-              <span className="pulse-dot"></span>
-            </span>
-            <span className="live-status-tag">Live Sync Active</span>
-          </div>
-        </div>
+        {/* BANNER HEADER CONTAINER */}
+        <WorkspaceHeader />
 
-        {/* METRICS METADATA GRID */}
-        <div className="rd-section-title">
-          <h2><FaChartPie /> Personal Operational Overview</h2>
-          <p>Hiring activity linked directly to your recruiter profile credentials.</p>
-        </div>
+        {/* SECTION I: PERSONAL OPERATIONAL METRICS */}
+        <SectionHeader 
+          icon={<FaChartPie />} 
+          title="Personal Operational Overview" 
+          subtitle="Hiring activity linked directly to your recruiter profile credentials." 
+        />
 
         <div className="rd-stats-grid">
           <StatCard icon={<FaBriefcase />} label="Total Jobs Listed" value={stats.totalJobs} accentClass="indigo" />
           <StatCard icon={<FaCheckCircle />} label="Active Openings" value={stats.activeJobs} accentClass="emerald" />
           <StatCard icon={<FaUserTie />} label="Gross Applications" value={stats.totalApplications} accentClass="blue" />
-          <StatCard icon={<FaCalendarCheck />} label="Shortlisted / Interviews" value={`${stats.shortlisted} / ${stats.interviews}`} accentClass="amber" />
+          <StatCard icon={<FaCalendarCheck />} label="Shortlisted / Interviews" value={`${stats.shortlisted ?? 0} / ${stats.interviews ?? 0}`} accentClass="amber" />
         </div>
 
-        {/* CHARTS LAYER MATRIX */}
+        {/* SECTION II: ANALYTICS VISUALIZATION CHARTS */}
         <div className="rd-charts-matrix">
           <div className="rd-chart-panel">
             <div className="panel-header">
@@ -176,7 +171,7 @@ const RecruiterDashboard = () => {
               <p>Hiring pipeline stages for your active job listings</p>
             </div>
             <div className="rd-chart-wrapper">
-              <Pie data={pipelinePieData} options={chartOptions} />
+              <Pie data={pipelinePieData} options={baseChartOptions} />
             </div>
           </div>
 
@@ -186,93 +181,74 @@ const RecruiterDashboard = () => {
               <p>Distribution profiles across global platform signups</p>
             </div>
             <div className="rd-chart-wrapper">
-              <Bar 
-                data={userCompositionBarData} 
-                options={{
-                  ...chartOptions,
-                  scales: {
-                    y: { 
-                      beginAtZero: true, 
-                      grid: { color: "#f1f5f9", drawTicks: false }, 
-                      border: { dash: [5, 5] },
-                      ticks: { font: { size: 11, family: "Inter" }, color: "#94a3b8", precision: 0 } 
-                    },
-                    x: { 
-                      grid: { display: false }, 
-                      ticks: { font: { size: 11, family: "Inter", weight: "500" }, color: "#64748b" } 
-                    }
-                  }
-                }} 
-              />
+              <Bar data={userCompositionBarData} options={barChartOptions} />
             </div>
           </div>
         </div>
 
-        {/* MACRO PLATFORM SYSTEM CONSOLE */}
-        <div className="rd-section-title">
-          <h2><FaGlobe /> Macro Platform Ecosystem</h2>
-          <p>Global baseline indices and aggregated cluster performance tracking.</p>
-        </div>
+        {/* SECTION III: GLOBAL MONITORING BASELINE */}
+        <SectionHeader 
+          icon={<FaGlobe />} 
+          title="Macro Platform Ecosystem" 
+          subtitle="Global baseline indices and aggregated cluster performance tracking." 
+        />
 
-        <div className="rd-macro-console">
-          <div className="macro-card-main">
-            <div className="macro-globe-icon">
-              <FaGlobe className="spinning-globe" />
-            </div>
-            <div className="macro-meta-text">
-              <h3>Systemic Infrastructure Log</h3>
-              <p>Aggregated telemetry operating dynamically across the complete cloud cluster platform instances.</p>
-            </div>
-          </div>
-
-          <div className="macro-metrics-row">
-            <div className="macro-metric-tile">
-              <div className="tile-header">
-                <span className="tile-icon students"><FaUsers /></span>
-                <p>Global Talent Pool</p>
-              </div>
-              <div className="tile-body">
-                <h3>{platformStats.totalStudents.toLocaleString()}</h3>
-                <span className="growth-tag"><FaArrowUp /> Verified Candidates</span>
-              </div>
-            </div>
-
-            <div className="macro-metric-tile">
-              <div className="tile-header">
-                <span className="tile-icon jobs"><FaBriefcase /></span>
-                <p>System Post Volume</p>
-              </div>
-              <div className="tile-body">
-                <h3>{platformStats.totalJobs.toLocaleString()}</h3>
-                <span className="growth-tag jobs-tag"><FaArrowUp /> {platformStats.activeJobs} Active Now</span>
-              </div>
-            </div>
-
-            <div className="macro-metric-tile">
-              <div className="tile-header">
-                <span className="tile-icon apps"><FaUserTie /></span>
-                <p>Total Conversions</p>
-              </div>
-              <div className="tile-body">
-                <h3>{platformStats.totalApplications.toLocaleString()}</h3>
-                <span className="growth-tag apps-tag">Applications Processed</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <MacroPlatformConsole platformStats={platformStats} />
 
       </main>
     </div>
   );
-};
+}
+
+/* ==========================================================================
+   SUB-COMPONENT ARCHITECTURES
+   ========================================================================== */
+
+const LoaderScreen = () => (
+  <div className="rd-loader-screen">
+    <div className="rd-spinner-wrapper">
+      <div className="rd-spinner-ring"></div>
+      <div className="rd-spinner-dot"></div>
+    </div>
+    <p className="rd-loader-text">Compiling Macro Intelligence Workspace...</p>
+  </div>
+);
+
+const WorkspaceHeader = () => (
+  <div className="rd-welcome-banner">
+    <div className="banner-left">
+      <div className="banner-badge">
+        <FaDatabase /> Workspace Operations
+      </div>
+      <h1>Recruiter Analytics Dashboard</h1>
+      <p>Real-time hiring metrics, core pipeline indicators, and global platform telemetry tracking.</p>
+    </div>
+    <div className="live-status-container">
+      <span className="live-pulse-ring">
+        <span className="pulse-wave"></span>
+        <span className="pulse-dot"></span>
+      </span>
+      <span className="live-status-tag">Live Sync Active</span>
+    </div>
+  </div>
+);
+
+const SectionHeader = ({ icon, title, subtitle }) => (
+  <div className="rd-section-title">
+    <h2>{icon} {title}</h2>
+    <p>{subtitle}</p>
+  </div>
+);
 
 const StatCard = ({ icon, label, value, accentClass }) => {
+  const displayValue = typeof value === 'number' ? value.toLocaleString() : (value ?? 0);
+  
   return (
     <div className={`rd-stat-card theme-${accentClass}`}>
       <div className="card-content">
         <div className="card-info">
           <p className="card-label">{label}</p>
-          <h2 className="card-value">{typeof value === 'number' ? value.toLocaleString() : value}</h2>
+          <h2 className="card-value">{displayValue}</h2>
         </div>
         <div className="icon-badge">{icon}</div>
       </div>
@@ -283,4 +259,53 @@ const StatCard = ({ icon, label, value, accentClass }) => {
   );
 };
 
-export default RecruiterDashboard;
+const MacroPlatformConsole = ({ platformStats }) => (
+  <div className="rd-macro-console">
+    <div className="macro-card-main">
+      <div className="macro-globe-icon">
+        <FaGlobe className="spinning-globe" />
+      </div>
+      <div className="macro-meta-text">
+        <h3>Systemic Infrastructure Log</h3>
+        <p>Aggregated telemetry operating dynamically across the complete cloud cluster platform instances.</p>
+      </div>
+    </div>
+
+    <div className="macro-metrics-row">
+      <div className="macro-metric-tile">
+        <div className="tile-header">
+          <span className="tile-icon students"><FaUsers /></span>
+          <p>Global Talent Pool</p>
+        </div>
+        <div className="tile-body">
+          <h3>{(platformStats.totalStudents ?? 0).toLocaleString()}</h3>
+          <span className="growth-tag"><FaArrowUp /> Verified Candidates</span>
+        </div>
+      </div>
+
+      <div className="macro-metric-tile">
+        <div className="tile-header">
+          <span className="tile-icon jobs"><FaBriefcase /></span>
+          <p>System Post Volume</p>
+        </div>
+        <div className="tile-body">
+          <h3>{(platformStats.totalJobs ?? 0).toLocaleString()}</h3>
+          <span className="growth-tag jobs-tag">
+            <FaArrowUp /> {platformStats.activeJobs ?? 0} Active Now
+          </span>
+        </div>
+      </div>
+
+      <div className="macro-metric-tile">
+        <div className="tile-header">
+          <span className="tile-icon apps"><FaUserTie /></span>
+          <p>Total Conversions</p>
+        </div>
+        <div className="tile-body">
+          <h3>{(platformStats.totalApplications ?? 0).toLocaleString()}</h3>
+          <span className="growth-tag apps-tag">Applications Processed</span>
+        </div>
+      </div>
+    </div>
+  </div>
+);

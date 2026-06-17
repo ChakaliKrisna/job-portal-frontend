@@ -4,10 +4,10 @@ import {
   FaPlus, FaEdit, FaTrash, FaSearch, FaChevronLeft, FaChevronRight,
   FaGlobe, FaBriefcase, FaMapMarkerAlt, FaSortAmountDown,
   FaMoneyBillWave, FaCheckCircle, FaChartLine, FaClock, 
-  FaUserGraduate, FaCalendarAlt, FaBuilding, FaUserTie, FaExclamationCircle, FaLock, FaLayerGroup
+  FaUserGraduate, FaCalendarAlt, FaBuilding, FaUserTie, FaExclamationCircle, FaLock, FaLayerGroup,
+  FaTags, FaDollarSign
 } from "react-icons/fa";
 import "../Styles/ManageJobs.css";
-
 
 export default function ManageJobs() {
   const [jobs, setJobs] = useState([]);
@@ -38,20 +38,21 @@ export default function ManageJobs() {
     if (!job || !job.recruiter || !currentUserEmail) return false;
     return job.recruiter.email?.toLowerCase().trim() === currentUserEmail.toLowerCase().trim();
   }, [currentUserEmail]);
+
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       setFilters(prev => ({ ...prev, keyword: searchTerm }));
       setCurrentPage(0);
-    }, 500); // Wait 500ms after user stops typing
+    }, 500);
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]);
-const fetchJobs = useCallback(async () => {
+
+  const fetchJobs = useCallback(async () => {
     setLoading(true);
     try {
       const endpoint = filters.viewMode === "MY_JOBS" ? `${API_BASE_URL}/my-jobs` : API_BASE_URL;
       
-      // Construct params object dynamically
       const params = new URLSearchParams();
       params.append("page", currentPage);
       params.append("size", 10);
@@ -63,7 +64,7 @@ const fetchJobs = useCallback(async () => {
       if (filters.workMode !== "ALL") params.append("workMode", filters.workMode);
       if (filters.category !== "ALL") params.append("category", filters.category);
       if (filters.experienceLevel !== "ALL") params.append("experienceLevel", filters.experienceLevel);
-      if (filters.minSalary > 0) params.append("minSalary", filters.minSalary / 100000); // Backend expects LAKHS?
+      if (filters.minSalary > 0) params.append("minSalary", filters.minSalary / 100000); 
 
       const res = await axios.get(endpoint, {
         params,
@@ -78,13 +79,14 @@ const fetchJobs = useCallback(async () => {
       setLoading(false);
     }
   }, [currentPage, filters]);
-    useEffect(() => {
+
+  useEffect(() => {
     const handler = setTimeout(() => fetchJobs(), 300);
     return () => clearTimeout(handler);
   }, [fetchJobs]);
 
   const processedJobs = useMemo(() => {
-    return [...jobs]; // Sorting is mostly handled by backend params.sort
+    return [...jobs]; 
   }, [jobs]);
 
   const handleFilterChange = (key, value) => {
@@ -122,7 +124,7 @@ const fetchJobs = useCallback(async () => {
       </header>
 
       <main className="mj-grid">
-        {/* Sidebar with all filters */}
+        {/* Sidebar Filter Control Tower */}
         <aside className="mj-sidebar">
           <div className="mj-sidebar-scroll">
             <section className="mj-filter-group">
@@ -143,7 +145,6 @@ const fetchJobs = useCallback(async () => {
               </div>
             </section>
 
-            {/* CATEGORY FILTER - Now outside of other tags */}
             <section className="mj-filter-group">
               <label className="mj-label"><FaLayerGroup /> Category</label>
               <select 
@@ -201,7 +202,7 @@ const fetchJobs = useCallback(async () => {
           </div>
         </aside>
 
-        {/* Central List Area */}
+        {/* Central Feed List */}
         <section className="mj-list-area">
           <div className="mj-search-cluster">
             <div className="mj-input-wrapper">
@@ -229,7 +230,12 @@ const fetchJobs = useCallback(async () => {
                       {job.title} 
                       {isOwner(job) && <FaCheckCircle className="owner-icon" title="Your Listing"/>}
                     </h4>
-                    <p>{!job.company || job.company === "N/A" ? "Direct Hire" : job.company} • {job.location}</p>
+                    {/* CRITICAL FIX: Evaluates object logic clearly avoiding React children validation exceptions */}
+                    <p>
+                      {job.company && typeof job.company === "object" && job.company.name 
+                        ? String(job.company.name) 
+                        : "Direct Hire"} • {job.location || "Remote"}
+                    </p>
                   </div>
                   <div className="mj-item-side">
                     <div className="mj-item-salary">₹{(job.salary/100000).toFixed(1)}LPA</div>
@@ -247,153 +253,157 @@ const fetchJobs = useCallback(async () => {
           </footer>
         </section>
 
+        {/* Detailed Inspection Pane */}
         <section className="mj-detail-pane">
-  {selectedJob ? (
-    <div className="mj-detail-scroll fade-in">
-      
-      {/* 1. BRAND HEADER & STATUS BADGES */}
-      <div className="mj-detail-top">
-        <div className="mj-brand-header">
-          <div className="mj-company-avatar">
-            <FaBuilding />
-          </div>
-          <div className="mj-main-titles">
-            <div className="mj-badge-row" style={{ display: 'flex', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
-              {/* Maps backend JobType Enum safely */}
-              {selectedJob.jobType && (
-                <span className="mj-category-tag">
-                  {typeof selectedJob.jobType === 'string' 
-                    ? selectedJob.jobType.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) 
-                    : "N/A"}
-                </span>
-              )}
-              {/* Dynamic status badge (OPEN, CLOSED, DRAFT, PAUSED) */}
-              {selectedJob.status && (
-                <span className={`mj-status-badge ${String(selectedJob.status).toLowerCase()}`}>
-                  {selectedJob.status}
-                </span>
-              )}
+          {selectedJob ? (
+            <div className="mj-detail-scroll fade-in">
+              
+              {/* 1. BRAND HEADER & STATUS BADGES */}
+              <div className="mj-detail-top">
+                <div className="mj-brand-header">
+                  <div className="mj-company-avatar">
+                    <FaBuilding />
+                  </div>
+                  <div className="mj-main-titles">
+                    <div className="mj-badge-row" style={{ display: 'flex', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
+                      {selectedJob.jobType && (
+                        <span className="mj-category-tag">
+                          {typeof selectedJob.jobType === 'string' 
+                            ? selectedJob.jobType.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) 
+                            : "N/A"}
+                        </span>
+                      )}
+                      {selectedJob.status && (
+                        <span className={`mj-status-badge ${String(selectedJob.status).toLowerCase()}`}>
+                          {selectedJob.status}
+                        </span>
+                      )}
+                    </div>
+                    <h2>{selectedJob.title || "Untitled Position"}</h2>
+                    {/* CRITICAL FIX: Safe deep validation string fallback guarding against raw rendering engine objects */}
+                    <h4>
+                      {selectedJob.company && typeof selectedJob.company === 'object' && selectedJob.company.name
+                        ? String(selectedJob.company.name)
+                        : "Company Confidential"}
+                    </h4>
+                  </div>
+                </div>
+                
+                {/* ACTION BUTTONS */}
+                <div className="mj-detail-actions">
+                  {typeof isOwner === 'function' && isOwner(selectedJob) ? (
+                    <>
+                      <button className="mj-btn-icon edit" title="Edit Job"><FaEdit /></button>
+                      <button className="mj-btn-icon delete" title="Delete Job"><FaTrash /></button>
+                    </>
+                  ) : (
+                    <div className="mj-view-only-badge"><FaLock /> Global View</div>
+                  )}
+                </div>
+              </div>
+
+              {/* 2. ANALYTICS GRID */}
+              <div className="mj-analytics-grid">
+                <div className="mj-analytic-card">
+                  <span>Openings</span>
+                  <h3>{selectedJob.openings ?? 1}</h3>
+                </div>
+                <div className="mj-analytic-card">
+                  <span>Experience</span>
+                  <h3>
+                    {selectedJob.experienceLevel && typeof selectedJob.experienceLevel === 'string'
+                      ? selectedJob.experienceLevel.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) 
+                      : "Any"}
+                  </h3>
+                </div>
+                <div className="mj-analytic-card">
+                  <span>Work Mode</span>
+                  <h3>
+                    {selectedJob.workMode && typeof selectedJob.workMode === 'string'
+                      ? selectedJob.workMode.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) 
+                      : "Onsite"}
+                  </h3>
+                </div>
+                <div className="mj-analytic-card">
+                  <span>Applicants</span>
+                  <h3>{selectedJob.applicantsCount ?? 0}</h3>
+                </div>
+              </div>
+
+              {/* 3. REQUIRED SKILLS SECTION */}
+              <div className="mj-section">
+                <h5>Required Skills</h5>
+                <div className="mj-pill-box">
+                  {Array.isArray(selectedJob.skillsRequired) && selectedJob.skillsRequired.length > 0 ? (
+                    selectedJob.skillsRequired.map((skillObj, i) => (
+                      <span key={skillObj?.id || i} className="mj-skill-pill">
+                        {skillObj?.skill || (typeof skillObj === 'string' ? skillObj : "Unknown Skill")}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="mj-text-light">No specific skills listed</span>
+                  )}
+                </div>
+              </div>
+
+              {/* 4. JOB INTELLIGENCE METADATA */}
+              <div className="mj-section">
+                <h5>Job Intelligence</h5>
+                <ul className="mj-intel-list">
+                  <li>
+                    <FaTags /> <strong>Category:</strong>{" "}
+                    {selectedJob.category && typeof selectedJob.category === 'string'
+                      ? selectedJob.category.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) 
+                      : "General"}
+                  </li>
+                  <li>
+                    {/* PATCHED: Normalized regional configuration targeting En-IN / INR standards */}
+                    <FaDollarSign /> <strong>Salary:</strong>{" "}
+                    {selectedJob.salary !== null && selectedJob.salary !== undefined && !isNaN(selectedJob.salary)
+                      ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(selectedJob.salary)
+                      : "Not Disclosed"}
+                  </li>
+                  <li>
+                    <FaUserTie /> <strong>Recruiter:</strong> {selectedJob.recruiter?.name || "Independent"}
+                  </li>
+                  <li>
+                    <FaMapMarkerAlt /> <strong>Location:</strong> {selectedJob.location || "Remote / Unspecified"}
+                  </li>
+                  <li>
+                    <FaCalendarAlt /> <strong>Posted:</strong>{" "}
+                    {selectedJob.postedDate && !isNaN(Date.parse(selectedJob.postedDate))
+                      ? new Date(selectedJob.postedDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) 
+                      : "N/A"}
+                  </li>
+                  <li>
+                    {/* PATCHED: Bound to matching database property closedDate */}
+                    <FaClock /> <strong>Deadline:</strong>{" "}
+                    {selectedJob.closedDate && !isNaN(Date.parse(selectedJob.closedDate))
+                      ? new Date(selectedJob.closedDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) 
+                      : "No Set Date"}
+                  </li>
+                  <li>
+                    <FaUserGraduate /> <strong>Education:</strong> {selectedJob.education || "Not Specified"}
+                  </li>
+                </ul>
+              </div>
+
+              {/* 5. JOB DESCRIPTION TEXT */}
+              <div className="mj-section">
+                <h5>Job Description</h5>
+                <p className="mj-description-text">
+                  {selectedJob.description || `We are looking for a qualified ${selectedJob.title || 'professional'} to join our team in ${selectedJob.location || 'our office'}.`}
+                </p>
+              </div>
+
             </div>
-            <h2>{selectedJob.title || "Untitled Position"}</h2>
-            {/* Matches backend nested Company object structure */}
-            <h4>{selectedJob.company?.name || "Company Confidential"}</h4>
-          </div>
-        </div>
-        
-        {/* ACTION BUTTONS (Owner vs Global View Check) */}
-        <div className="mj-detail-actions">
-          {typeof isOwner === 'function' && isOwner(selectedJob) ? (
-            <>
-              <button className="mj-btn-icon edit" title="Edit Job"><FaEdit /></button>
-              <button className="mj-btn-icon delete" title="Delete Job"><FaTrash /></button>
-            </>
           ) : (
-            <div className="mj-view-only-badge"><FaLock /> Global View</div>
+            <div className="mj-empty-state">
+              <FaChartLine size={50} />
+              <p>Select a job from the list to view full details.</p>
+            </div>
           )}
-        </div>
-      </div>
-
-      {/* 2. ANALYTICS GRID */}
-      <div className="mj-analytics-grid">
-        <div className="mj-analytic-card">
-          <span>Openings</span>
-          <h3>{selectedJob.openings ?? 1}</h3>
-        </div>
-        <div className="mj-analytic-card">
-          <span>Experience</span>
-          <h3>
-            {selectedJob.experienceLevel && typeof selectedJob.experienceLevel === 'string'
-              ? selectedJob.experienceLevel.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) 
-              : "Any"}
-          </h3>
-        </div>
-        <div className="mj-analytic-card">
-          <span>Work Mode</span>
-          <h3>
-            {selectedJob.workMode && typeof selectedJob.workMode === 'string'
-              ? selectedJob.workMode.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) 
-              : "Onsite"}
-          </h3>
-        </div>
-        <div className="mj-analytic-card">
-          <span>Applicants</span>
-          <h3>{selectedJob.applicantsCount ?? 0}</h3>
-        </div>
-      </div>
-
-      {/* 3. REQUIRED SKILLS SECTION */}
-      <div className="mj-section">
-        <h5>Required Skills</h5>
-        <div className="mj-pill-box">
-          {Array.isArray(selectedJob.skillsRequired) && selectedJob.skillsRequired.length > 0 ? (
-            selectedJob.skillsRequired.map((skillObj, i) => (
-              <span key={skillObj?.id || i} className="mj-skill-pill">
-                {skillObj?.skill || (typeof skillObj === 'string' ? skillObj : "Unknown Skill")}
-              </span>
-            ))
-          ) : (
-            <span className="mj-text-light">No specific skills listed</span>
-          )}
-        </div>
-      </div>
-
-      {/* 4. JOB INTELLIGENCE METADATA */}
-      <div className="mj-section">
-        <h5>Job Intelligence</h5>
-        <ul className="mj-intel-list">
-          <li>
-            <FaTags /> <strong>Category:</strong>{" "}
-            {selectedJob.category && typeof selectedJob.category === 'string'
-              ? selectedJob.category.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) 
-              : "General"}
-          </li>
-          <li>
-            <FaDollarSign /> <strong>Salary:</strong>{" "}
-            {selectedJob.salary !== null && selectedJob.salary !== undefined && !isNaN(selectedJob.salary)
-              ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(selectedJob.salary)
-              : "Not Disclosed"}
-          </li>
-          <li>
-            <FaUserTie /> <strong>Recruiter:</strong> {selectedJob.recruiter?.name || "Independent"}
-          </li>
-          <li>
-            <FaMapMarkerAlt /> <strong>Location:</strong> {selectedJob.location || "Remote / Unspecified"}
-          </li>
-          <li>
-            <FaCalendarAlt /> <strong>Posted:</strong>{" "}
-            {selectedJob.postedDate && !isNaN(Date.parse(selectedJob.postedDate))
-              ? new Date(selectedJob.postedDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) 
-              : "N/A"}
-          </li>
-          <li>
-            <FaClock /> <strong>Deadline:</strong>{" "}
-            {selectedJob.closingDate && !isNaN(Date.parse(selectedJob.closingDate))
-              ? new Date(selectedJob.closingDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) 
-              : "No Set Date"}
-          </li>
-          <li>
-            <FaUserGraduate /> <strong>Education:</strong> {selectedJob.education || "Not Specified"}
-          </li>
-        </ul>
-      </div>
-
-      {/* 5. JOB DESCRIPTION TEXT */}
-      <div className="mj-section">
-        <h5>Job Description</h5>
-        <p className="mj-description-text">
-          {selectedJob.description || `We are looking for a qualified ${selectedJob.title || 'professional'} to join our team in ${selectedJob.location || 'our office'}.`}
-        </p>
-      </div>
-
-    </div>
-  ) : (
-    /* EMPTY STATE CONTAINER */
-    <div className="mj-empty-state">
-      <FaChartLine size={50} />
-      <p>Select a job from the list to view full details.</p>
-    </div>
-  )}
-</section>
+        </section>
       </main>
     </div>
   );

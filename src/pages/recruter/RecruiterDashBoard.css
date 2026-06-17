@@ -1,384 +1,521 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap');
-
+/* ==========================================================================
+   THEME CONFIGURATION VARIABLES
+   ========================================================================== */
 :root {
-  --bg-deep: #0a0b10;
-  --bg-surface: #12131a;
-  --bg-card: #171923;
-  --border-glow: #242736;
+  --rd-bg-workspace: #f8fafc;
+  --rd-bg-card: #ffffff;
+  --rd-border: #e2e8f0;
   
-  --neon-indigo: #6366f1;
-  --neon-cyan: #06b6d4;
-  --neon-emerald: #10b981;
-  --neon-amber: #f59e0b;
-  
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-dark: #64748b;
+  /* Text Profiles */
+  --rd-text-main: #0f172a;
+  --rd-text-muted: #64748b;
+  --rd-text-light: #94a3b8;
+
+  /* Typography Accent Tones */
+  --rd-indigo: #6366f1;
+  --rd-indigo-glow: rgba(99, 102, 241, 0.12);
+  --rd-emerald: #10b981;
+  --rd-emerald-glow: rgba(16, 185, 129, 0.12);
+  --rd-blue: #3b82f6;
+  --rd-blue-glow: rgba(59, 130, 246, 0.12);
+  --rd-amber: #f59e0b;
+  --rd-amber-glow: rgba(245, 158, 11, 0.12);
+
+  /* Geometry Specs */
+  --rd-radius-card: 16px;
+  --rd-radius-inner: 10px;
+  --rd-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --rd-shadow-md: 0 4px 12px -1px rgba(15, 23, 42, 0.04), 0 2px 4px -1px rgba(15, 23, 42, 0.02);
+  --rd-shadow-lg: 0 20px 25px -5px rgba(15, 23, 42, 0.05), 0 10px 10px -5px rgba(15, 23, 42, 0.03);
+  --rd-speed: 0.25s;
 }
 
+/* ==========================================================================
+   GLOBAL STRUCTURE WORKSPACE LAYOUT
+   ========================================================================== */
 .rd-layout {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  background-color: var(--bg-deep);
-  color: var(--text-primary);
   min-height: 100vh;
+  background-color: var(--rd-bg-workspace);
+  color: var(--rd-text-main);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   display: flex;
+  flex-direction: column;
 }
 
 .rd-main-content {
-  flex-grow: 1;
-  padding: 2rem;
+  flex: 1;
   max-width: 1600px;
-  margin: 0 auto;
   width: 100%;
+  margin: 0 auto;
+  padding: 2rem;
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  box-sizing: border-box;
 }
 
-/* 1. Cyberpunk Header / Banner */
+/* ==========================================================================
+   WELCOME BANNER HEADER MODULE
+   ========================================================================== */
 .rd-welcome-banner {
-  background: linear-gradient(135deg, #131520 0%, #0a0b10 100%);
-  border: 1px solid var(--border-glow);
-  border-left: 4px solid var(--neon-indigo);
-  border-radius: 12px;
-  padding: 2rem;
+  background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+  border-radius: var(--rd-radius-card);
+  padding: 2.25rem 2.5rem;
+  color: #ffffff;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--rd-shadow-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.rd-welcome-banner::before {
+  content: '';
+  position: absolute;
+  top: -30%;
+  right: -10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.banner-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 70%;
 }
 
 .banner-badge {
-  font-family: 'JetBrains Mono', monospace;
-  background: rgba(99, 102, 241, 0.1);
-  color: var(--neon-indigo);
-  padding: 0.25rem 0.75rem;
-  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
   font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  margin-bottom: 0.5rem;
-  display: inline-block;
+  color: #c7d2fe;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: fit-content;
 }
 
-.rd-welcome-banner h1 {
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin: 0 0 0.5rem 0;
+.banner-left h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0;
   letter-spacing: -0.02em;
 }
 
-.rd-welcome-banner p {
-  color: var(--text-secondary);
+.banner-left p {
+  font-size: 0.95rem;
+  color: #94a3b8;
   margin: 0;
-  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
-/* Status Indicator Pulse */
+/* Status Pulse Animation Infrastructure */
 .live-status-container {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  background: rgba(16, 185, 129, 0.05);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  font-family: 'JetBrains Mono', monospace;
-}
-
-.live-status-tag {
-  color: var(--neon-emerald);
-  font-size: 0.8rem;
-  text-transform: uppercase;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--rd-radius-inner);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .live-pulse-ring {
   position: relative;
   display: flex;
-  height: 8px;
-  width: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 .pulse-wave {
   position: absolute;
-  height: 100%;
   width: 100%;
+  height: 100%;
+  background-color: var(--rd-emerald);
   border-radius: 50%;
-  background-color: var(--neon-emerald);
+  animation: wave 2s infinite ease-in-out;
   opacity: 0.6;
-  animation: wavePulse 2s infinite;
 }
 
 .pulse-dot {
+  width: 10px;
+  height: 10px;
+  background-color: var(--rd-emerald);
   border-radius: 50%;
-  height: 8px;
-  width: 8px;
-  background-color: var(--neon-emerald);
 }
 
-@keyframes wavePulse {
-  75%, 100% { transform: scale(2.5); opacity: 0; }
+@keyframes wave {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(3); opacity: 0; }
 }
 
-/* Section Group Elements */
+.live-status-tag {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+/* ==========================================================================
+   SECTION SECTION HEADERS
+   ========================================================================== */
 .rd-section-title {
-  border-bottom: 1px solid var(--border-glow);
-  padding-bottom: 0.75rem;
-  margin-top: 1rem;
+  margin-bottom: -0.5rem;
 }
 
 .rd-section-title h2 {
-  font-size: 1.15rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--rd-text-main);
+  margin: 0 0 0.25rem 0;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin: 0 0 0.25rem 0;
+  gap: 0.625rem;
+}
+
+.rd-section-title h2 svg {
+  color: var(--rd-indigo);
 }
 
 .rd-section-title p {
-  font-size: 0.8rem;
-  color: var(--text-dark);
+  font-size: 0.875rem;
+  color: var(--rd-text-muted);
   margin: 0;
 }
 
-/* 2. System Status Grid Cards */
+/* ==========================================================================
+   CORE ANALYTICS SUMMARY MATRIX (STAT CARDS)
+   ========================================================================== */
 .rd-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 1.25rem;
 }
 
 .rd-stat-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-glow);
-  border-radius: 12px;
+  background-color: var(--rd-bg-card);
+  border: 1px solid var(--rd-border);
+  border-radius: var(--rd-radius-card);
   padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: var(--rd-shadow-md);
   position: relative;
-  transition: all 0.2s ease;
+  overflow: hidden;
+  transition: transform var(--rd-speed) ease, box-shadow var(--rd-speed) ease;
 }
 
 .rd-stat-card:hover {
-  border-color: rgba(255, 255, 255, 0.15);
   transform: translateY(-2px);
+  box-shadow: var(--rd-shadow-lg);
 }
 
 .card-content {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  margin-bottom: 1.25rem;
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
 .card-label {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  margin: 0 0 0.5rem 0;
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: var(--rd-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.03em;
+  margin: 0;
 }
 
 .card-value {
   font-size: 1.75rem;
-  font-weight: 700;
+  font-weight: 800;
+  color: var(--rd-text-main);
   margin: 0;
-  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: -0.01em;
 }
 
 .icon-badge {
-  width: 42px;
-  height: 42px;
-  border-radius: 8px;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--rd-radius-inner);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
 }
 
-/* Accent Indicators */
-.theme-indigo .icon-badge { background: rgba(99, 102, 241, 0.1); color: var(--neon-indigo); }
-.theme-indigo .progress-fill { background: var(--neon-indigo); }
-.theme-emerald .icon-badge { background: rgba(16, 185, 129, 0.1); color: var(--neon-emerald); }
-.theme-emerald .progress-fill { background: var(--neon-emerald); }
-.theme-blue .icon-badge { background: rgba(59, 130, 246, 0.1); color: var(--neon-cyan); }
-.theme-blue .progress-fill { background: var(--neon-cyan); }
-.theme-amber .icon-badge { background: rgba(245, 158, 11, 0.1); color: var(--neon-amber); }
-.theme-amber .progress-fill { background: var(--neon-amber); }
+/* Structural Progress Accent Matrices */
+.rd-stat-card.theme-indigo .icon-badge { background-color: var(--rd-indigo-glow); color: var(--rd-indigo); }
+.rd-stat-card.theme-indigo .progress-fill { background-color: var(--rd-indigo); width: 65%; }
+
+.rd-stat-card.theme-emerald .icon-badge { background-color: var(--rd-emerald-glow); color: var(--rd-emerald); }
+.rd-stat-card.theme-emerald .progress-fill { background-color: var(--rd-emerald); width: 80%; }
+
+.rd-stat-card.theme-blue .icon-badge { background-color: var(--rd-blue-glow); color: var(--rd-blue); }
+.rd-stat-card.theme-blue .progress-fill { background-color: var(--rd-blue); width: 45%; }
+
+.rd-stat-card.theme-amber .icon-badge { background-color: var(--rd-amber-glow); color: var(--rd-amber); }
+.rd-stat-card.theme-amber .progress-fill { background-color: var(--rd-amber); width: 55%; }
 
 .card-progress-bar {
-  height: 2px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 1px;
-  margin-top: 1rem;
+  height: 4px;
+  background-color: var(--rd-workspace-bg, #f1f5f9);
+  border-radius: 2px;
+  width: 100%;
+  overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  width: 45%;
+  border-radius: 2px;
 }
 
-/* 3. Central Charts Layout Matrix */
+/* ==========================================================================
+   CHARTS VISUALIZATION LAYER CONSOLE
+   ========================================================================== */
 .rd-charts-matrix {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.25rem;
+  grid-template-columns: 1fr 2fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+  .rd-charts-matrix {
+    grid-template-columns: 1fr;
+  }
+  .span-two-columns {
+    grid-column: span 1 !important;
+  }
 }
 
 .rd-chart-panel {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-glow);
-  border-radius: 12px;
+  background-color: var(--rd-bg-card);
+  border: 1px solid var(--rd-border);
+  border-radius: var(--rd-radius-card);
   padding: 1.5rem;
-}
-
-.span-two-columns {
-  grid-column: span 2;
-}
-
-.panel-header {
-  margin-bottom: 1.25rem;
+  box-shadow: var(--rd-shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .panel-header h3 {
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--rd-text-main);
   margin: 0 0 0.25rem 0;
 }
 
 .panel-header p {
-  font-size: 0.8rem;
-  color: var(--text-dark);
+  font-size: 0.85rem;
+  color: var(--rd-text-muted);
   margin: 0;
 }
 
 .rd-chart-wrapper {
   position: relative;
-  height: 240px;
+  flex: 1;
+  min-height: 280px;
+  max-height: 320px;
+  width: 100%;
 }
 
-/* 4. Macro System Interface */
+/* ==========================================================================
+   MACRO PLATFORM TRACKING SYSTEM CONSOLE
+   ========================================================================== */
 .rd-macro-console {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-glow);
-  border-radius: 12px;
-  overflow: hidden;
+  background-color: var(--rd-bg-card);
+  border: 1px solid var(--rd-border);
+  border-radius: var(--rd-radius-card);
+  padding: 1.75rem 2rem;
+  box-shadow: var(--rd-shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
 }
 
 .macro-card-main {
-  background: rgba(255, 255, 255, 0.01);
-  padding: 1.25rem 1.5rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  border-bottom: 1px solid var(--border-glow);
+  gap: 1.25rem;
+  border-bottom: 1px solid var(--rd-border);
+  padding-bottom: 1.25rem;
 }
 
 .macro-globe-icon {
-  color: var(--neon-cyan);
-  font-size: 1.2rem;
+  width: 50px;
+  height: 50px;
+  background-color: var(--rd-indigo-glow);
+  color: var(--rd-indigo);
+  border-radius: 50%;
   display: flex;
   align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+}
+
+.spinning-globe {
+  animation: slowSpin 20s linear infinite;
+}
+
+@keyframes slowSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .macro-meta-text h3 {
-  font-size: 0.95rem;
-  font-weight: 600;
-  margin: 0 0 0.15rem 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
 }
 
 .macro-meta-text p {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
+  font-size: 0.875rem;
+  color: var(--rd-text-muted);
   margin: 0;
+  line-height: 1.4;
 }
 
+/* Telemetry Tile Row layouts */
 .macro-metrics-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
 }
 
 .macro-metric-tile {
-  padding: 1.5rem;
+  background-color: var(--rd-bg-workspace);
+  border: 1px solid var(--rd-border);
+  border-radius: var(--rd-radius-inner);
+  padding: 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-}
-
-.macro-metrics-row .macro-metric-tile:not(:last-child) {
-  border-right: 1px solid var(--border-glow);
+  gap: 0.75rem;
 }
 
 .tile-header {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  color: var(--text-dark);
+  gap: 0.75rem;
 }
 
-.tile-icon { display: none; } /* Drop redundant icons for cleaner UI */
+.tile-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+.tile-icon.students { background-color: var(--rd-blue-glow); color: var(--rd-blue); }
+.tile-icon.jobs { background-color: var(--rd-indigo-glow); color: var(--rd-indigo); }
+.tile-icon.apps { background-color: var(--rd-emerald-glow); color: var(--rd-emerald); }
+
+.tile-header p {
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: var(--rd-text-muted);
+  margin: 0;
+}
+
+.tile-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
 
 .tile-body h3 {
-  font-size: 1.6rem;
-  font-weight: 700;
-  margin: 0 0 0.15rem 0;
-  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -0.01em;
 }
 
 .growth-tag {
   font-size: 0.75rem;
-  color: var(--text-secondary);
+  font-weight: 700;
+  color: var(--rd-emerald);
+  background-color: var(--rd-emerald-glow);
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   gap: 0.25rem;
 }
 
-/* 5. Clean Loading Animation Minimalist Layer */
+.growth-tag.jobs-tag { color: var(--rd-indigo); background-color: var(--rd-indigo-glow); }
+.growth-tag.apps-tag { color: var(--rd-blue); background-color: var(--rd-blue-glow); }
+
+/* ==========================================================================
+   INITIALIZATION COMPILING SCREEN LOADERS
+   ========================================================================== */
 .rd-loader-screen {
-  background: var(--bg-deep);
-  color: var(--text-primary);
   min-height: 100vh;
+  background-color: #0f172a;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  gap: 1rem;
-  font-family: 'JetBrains Mono', monospace;
+  justify-content: center;
+  gap: 1.5rem;
 }
 
 .rd-spinner-wrapper {
-  width: 40px;
-  height: 40px;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
 }
 
 .rd-spinner-ring {
   width: 100%;
   height: 100%;
-  border: 2px solid rgba(255, 255, 255, 0.05);
-  border-top-color: var(--neon-indigo);
+  border: 3px solid rgba(99, 102, 241, 0.1);
+  border-top-color: var(--rd-indigo);
   border-radius: 50%;
-  animation: cleanSpin 0.8s linear infinite;
+  animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
-@keyframes cleanSpin {
-  100% { transform: rotate(360deg); }
+.rd-spinner-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: var(--rd-emerald);
+  border-radius: 50%;
+  animation: pulse 1.2s infinite ease-in-out;
 }
 
 .rd-loader-text {
-  font-size: 0.75rem;
-  letter-spacing: 2px;
-  color: var(--text-secondary);
+  color: #94a3b8;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
-/* Responsiveness adjustments */
-@media (max-width: 1024px) {
-  .rd-charts-matrix { grid-template-columns: 1fr; }
-  .span-two-columns { grid-column: auto; }
-  .macro-metrics-row { grid-template-columns: 1fr; }
-  .macro-metrics-row .macro-metric-tile:not(:last-child) { border-right: none; border-bottom: 1px solid var(--border-glow); }
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(0.8); opacity: 0.5; }
+  50% { transform: scale(1.3); opacity: 1; }
 }
