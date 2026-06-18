@@ -66,7 +66,7 @@ function App() {
         <Route path="/jobs" element={<JobPortal />} />
         <Route path="/job/:jobPublicId" element={<JobDetails />} />
         <Route path="/companies" element={<CompanySection />} />
-        <Route path="/companies/:companyPublicId" element={<CompanyDetails />} />
+    <Route path="/company/:companyPublicId" element={<CompanyDetails />} />
         <Route path="/internships" element={<InternshipsPage />} />
 
         {/* ================= STUDENT ROUTES ================= */}

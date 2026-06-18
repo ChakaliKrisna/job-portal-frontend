@@ -63,14 +63,21 @@ export default function NotificationDashboard() {
         try {
             if (!dateString) return 'Just now';
             
-            // Reformat ISO timestamp to drop microsecond decimals beyond 3 digits if necessary
-            const cleanDateString = dateString.includes('.') 
-                ? dateString.split('.')[0] + 'Z' 
-                : dateString;
+            // 1. Append UTC designator 'Z' if missing from backend string
+            let normalizedString = dateString;
+            if (!normalizedString.endsWith('Z') && !normalizedString.includes('+')) {
+                normalizedString = normalizedString + 'Z';
+            }
 
-            const dateObj = new Date(cleanDateString);
+            let dateObj = new Date(normalizedString);
             
-            // Check if date creation failed
+            // 2. Fallback: If browser engine rejects long microsecond decimals, truncate them
+            if (isNaN(dateObj.getTime())) {
+                const truncatedString = dateString.split('.')[0] + 'Z';
+                dateObj = new Date(truncatedString);
+            }
+
+            // 3. Final structural validation check
             if (isNaN(dateObj.getTime())) {
                 return 'Recent';
             }
@@ -141,7 +148,6 @@ export default function NotificationDashboard() {
                 <div className="notif-dropdown-scroll-stack">
                     {notifications.map((notif) => {
                         const typeAttr = getTypeAttributes(notif.type);
-                        // Safely stringify or read the numerical ID for keys
                         const stableKey = notif.id ? String(notif.id) : Math.random().toString();
                         
                         return (
@@ -155,15 +161,14 @@ export default function NotificationDashboard() {
                                     <span className={`notif-tray-tag ${typeAttr.className}`}>
                                         {typeAttr.label}
                                     </span>
-                                    {/* FIXED: Using clean safe parsing wrapper function */}
                                     <span className="notif-tray-time">
                                         {formatNotificationTime(notif.createdAt)}
                                     </span>
                                 </div>
 
                                 <div className="notif-tray-card-body-content">
-                                    <h4 className="notif-tray-item-title">{notif.title}</h4>
-                                    <p className="notif-tray-item-msg">{notif.message}</p>
+                                    <h4 className="notif-tray-item-title">{notif.title || "Alert Update"}</h4>
+                                    <p className="notif-tray-item-msg">{notif.message || "No message payload included."}</p>
                                 </div>
 
                                 <div className="notif-tray-card-footer">
