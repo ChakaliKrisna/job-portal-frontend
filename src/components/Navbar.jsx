@@ -94,30 +94,121 @@ const Navbar = () => {
           {/* BRAND LOGO - TRANSFORMED WITH CUSTOM VECTOR LOGO AND TEXT */}
          <div className="brand-wrapper">
   <Link to="/" className="brand-modern" onClick={() => setIsMobile(false)}>
-    <div className="logo-vector-mark">
-      <svg viewBox="0 0 100 100" className="vector-svg-logo" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="csGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="var(--logo-accent-secondary)" />
-            <stop offset="100%" stopColor="var(--logo-accent-primary)" />
-          </linearGradient>
-        </defs>
-        {/* Sleek, continuous geometric ribbon forming an upward trending C + S track */}
-        <path 
-          d="M 25 70 C 20 50, 35 30, 55 30 C 70 30, 78 42, 75 55 C 72 68, 55 70, 45 65 L 75 35" 
-          fill="none" 
-          stroke="url(#csGrad)" 
-          strokeWidth="10" 
-          strokeLinecap="round" 
-          strokeLinejoin="round"
-        />
-        {/* Forward momentum accent rocket dot */}
-        <circle cx="75" cy="35" r="5" fill="#ffffff" />
-      </svg>
-    </div>
+<div className="logo-vector-mark">
+  <svg 
+    viewBox="0 0 100 100" 
+    className="vector-svg-logo" 
+    xmlns="http://www.w3.org/2000/svg"
+    style={{ width: '100%', height: '100%', overflow: 'visible' }}
+  >
+    <defs>
+      {/* Aurora Mesh Gradient - Deep Velvet to High-Ignition Lime & Cyan */}
+      <linearGradient id="chronoPrimary" x1="0%" y1="100%" x2="100%" y2="0%">
+        <stop offset="0%" stopColor="#a855f7" />   {/* Royal Amethyst */}
+        <stop offset="40%" stopColor="#3b82f6" />  {/* Hyper Blue */}
+        <stop offset="80%" stopColor="#06b6d4" />  {/* Cyber Cyan */}
+        <stop offset="100%" stopColor="#10b981" /> {/* Electric Emerald */}
+      </linearGradient>
+
+      {/* Shadow Hull Gradient for structural depth */}
+      <linearGradient id="chronoDark" x1="100%" y1="100%" x2="0%" y2="0%">
+        <stop offset="0%" stopColor="#0f172a" />
+        <stop offset="100%" stopColor="#1e293b" />
+      </linearGradient>
+
+      {/* Advanced Layered Studio Glow */}
+      <filter id="chronoGlow" x="-30%" y="-30%" width="160%" height="160%">
+        <feDropShadow dx="0" dy="14" stdDeviation="10" floodColor="#3b82f6" floodOpacity="0.25"/>
+        <feDropShadow dx="0" dy="4" stdDeviation="3" floodColor="#10b981" floodOpacity="0.18"/>
+      </filter>
+    </defs>
+
+    {/* Master Composition Wrapper */}
+    <g filter="url(#chronoGlow)">
+      
+      {/* 1. MICRO-PRECISION RADAR CIRCLE (Subtle architectural background element) */}
+      <circle 
+        cx="50" 
+        cy="50" 
+        r="38" 
+        fill="none" 
+        stroke="url(#chronoPrimary)" 
+        strokeWidth="1" 
+        strokeDasharray="3 6" 
+        opacity="0.18" 
+      />
+
+      {/* 2. THE RECURVE BOW HULL (Solid structural back-plate forming the 'C') */}
+      <path
+        d="M 68 22 
+           C 36 12, 14 30, 14 50 
+           C 14 70, 36 88, 68 78
+           C 52 74, 28 66, 28 50
+           C 28 34, 52 26, 68 22 Z"
+        fill="url(#chronoDark)"
+      />
+
+      {/* 3. PRECISION TICKS (Instrument markings on the bow hull for tactical tech feel) */}
+      <line x1="14" y1="50" x2="20" y2="50" stroke="#ffffff" strokeWidth="1.5" opacity="0.3" />
+      <line x1="41" y1="17" x2="43" y2="23" stroke="#ffffff" strokeWidth="1" opacity="0.2" />
+      <line x1="41" y1="83" x2="43" y2="77" stroke="#ffffff" strokeWidth="1" opacity="0.2" />
+
+      {/* 4. THE INFINITY KINETIC FLIGHT RIBBON (Weaves the 'S' track into pure vector acceleration) */}
+      <path
+        d="M 28 72 
+           C 20 54, 40 48, 50 40
+           L 76 14"
+        fill="none"
+        stroke="url(#chronoPrimary)"
+        strokeWidth="8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      {/* 5. MULTI-FACETED TARGET ARROWHEAD (Aerodynamic stealth-blade segmentation) */}
+      {/* Core Driving Wedge */}
+      <path
+        d="M 76 14 
+           L 48 24 
+           L 58 34 
+           Z"
+        fill="url(#chronoPrimary)"
+      />
+      {/* High-Contrast Split Wing */}
+      <path
+        d="M 76 14 
+           L 58 34 
+           L 68 44 
+           Z"
+        fill="#10b981"
+        opacity="0.85"
+      />
+
+      {/* 6. GLASSMORPHIC EDGE HIGHLIGHT (Simulated light reflection along the main speed line) */}
+      <path
+        d="M 32 70 C 26 58, 38 52, 46 44 L 70 20"
+        fill="none"
+        stroke="#ffffff"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        opacity="0.4"
+      />
+
+      {/* 7. THE INTERSECTION POINT (Pure white focal ignition node) */}
+      <circle 
+        cx="76" 
+        cy="14" 
+        r="3" 
+        fill="#ffffff" 
+        style={{ filter: 'drop-shadow(0px 0px 6px #10b981)' }}
+      />
+      
+    </g>
+  </svg>
+</div>
     <div className="brand-text-group">
       <span className="brand-name-main">Career<span className="brand-name-sub">Setu</span></span>
-      <span className="brand-tagline">Your Next Move Starts Here</span>
+      <span className="brand-tagline">Where Talent Meets Opportunity</span>
     </div>
   </Link>
 </div>
