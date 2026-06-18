@@ -31,12 +31,10 @@ const JobPortal = ({
   const [loading, setLoading] = useState(false);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [error, setError] = useState(null);
-  
-  // Slice architecture handles pagination using "last" indicators instead of totalPages
-  const [isLastPage, setIsLastPage] = useState(true);
+  const [totalPages, setTotalPages] = useState(0);
 
-  // Seed state variables directly out of search parameters once
-  const [filters, setFilters] = useState(() => ({
+  // CRITICAL FIX: Pre-seed the jobType state if internshipMode is explicitly passed down
+  const [filters, setFilters] = useState({
     keyword: searchParams.get("keyword") || "",
     location: searchParams.get("location") || "",
     category: searchParams.get("category") || "",
@@ -48,110 +46,27 @@ const JobPortal = ({
     sort: searchParams.get("sort") || "postedDate,desc",
     page: Number(searchParams.get("page")) || 0,
     size: isHomePage ? 6 : 10
-  }));
+  });
 
-  // --- MAIN CORE API CONTENT STREAM ---
-  const fetchJobs = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const cleanParams = {};
-      Object.entries(filters).forEach(([k, v]) => {
-        if (v !== "" && v !== null && v !== undefined) {
-          cleanParams[k] = v;
-        }
-      });
-
-      if (internshipMode) {
-        cleanParams.jobType = "INTERNSHIP";
-      }
-
-      const res = await axios.get(`${API_BASE}/jobs`, {
-        params: cleanParams,
-        headers: token ? { Authorization: `Bearer ${token}` } : {} 
-      });
-
-      // Handle both Slice and Page backends gracefully
-      const content = res.data?.content || [];
-      setJobs(content);
-      setIsLastPage(res.data?.last !== undefined ? res.data.last : true);
-
-      const jobIdFromUrl = searchParams.get("id");
-      
-      if (content.length > 0 && !isHomePage) {
-        if (jobIdFromUrl) {
-          const targetedJob = content.find(j => j.publicId === jobIdFromUrl);
-          const activeSelection = targetedJob || content[0];
-          setSelectedJob(activeSelection);
-          trackRecentlyViewed(activeSelection);
-        } else {
-          setSelectedJob(content[0]);
-          trackRecentlyViewed(content[0]);
-          
-          if (!isHomePage) {
-            setSearchParams(prev => {
-              const current = Object.fromEntries(prev.entries());
-              return { ...current, id: content[0].publicId };
-            }, { replace: true });
-          }
-        }
-      } else if (isHomePage) {
-        setSelectedJob(null);
-      }
-    } catch (err) {
-      console.error("Fetch lifecycle failure context:", err);
-      setError(err.response?.status === 403 ? "Access Denied" : "Failed to load jobs.");
-    } finally {
-      setLoading(false);
-    }
-  }, [filters, token, isHomePage, internshipMode]); // Removed searchParams dependency to prevent fetch re-triggers
-
-  // Contextual secondary lookup loop
-  const fetchSimilarJobs = useCallback(async (jobId) => {
-    if (!jobId) return;
-    try {
-      const res = await axios.get(`${API_BASE}/jobs/${jobId}/similar`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      });
-      setSimilarJobs(res.data || []);
-    } catch (err) {
-      console.error("Contextual lookup failure", err);
-      setSimilarJobs([]);
-    }
-  }, [token]);
-
-  const fetchSavedStatus = useCallback(async () => {
-    if (!token) return;
-    try {
-      const res = await axios.get(`${API_BASE}/saved`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const ids = new Set(res.data.filter(item => item?.job?.publicId).map(item => item.job.publicId));
-      setSavedJobIds(ids);
-    } catch (err) { console.error(err); }
-  }, [token]);
-
-  // Initial lookup triggers
+  // Watch for changes in the URL search params and sync active filters (Only for full Browse page)
   useEffect(() => {
-    fetchSavedStatus();
-  }, [fetchSavedStatus]);
+    if (isHomePage) return;
+    
+    setFilters(prev => ({
+      ...prev,
+      keyword: searchParams.get("keyword") || "",
+      location: searchParams.get("location") || "",
+      category: searchParams.get("category") || "",
+      jobType: internshipMode ? "INTERNSHIP" : (searchParams.get("jobType") || ""),
+      workMode: searchParams.get("workMode") || "",
+      experienceLevel: searchParams.get("experienceLevel") || "",
+      minSalary: searchParams.get("minSalary") || "",
+      sort: searchParams.get("sort") || "postedDate,desc",
+      page: Number(searchParams.get("page")) || 0,
+    }));
+  }, [searchParams, isHomePage, internshipMode]);
 
-  useEffect(() => {
-    if (selectedJob?.publicId) {
-      fetchSimilarJobs(selectedJob.publicId);
-    }
-  }, [selectedJob?.publicId, fetchSimilarJobs]);
-
-  // Debounce state pipeline manager
-  useEffect(() => {
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    debounceTimer.current = setTimeout(() => { 
-      fetchJobs(); 
-    }, 300);
-    return () => clearTimeout(debounceTimer.current);
-  }, [filters, fetchJobs]);
-
-  // Push filter variations downstream to URL structure smoothly
+  // Dynamic state synchronization back downstream inside URL search space parameters
   useEffect(() => {
     if (isHomePage) return;
     
@@ -167,8 +82,96 @@ const JobPortal = ({
       cleanParams.id = activeJobId;
     }
 
-    setSearchParams(cleanParams, { replace: true });
-  }, [filters, isHomePage, setSearchParams]);
+    const currentParamsString = searchParams.toString();
+    const newParamsString = new URLSearchParams(cleanParams).toString();
+    
+    if (currentParamsString !== newParamsString) {
+      setSearchParams(cleanParams, { replace: true });
+    }
+  }, [filters, setSearchParams, isHomePage, searchParams]);
+  
+  // Fetch similar jobs
+  const fetchSimilarJobs = useCallback(async (jobId) => {
+    if (!jobId) return;
+    try {
+      const res = await axios.get(`${API_BASE}/jobs/${jobId}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      setSimilarJobs(res.data || []);
+    } catch (err) {
+      console.error("Contextual lookup failure", err);
+      setSimilarJobs([]);
+    }
+  }, [token]);
+
+  // --- MAIN CORE API CONTENT STREAM ---
+  const fetchJobs = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Clean query inputs completely before building request package
+      const cleanParams = Object.fromEntries(
+        Object.entries(filters).filter(([_, v]) => v !== "" && v !== null)
+      );
+
+      // Force safety layer assignment
+      if (internshipMode) {
+        cleanParams.jobType = "INTERNSHIP";
+      }
+
+      const res = await axios.get(`${API_BASE}/jobs`, {
+        params: cleanParams,
+        headers: token ? { Authorization: `Bearer ${token}` } : {} 
+      });
+
+      const content = res.data?.content || [];
+      setJobs(content);
+      setTotalPages(res.data?.totalPages || 0);
+
+      const jobIdFromUrl = searchParams.get("id");
+      
+      if (content.length > 0 && !isHomePage) {
+        if (jobIdFromUrl) {
+          const targetedJob = content.find(j => j.publicId === jobIdFromUrl);
+          const activeSelection = targetedJob || content[0];
+          setSelectedJob(activeSelection);
+          trackRecentlyViewed(activeSelection);
+        } else {
+          setSelectedJob(content[0]);
+          trackRecentlyViewed(content[0]);
+          
+          setSearchParams(prev => {
+            const current = Object.fromEntries(prev.entries());
+            return { ...current, id: content[0].publicId };
+          }, { replace: true });
+        }
+      } else if (isHomePage) {
+        setSelectedJob(null);
+      }
+    } catch (err) {
+      console.error("Fetch lifecycle failure execution context:", err);
+      setError(err.response?.status === 403 ? "Access Denied" : "Failed to load jobs.");
+    } finally {
+      setLoading(false);
+    }
+  }, [filters, token, isHomePage, internshipMode, searchParams, setSearchParams]);
+
+  const fetchSavedStatus = useCallback(async () => {
+    if (!token) return;
+    try {
+      const res = await axios.get(`${API_BASE}/saved`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const ids = new Set(res.data.filter(item => item?.job?.publicId).map(item => item.job.publicId));
+      setSavedJobIds(ids);
+    } catch (err) { console.error(err); }
+  }, [token]);
+
+  useEffect(() => {
+    if (selectedJob?.publicId) {
+      fetchSimilarJobs(selectedJob.publicId);
+    }
+  }, [selectedJob?.publicId, fetchSimilarJobs]);
 
   const toggleSave = async (e, jobId) => {
     e.stopPropagation();
@@ -203,11 +206,11 @@ const JobPortal = ({
     const diffTime = target - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays < 0) return { text: "Expired", class: "expired" };
-    if (diffDays === 0) return { text: "Ends Today!", class: "urgent" };
-    if (diffDays <= 3) return { text: `${diffDays} days left`, class: "urgent" };
-    if (diffDays <= 7) return { text: `${diffDays} days left`, class: "warning" };
-    return { text: `${diffDays} days left`, class: "upcoming" };
+    if (diffDays < 0) return { text: "Expired", class: "expired", percent: 100 };
+    if (diffDays === 0) return { text: "Ends Today!", class: "urgent", percent: 95 };
+    if (diffDays <= 3) return { text: `${diffDays} days left`, class: "urgent", percent: 85 };
+    if (diffDays <= 7) return { text: `${diffDays} days left`, class: "warning", percent: 65 };
+    return { text: `${diffDays} days left`, class: "upcoming", percent: 25 };
   };
 
   const trackRecentlyViewed = (job) => {
@@ -218,14 +221,23 @@ const JobPortal = ({
       const trackingMeta = {
         publicId: job.publicId,
         title: job.title,
-        companyName: typeof job.company === 'string' ? job.company : job.company?.name || "Partner Enterprise",
+        companyName: job.company || job.companyName || "Anonymous Venture",
         location: job.location,
         companyLogo: job.companyLogo || null
       };
       const updated = [trackingMeta, ...filtered].slice(0, 5);
       localStorage.setItem("recentJobs", JSON.stringify(updated));
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error(e);
+    }
   };
+
+  // Debounce Engine
+  useEffect(() => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => { fetchJobs(); }, 400);
+    return () => clearTimeout(debounceTimer.current);
+  }, [filters, fetchJobs]);
 
   const handleReset = () => {
     setFilters({
@@ -250,7 +262,11 @@ const JobPortal = ({
 
   const handleJobSelection = (job) => {
     if (isHomePage) {
-      navigate(`/jobs?jobType=${internshipMode ? "INTERNSHIP" : ""}&id=${job.publicId}`);
+      if (internshipMode) {
+        navigate(`/jobs?jobType=INTERNSHIP&id=${job.publicId}`);
+      } else {
+        navigate(`/jobs?id=${job.publicId}`);
+      }
     } else {
       setSelectedJob(job);
       trackRecentlyViewed(job);
@@ -263,12 +279,48 @@ const JobPortal = ({
 
   const formatSalary = (s) => s ? (s / 100000).toFixed(1) : "N/A";
 
+  // Structural Architecture Fix #12: Strategic string parsers to break down giant generic blobs into cleanly rendered fragments
+  const renderStructuredDescription = (text) => {
+    if (!text) return null;
+    
+    // Check if the source text block contains embedded structural markdown configurations
+    if (text.includes("Responsibilities:") || text.includes("Requirements:")) {
+      const sections = text.split(/(?=Responsibilities:|Requirements:|About Role:|Benefits:)/gi);
+      return sections.map((sec, idx) => {
+        const cleanSec = sec.trim();
+        if (cleanSec.toLowerCase().startsWith("responsibilities:")) {
+          return (
+            <div key={idx} className="desc-block-segment">
+              <h4>Responsibilities</h4>
+              <p>{cleanSec.replace(/Responsibilities:/i, "").trim()}</p>
+            </div>
+          );
+        }
+        if (cleanSec.toLowerCase().startsWith("requirements:")) {
+          return (
+            <div key={idx} className="desc-block-segment">
+              <h4>Requirements</h4>
+              <p>{cleanSec.replace(/Requirements:/i, "").trim()}</p>
+            </div>
+          );
+        }
+        return <p key={idx} className="desc-paragraph">{cleanSec}</p>;
+      });
+    }
+
+    // Default processing rules fallback strategy
+    return text.split("\n\n").map((para, i) => (
+      <p key={i} className="desc-paragraph">{para.trim()}</p>
+    ));
+  };
+
   const EmptyState = () => (
     <div className="empty-state">
       <FaSearch size={40} />
       <p>No jobs matching your explicit filter variables found.</p>
     </div>
   );
+
   // --- 🏠 RENDER MODULE: FEATURED HOVER TILES HOME AREA ---
   if (isHomePage) {
     return (
