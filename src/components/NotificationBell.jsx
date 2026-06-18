@@ -58,6 +58,36 @@ export default function NotificationDashboard() {
         }
     };
 
+    // Helper function to safely format ISO strings with trailing microseconds
+    const formatNotificationTime = (dateString) => {
+        try {
+            if (!dateString) return 'Just now';
+            
+            // Reformat ISO timestamp to drop microsecond decimals beyond 3 digits if necessary
+            const cleanDateString = dateString.includes('.') 
+                ? dateString.split('.')[0] + 'Z' 
+                : dateString;
+
+            const dateObj = new Date(cleanDateString);
+            
+            // Check if date creation failed
+            if (isNaN(dateObj.getTime())) {
+                return 'Recent';
+            }
+
+            return dateObj.toLocaleString(undefined, {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+        } catch (e) {
+            console.error("Date parsing error: ", e);
+            return 'Recent';
+        }
+    };
+
     if (loading) {
         return (
             <div className="notif-dropdown-container minimal-flex-center">
@@ -111,10 +141,12 @@ export default function NotificationDashboard() {
                 <div className="notif-dropdown-scroll-stack">
                     {notifications.map((notif) => {
                         const typeAttr = getTypeAttributes(notif.type);
+                        // Safely stringify or read the numerical ID for keys
+                        const stableKey = notif.id ? String(notif.id) : Math.random().toString();
                         
                         return (
                             <div
-                                key={notif.id}
+                                key={stableKey}
                                 className={`notif-tray-item-card ${
                                     !notif.isRead ? 'unread-tray-state' : 'read-tray-state'
                                 }`}
@@ -123,15 +155,9 @@ export default function NotificationDashboard() {
                                     <span className={`notif-tray-tag ${typeAttr.className}`}>
                                         {typeAttr.label}
                                     </span>
-                                    {/* UPDATED: Changed from toLocaleDateString to toLocaleString with time tokens */}
+                                    {/* FIXED: Using clean safe parsing wrapper function */}
                                     <span className="notif-tray-time">
-                                        {new Date(notif.createdAt).toLocaleString(undefined, {
-                                            month: 'short',
-                                            day: 'numeric',
-                                            hour: '2-digit',
-                                            minute: '2-digit',
-                                            hour12: true
-                                        })}
+                                        {formatNotificationTime(notif.createdAt)}
                                     </span>
                                 </div>
 

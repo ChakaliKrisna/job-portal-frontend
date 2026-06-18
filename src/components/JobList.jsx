@@ -33,7 +33,7 @@ const JobPortal = ({
   const [error, setError] = useState(null);
   const [totalPages, setTotalPages] = useState(0);
 
-  // CRITICAL FIX: Pre-seed the jobType state if internshipMode is explicitly passed down
+  // ✅ CONSTRICTOR ARCHITECTURE: Hard caps sizes to 10 max instead of leakages to 10200
   const [filters, setFilters] = useState({
     keyword: searchParams.get("keyword") || "",
     location: searchParams.get("location") || "",
@@ -48,25 +48,52 @@ const JobPortal = ({
     size: isHomePage ? 6 : 10
   });
 
-  // Watch for changes in the URL search params and sync active filters (Only for full Browse page)
+  // ✅ FIX #1: Strict value matching check before syncing URL parameters back into state values
   useEffect(() => {
     if (isHomePage) return;
     
-    setFilters(prev => ({
-      ...prev,
-      keyword: searchParams.get("keyword") || "",
-      location: searchParams.get("location") || "",
-      category: searchParams.get("category") || "",
-      jobType: internshipMode ? "INTERNSHIP" : (searchParams.get("jobType") || ""),
-      workMode: searchParams.get("workMode") || "",
-      experienceLevel: searchParams.get("experienceLevel") || "",
-      minSalary: searchParams.get("minSalary") || "",
-      sort: searchParams.get("sort") || "postedDate,desc",
-      page: Number(searchParams.get("page")) || 0,
-    }));
+    setFilters(prev => {
+      const urlPage = Number(searchParams.get("page")) || 0;
+      const urlKeyword = searchParams.get("keyword") || "";
+      const urlLocation = searchParams.get("location") || "";
+      const urlCategory = searchParams.get("category") || "";
+      const urlJobType = internshipMode ? "INTERNSHIP" : (searchParams.get("jobType") || "");
+      const urlWorkMode = searchParams.get("workMode") || "";
+      const urlExp = searchParams.get("experienceLevel") || "";
+      const urlSalary = searchParams.get("minSalary") || "";
+      const urlSort = searchParams.get("sort") || "postedDate,desc";
+
+      // If nothing actually changed in the browser search bar, do not trigger state changes!
+      if (
+        prev.page === urlPage &&
+        prev.keyword === urlKeyword &&
+        prev.location === urlLocation &&
+        prev.category === urlCategory &&
+        prev.jobType === urlJobType &&
+        prev.workMode === urlWorkMode &&
+        prev.experienceLevel === urlExp &&
+        prev.minSalary === urlSalary &&
+        prev.sort === urlSort
+      ) {
+        return prev; 
+      }
+
+      return {
+        ...prev,
+        keyword: urlKeyword,
+        location: urlLocation,
+        category: urlCategory,
+        jobType: urlJobType,
+        workMode: urlWorkMode,
+        experienceLevel: urlExp,
+        minSalary: urlSalary,
+        sort: urlSort,
+        page: urlPage,
+      };
+    });
   }, [searchParams, isHomePage, internshipMode]);
 
-  // Dynamic state synchronization back downstream inside URL search space parameters
+  // ✅ FIX #2: Unified single sync interface to prevent state updating from double looping
   useEffect(() => {
     if (isHomePage) return;
     
@@ -85,10 +112,11 @@ const JobPortal = ({
     const currentParamsString = searchParams.toString();
     const newParamsString = new URLSearchParams(cleanParams).toString();
     
+    // Only push history updates if strings mismatch
     if (currentParamsString !== newParamsString) {
       setSearchParams(cleanParams, { replace: true });
     }
-  }, [filters, setSearchParams, isHomePage, searchParams]);
+  }, [filters, isHomePage, searchParams, setSearchParams]);
   
   // Fetch similar jobs
   const fetchSimilarJobs = useCallback(async (jobId) => {
@@ -109,16 +137,15 @@ const JobPortal = ({
     setLoading(true);
     setError(null);
     try {
-      // Clean query inputs completely before building request package
       const cleanParams = Object.fromEntries(
         Object.entries(filters).filter(([_, v]) => v !== "" && v !== null)
       );
 
-      // Force safety layer assignment
       if (internshipMode) {
         cleanParams.jobType = "INTERNSHIP";
       }
 
+      // ✅ Hits backend clean pagination layers (size parameter is passed explicitly)
       const res = await axios.get(`${API_BASE}/jobs`, {
         params: cleanParams,
         headers: token ? { Authorization: `Bearer ${token}` } : {} 
@@ -279,11 +306,9 @@ const JobPortal = ({
 
   const formatSalary = (s) => s ? (s / 100000).toFixed(1) : "N/A";
 
-  // Structural Architecture Fix #12: Strategic string parsers to break down giant generic blobs into cleanly rendered fragments
   const renderStructuredDescription = (text) => {
     if (!text) return null;
     
-    // Check if the source text block contains embedded structural markdown configurations
     if (text.includes("Responsibilities:") || text.includes("Requirements:")) {
       const sections = text.split(/(?=Responsibilities:|Requirements:|About Role:|Benefits:)/gi);
       return sections.map((sec, idx) => {
@@ -308,7 +333,6 @@ const JobPortal = ({
       });
     }
 
-    // Default processing rules fallback strategy
     return text.split("\n\n").map((para, i) => (
       <p key={i} className="desc-paragraph">{para.trim()}</p>
     ));
@@ -320,7 +344,6 @@ const JobPortal = ({
       <p>No jobs matching your explicit filter variables found.</p>
     </div>
   );
-
   // --- 🏠 RENDER MODULE: FEATURED HOVER TILES HOME AREA ---
   if (isHomePage) {
     return (
