@@ -239,73 +239,76 @@ const Navbar = () => {
           </form>
 
           {/* NAVIGATION LINKS */}
-          <ul className={`modern-menu-links ${isMobile ? "mobile-active" : ""}`}>
-            {/* JOBS DROP-DOWN */}
-            <li className={`has-mega-dropdown ${activeDropdown === "jobs" ? "forced-open" : ""}`}>
-              <span className="modern-nav-trigger" onClick={() => toggleDropdown("jobs")}>
-                Find Jobs <FaChevronDown className="chevron-transition" />
-              </span>
-              
-              <div className="premium-mega-panel">
-                <div className="mega-grid">
-                  <div className="mega-column">
-                    <h6 className="column-title">By Domain / Category</h6>
-                    <Link to="/jobs?jobType=FULL_TIME&category=SOFTWARE_DEVELOPMENT" onClick={() => setIsMobile(false)}>Software Development</Link>
-                    <Link to="/jobs?jobType=FULL_TIME&category=DATA_SCIENCE" onClick={() => setIsMobile(false)}>Data Science & AI</Link>
-                    <Link to="/jobs?jobType=FULL_TIME&category=DEVOPS" onClick={() => setIsMobile(false)}>DevOps Engineering</Link>
-                    <Link to="/jobs?jobType=FULL_TIME&category=CYBER_SECURITY" onClick={() => setIsMobile(false)}>Cyber Security</Link>
-                    <Link to="/jobs?jobType=FULL_TIME&category=UI_UX" onClick={() => setIsMobile(false)}>UI/UX Design</Link>
-                  </div>
-                  <div className="mega-column">
-                    <h6 className="column-title">By Work Mode</h6>
-                    <Link to="/jobs?jobType=FULL_TIME&workMode=REMOTE" onClick={() => setIsMobile(false)} className="highlight-link">💥 Remote Jobs</Link>
-                    <Link to="/jobs?jobType=FULL_TIME&workMode=HYBRID" onClick={() => setIsMobile(false)}>Hybrid Work</Link>
-                    <Link to="/jobs?jobType=FULL_TIME&workMode=ONSITE" onClick={() => setIsMobile(false)}>Onsite / Office</Link>
-                  </div>
-                  <div className="mega-column">
-                    <h6 className="column-title">Business Roles</h6>
-                    <Link to="/jobs?jobType=FULL_TIME&category=MANAGEMENT" onClick={() => setIsMobile(false)}>Management</Link>
-                    <Link to="/jobs?jobType=FULL_TIME&category=MARKETING" onClick={() => setIsMobile(false)}>Digital Marketing</Link>
-                    <Link to="/jobs?jobType=FULL_TIME&category=FINANCE" onClick={() => setIsMobile(false)}>Finance & Accounts</Link>
-                    <Link to="/jobs?jobType=FULL_TIME&category=HUMAN_RESOURCES" onClick={() => setIsMobile(false)}>Human Resources</Link>
-                  </div>
-                </div>
-              </div>
-            </li>
+         {/* NAVIGATION LINKS */}
+<ul className={`modern-menu-links ${isMobile ? "mobile-open" : "desktop-view"}`}>
+  
+  {/* JOBS DROP-DOWN */}
+  <li className={`has-mega-dropdown ${activeDropdown === "jobs" ? "forced-open" : ""}`}>
+    <span className="modern-nav-trigger cursor-pointer flex items-center justify-between" onClick={() => toggleDropdown("jobs")}>
+      Find Jobs <FaChevronDown className="chevron-transition ml-1" />
+    </span>
+    
+    {/* MEGA PANEL - Contextual toggle for mobile views */}
+    <div className={`premium-mega-panel ${activeDropdown === "jobs" ? "mobile-visible" : "mobile-hidden"}`}>
+      <div className="mega-grid">
+        <div className="mega-column">
+          <h6 className="column-title">By Domain / Category</h6>
+          <Link to="/jobs?jobType=FULL_TIME&category=SOFTWARE_DEVELOPMENT" onClick={() => setIsMobile(false)}>Software Development</Link>
+          <Link to="/jobs?jobType=FULL_TIME&category=DATA_SCIENCE" onClick={() => setIsMobile(false)}>Data Science & AI</Link>
+          <Link to="/jobs?jobType=FULL_TIME&category=DEVOPS" onClick={() => setIsMobile(false)}>DevOps Engineering</Link>
+          <Link to="/jobs?jobType=FULL_TIME&category=CYBER_SECURITY" onClick={() => setIsMobile(false)}>Cyber Security</Link>
+          <Link to="/jobs?jobType=FULL_TIME&category=UI_UX" onClick={() => setIsMobile(false)}>UI/UX Design</Link>
+        </div>
+        <div className="mega-column">
+          <h6 className="column-title">By Work Mode</h6>
+          <Link to="/jobs?jobType=FULL_TIME&workMode=REMOTE" onClick={() => setIsMobile(false)} className="highlight-link">💥 Remote Jobs</Link>
+          <Link to="/jobs?jobType=FULL_TIME&workMode=HYBRID" onClick={() => setIsMobile(false)}>Hybrid Work</Link>
+          <Link to="/jobs?jobType=FULL_TIME&workMode=ONSITE" onClick={() => setIsMobile(false)}>Onsite / Office</Link>
+        </div>
+        <div className="mega-column">
+          <h6 className="column-title">Business Roles</h6>
+          <Link to="/jobs?jobType=FULL_TIME&category=MANAGEMENT" onClick={() => setIsMobile(false)}>Management</Link>
+          <Link to="/jobs?jobType=FULL_TIME&category=MARKETING" onClick={() => setIsMobile(false)}>Digital Marketing</Link>
+          <Link to="/jobs?jobType=FULL_TIME&category=FINANCE" onClick={() => setIsMobile(false)}>Finance & Accounts</Link>
+          <Link to="/jobs?jobType=FULL_TIME&category=HUMAN_RESOURCES" onClick={() => setIsMobile(false)}>Human Resources</Link>
+        </div>
+      </div>
+    </div>
+  </li>
 
-            {/* INTERNSHIPS DROP-DOWN */}
-            <li className={`has-mega-dropdown ${activeDropdown === "internships" ? "forced-open" : ""}`}>
-              <span className="modern-nav-trigger" onClick={() => toggleDropdown("internships")}>
-                Internships <FaChevronDown className="chevron-transition" />
-              </span>
-              
-              <div className="premium-mega-panel">
-                <div className="mega-grid">
-                  <div className="mega-column">
-                    <h6 className="column-title">Tech Tracks</h6>
-                    <Link to="/jobs?jobType=INTERNSHIP&category=SOFTWARE_DEVELOPMENT" onClick={() => setIsMobile(false)}>Web Development</Link>
-                    <Link to="/jobs?jobType=INTERNSHIP&category=DATA_SCIENCE" onClick={() => setIsMobile(false)}>Data Analytics</Link>
-                    <Link to="/jobs?jobType=INTERNSHIP&category=UI_UX" onClick={() => setIsMobile(false)}>Product Design</Link>
-                    <Link to="/jobs?jobType=INTERNSHIP&category=QA_TESTING" onClick={() => setIsMobile(false)}>QA & Testing</Link>
-                  </div>
-                  <div className="mega-column">
-                    <h6 className="column-title">Non-Tech Tracks</h6>
-                    <Link to="/jobs?jobType=INTERNSHIP&category=MARKETING" onClick={() => setIsMobile(false)}>Content Writing</Link>
-                    <Link to="/jobs?jobType=INTERNSHIP&category=SALES" onClick={() => setIsMobile(false)}>Business Development</Link>
-                    <Link to="/jobs?jobType=INTERNSHIP&category=DIGITAL_MARKETING" onClick={() => setIsMobile(false)}>Social Media Growth</Link>
-                  </div>
-                  <div className="mega-column">
-                    <h6 className="column-title">Preferences</h6>
-                    <Link to="/jobs?jobType=INTERNSHIP&workMode=REMOTE" onClick={() => setIsMobile(false)}>Work From Home (WFH)</Link>
-                    <Link to="/jobs?jobType=INTERNSHIP&workMode=PART_TIME" onClick={() => setIsMobile(false)}>Part-Time Allowed</Link>
-                  </div>
-                </div>
-              </div>
-            </li>
+  {/* INTERNSHIPS DROP-DOWN */}
+  <li className={`has-mega-dropdown ${activeDropdown === "internships" ? "forced-open" : ""}`}>
+    <span className="modern-nav-trigger cursor-pointer flex items-center justify-between" onClick={() => toggleDropdown("internships")}>
+      Internships <FaChevronDown className="chevron-transition ml-1" />
+    </span>
+    
+    <div className={`premium-mega-panel ${activeDropdown === "internships" ? "mobile-visible" : "mobile-hidden"}`}>
+      <div className="mega-grid">
+        <div className="mega-column">
+          <h6 className="column-title">Tech Tracks</h6>
+          <Link to="/jobs?jobType=INTERNSHIP&category=SOFTWARE_DEVELOPMENT" onClick={() => setIsMobile(false)}>Web Development</Link>
+          <Link to="/jobs?jobType=INTERNSHIP&category=DATA_SCIENCE" onClick={() => setIsMobile(false)}>Data Analytics</Link>
+          <Link to="/jobs?jobType=INTERNSHIP&category=UI_UX" onClick={() => setIsMobile(false)}>Product Design</Link>
+          <Link to="/jobs?jobType=INTERNSHIP&category=QA_TESTING" onClick={() => setIsMobile(false)}>QA & Testing</Link>
+        </div>
+        <div className="mega-column">
+          <h6 className="column-title">Non-Tech Tracks</h6>
+          <Link to="/jobs?jobType=INTERNSHIP&category=MARKETING" onClick={() => setIsMobile(false)}>Content Writing</Link>
+          <Link to="/jobs?jobType=INTERNSHIP&category=SALES" onClick={() => setIsMobile(false)}>Business Development</Link>
+          <Link to="/jobs?jobType=INTERNSHIP&category=DIGITAL_MARKETING" onClick={() => setIsMobile(false)}>Social Media Growth</Link>
+        </div>
+        <div className="mega-column">
+          <h6 className="column-title">Preferences</h6>
+          <Link to="/jobs?jobType=INTERNSHIP&workMode=REMOTE" onClick={() => setIsMobile(false)}>Work From Home (WFH)</Link>
+          <Link to="/jobs?jobType=INTERNSHIP&workMode=PART_TIME" onClick={() => setIsMobile(false)}>Part-Time Allowed</Link>
+        </div>
+      </div>
+    </div>
+  </li>
 
-            <li><Link to="/companies" className="modern-nav-trigger" onClick={() => setIsMobile(false)}>Companies</Link></li>
-            <li><Link to="/courses" className="modern-nav-trigger" onClick={() => setIsMobile(false)}>Courses</Link></li>
-          </ul>
+  <li><Link to="/companies" className="modern-nav-trigger" onClick={() => setIsMobile(false)}>Companies</Link></li>
+  <li><Link to="/courses" className="modern-nav-trigger" onClick={() => setIsMobile(false)}>Courses</Link></li>
+</ul>
 
           {/* RIGHT UTILITY HUB */}
           <div className="utility-action-hub">
