@@ -28,6 +28,7 @@ import RecruiterMyApplications from "./pages/recruter/RecruiterMyApplications";
 import SearchTalent from "./pages/recruter/Searchtalent";
 import CompanyProfile from "./pages/recruter/CompanyProfile";
 
+
 // Navbar
 import Navbar from "./components/Navbar";
 import RecruiterNavbar from "./components/recruter/RecruterNavbar";
