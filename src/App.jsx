@@ -18,7 +18,7 @@ import InternshipsPage from "./components/Internship";
 import ApplyJob from "./components/ApplyJob";
 import MyApplications from "./pages/MyApplications";
 import ApplicationDetails from "./pages/ApplicationDetails";
-import UserDashboard from "./pages/Dashboard";app
+import UserDashboard from "./pages/Dashboard";
 
 // Recruiter
 import RecruiterDashboard from "./pages/recruter/RecruiterDashBoard";
