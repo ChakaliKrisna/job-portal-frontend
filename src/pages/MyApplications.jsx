@@ -178,7 +178,8 @@ const SavedJobCard = ({ job, navigate, unsaveJob }) => (
     
     <div className="flex gap-3 w-full md:w-auto">
       <button 
-        onClick={() => navigate(`/job-details/${job.publicId}`)}
+      // /job/:jobPublicId
+        onClick={() => navigate(`/job/${job.publicId}`)}
         className="flex-1 md:px-8 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-blue-600 transition-all whitespace-nowrap"
       >
         {job.alreadyApplied ? "View Listing" : "Apply Now"}
@@ -220,7 +221,7 @@ const ApplicationCard = ({ app, navigate }) => (
 
     <div className="flex justify-between items-center border-t border-slate-100 pt-5 mt-2">
       <span className="flex items-center gap-2 text-sm text-slate-400 font-medium">
-        <FaClock /> Submitted {new Date(app.appliedAt).toLocaleDateString()}
+        <FaClock /> Submitted {new Date(app.appliedAt).toLocaleDateString()}F
       </span>
       <button 
         onClick={() => navigate(`/applications/${app.applicationId}`)}
