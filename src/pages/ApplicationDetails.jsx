@@ -107,7 +107,7 @@ const ApplicationDetails = () => {
                 <p>resume_snapshot.pdf</p>
                 <div className="resume-actions">
                   <a 
-                    href={`${API_BASE}${data.resumeUrl}`} 
+                    href={`${data.resumeUrl}`} 
                     target="_blank" 
                     rel="noreferrer"
                     className="btn-view"
