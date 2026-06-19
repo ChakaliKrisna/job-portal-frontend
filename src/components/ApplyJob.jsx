@@ -239,8 +239,17 @@ const ApplyJob = () => {
       setSuccess(true);
       setIsDirty(false);
     } catch (err) {
-      setError(err.response?.data?.message || "Something went wrong during entry registration.");
-    } finally {
+  const errorMessage =
+    err.response?.data?.message ||
+    JSON.stringify(err.response?.data) ||
+    err.message;
+
+  alert(
+    `Status: ${err.response?.status}\n\nError: ${errorMessage}`
+  );
+
+  setError(errorMessage);
+} finally {
       setSubmitting(false);
       setShowConfirm(false);
     }
