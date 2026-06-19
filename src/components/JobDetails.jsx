@@ -152,7 +152,8 @@ const JobDetails = () => {
     description,
     recruiter,
     company, // Extracted Object Structure
-    applicationsCount,
+    // applicationsCount,
+    applicantsCount,
     publicId
   } = job;
 
@@ -326,7 +327,7 @@ const JobDetails = () => {
               <FaUsers className="stat-icon" />
               <div>
                 <label>Applicants</label>
-                <span>{applicationsCount ?? 0} applied</span>
+                <span>{applicantsCount ?? 0} applied</span>
               </div>
             </div>
 
