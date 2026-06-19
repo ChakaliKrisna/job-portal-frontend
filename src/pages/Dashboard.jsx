@@ -86,7 +86,7 @@ const UserDashboard = () => {
   if (!profile?.resumeUrl) return;
   
   // Construct the full URL to your Spring Boot backend
-  const fileUrl = `${API_BASE}${profile.resumeUrl}`;
+  const fileUrl = `${profile.resumeUrl}`;
   
   // Opens the PDF in a new tab instead of a forced background download
   window.open(fileUrl, "_blank", "noreferrer");
@@ -141,7 +141,7 @@ const handleOpenProject = (url) => {
         <div style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }}>
           <div className="avatar-canvas">
             {profile?.profileImageUrl ? (
-              <img src={`${API_BASE}${profile.profileImageUrl}`} alt="Profile" className="avatar-img" />
+              <img src={`${profile.profileImageUrl}`} alt="Profile" className="avatar-img" />
             ) : (
               <div className="avatar-placeholder" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', fontWeight: '800', color: '#10b981' }}>
                 {localStorage.getItem("userName")?.charAt(0)}

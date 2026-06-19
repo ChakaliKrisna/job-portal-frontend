@@ -7,7 +7,7 @@ import {
 } from "react-icons/fa";
 import "../components/Styles/authDrawer.css";
 
-// 1. FIXED: Added sanitization check to dynamically clean trailing slashes from the API path
+// Dynamic API Path Clean up
 const RAW_API = import.meta.env.VITE_API_URL || "https://job-portal-backend-365l.onrender.com";
 const API = RAW_API.endsWith("/") ? RAW_API.slice(0, -1) : RAW_API;
 
@@ -109,7 +109,6 @@ const AuthDrawer = ({ isOpen, onClose, initialMode = "login" }) => {
       }
     }
 
-    // 2. Safely references sanitized API base without duplicate slashes
     const url = currentView === "login" ? `${API}/auth/login` : `${API}/auth/register`;
 
     try {
@@ -118,8 +117,13 @@ const AuthDrawer = ({ isOpen, onClose, initialMode = "login" }) => {
       if (currentView === "login") {
         const { token, role, name, email, publicId } = res.data;
         
-        // Scrub residual session metrics before saving new data context
-        localStorage.clear();
+        // FIXED: Do not use localStorage.clear() as it wipes setup contextual variables. 
+        // Explicitly clear key profile metrics instead.
+        localStorage.removeItem("token");
+        localStorage.removeItem("userName");
+        localStorage.removeItem("email");
+        localStorage.removeItem("publicId");
+        localStorage.removeItem("role");
 
         // Commit credentials to system storage
         localStorage.setItem("token", token);
@@ -130,13 +134,19 @@ const AuthDrawer = ({ isOpen, onClose, initialMode = "login" }) => {
 
         setMessage({ type: "success", text: "Authenticated successfully. Diverting access pathway..." });
         
-        // Safely normalize role values coming back from Spring Boot
         const isRecruiter = role === "ROLE_RECRUITER" || role === "RECRUITER";
-        const targetRoute = isRecruiter ? "/recruiter-dashboard" : "/";
 
         setTimeout(() => {
           handleClose(); 
-          window.location.href = targetRoute;
+          
+          // CRITICAL UX ROUTING MANAGEMENT FIX:
+          if (isRecruiter) {
+            // Recruiters are forced out of structural user pathing directly to the administration console
+            window.location.href = "/recruiter-dashboard";
+          } else {
+            // Students instantly refresh to commit auth state on current job / apply pathing layouts
+            window.location.reload();
+          }
         }, 1200);
       } else {
         setMessage({ type: "success", text: "Profile initialized successfully! Switching to sign in panel..." });
