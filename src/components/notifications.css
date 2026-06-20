@@ -1,251 +1,262 @@
 /* ==========================================================================
-   FLOATING ABOLUTE CONTEXT DROPDOWN ARCHITECTURE
+   Scoped Notification Dropdown Styles 
    ========================================================================== */
+
 .notif-dropdown-container {
-  width: 380px;
-  max-height: 480px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.05);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    /* Design Tokens / Variables scoped only to this component */
+    --notif-bg-main: #ffffff;
+    --notif-bg-hover: #f8fafc;
+    --notif-border-color: #e2e8f0;
+    --notif-text-primary: #0f172a;
+    --notif-text-secondary: #64748b;
+    
+    --cls-status-bg: #e0f2fe;
+    --cls-status-text: #0369a1;
+    --cls-applied-bg: #dcfce7;
+    --cls-applied-text: #15803d;
+    --cls-interview-bg: #fef3c7;
+    --cls-interview-text: #b45309;
+    --cls-default-bg: #f1f5f9;
+    --cls-default-text: #475569;
+
+    width: 100%;
+    max-width: 420px;
+    background-color: var(--notif-bg-main);
+    border: 1px solid var(--notif-border-color);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+
+    /* --- Header Section --- */
+    .notif-dropdown-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--notif-border-color);
+
+        .notif-tray-title {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--notif-text-primary);
+        }
+
+        .notif-tray-subtitle {
+            margin: 2px 0 0 0;
+            font-size: 0.8rem;
+            color: var(--notif-text-secondary);
+        }
+
+        .notif-tray-badge {
+            background-color: #ef4444;
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 20px;
+        }
+    }
+
+    /* --- Scrollable Content Stack --- */
+    .notif-dropdown-scroll-stack {
+        max-height: 400px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        
+        &::-webkit-scrollbar {
+            width: 5px;
+        }
+        &::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+    }
+
+    /* --- Individual Cards --- */
+    .notif-tray-item-card {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--notif-border-color);
+        transition: background-color 0.2s ease;
+        position: relative;
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        &:hover {
+            background-color: var(--notif-bg-hover);
+        }
+
+        &.unread-tray-state {
+            background-color: rgba(59, 130, 246, 0.03);
+            
+            &:hover {
+                background-color: rgba(59, 130, 246, 0.06);
+            }
+        }
+    }
+
+    /* --- Card Metadata Row --- */
+    .notif-tray-card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+
+        .notif-tray-time {
+            font-size: 0.75rem;
+            color: var(--notif-text-secondary);
+            font-variant-numeric: tabular-nums;
+        }
+    }
+
+    /* --- Semantic Pills/Tags --- */
+    .notif-tray-tag {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 2px 8px;
+        border-radius: 4px;
+        display: inline-block;
+
+        &.notif-tag-status { background-color: var(--cls-status-bg); color: var(--cls-status-text); }
+        &.notif-tag-applied { background-color: var(--cls-applied-bg); color: var(--cls-applied-text); }
+        &.notif-tag-interview { background-color: var(--cls-interview-bg); color: var(--cls-interview-text); }
+        &.notif-tag-default { background-color: var(--cls-default-bg); color: var(--cls-default-text); }
+    }
+
+    /* --- Card Body --- */
+    .notif-tray-card-body-content {
+        .notif-tray-item-title {
+            margin: 0 0 4px 0;
+            font-size: 0.925rem;
+            font-weight: 600;
+            color: var(--notif-text-primary);
+        }
+
+        .notif-tray-item-msg {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--notif-text-secondary);
+            line-height: 1.4;
+        }
+    }
+
+    /* --- Card Footer --- */
+    .notif-tray-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+
+        .notif-log-ref {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            font-family: monospace;
+        }
+
+        .notif-pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #3b82f6;
+            border-radius: 50%;
+            display: inline-block;
+        }
+    }
+
+    /* --- Empty State View --- */
+    .notif-empty-dropdown {
+        padding: 40px 20px;
+        text-align: center;
+
+        .notif-empty-icon-tray {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05));
+        }
+
+        .notif-empty-title-tray {
+            margin: 0 0 6px 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--notif-text-primary);
+        }
+
+        .notif-empty-desc-tray {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--notif-text-secondary);
+            line-height: 1.4;
+        }
+    }
+
+    /* --- Connection Fault Error State --- */
+    .notif-error-card-dropdown {
+        padding: 24px;
+        text-align: center;
+
+        .notif-error-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .notif-error-icon-shield {
+            font-size: 1.2rem;
+        }
+
+        .notif-error-title-dropdown {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #991b1b;
+        }
+
+        .notif-error-desc-dropdown {
+            margin: 0;
+            font-size: 0.85rem;
+            color: #ef4444;
+        }
+    }
+
+    /* --- Loading / Sync Spinnner State --- */
+    &.minimal-flex-center {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 200px;
+    }
+
+    .notif-spinner-stack {
+        text-align: center;
+
+        .notif-spinner-ring {
+            width: 28px;
+            height: 28px;
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            margin: 0 auto 12px auto;
+            animation: notif-spin 0.8s linear infinite;
+        }
+
+        .notif-loading-text {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--notif-text-secondary);
+        }
+    }
 }
 
-.minimal-flex-center {
-  padding: 40px;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Header Context Section Blocks */
-.notif-dropdown-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid #f1f5f9;
-  background: #ffffff;
-}
-
-.notif-tray-title {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.notif-tray-subtitle {
-  margin: 2px 0 0 0;
-  font-size: 11px;
-  color: #64748b;
-}
-
-.notif-tray-badge {
-  font-size: 11px;
-  font-weight: 700;
-  color: #4f46e5;
-  background: #e0e7ff;
-  padding: 4px 8px;
-  border-radius: 999px;
-}
-
-/* Main Container Scroll Stack Elements */
-.notif-dropdown-scroll-stack {
-  padding: 12px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  background: #f8fafc;
-}
-
-/* Individual Card Blocks Inside Overlay Feed Trays */
-.notif-tray-item-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.notif-tray-item-card:hover {
-  border-color: #cbd5e1;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
-}
-
-/* Unread Activity Accent Ring Anchors */
-.unread-tray-state {
-  border-left: 3px solid #4f46e5;
-  background: linear-gradient(90deg, #fafbff 0%, #ffffff 100%);
-}
-
-.read-tray-state {
-  border-left: 1px solid #e2e8f0;
-}
-
-/* Top Meta Row Positioning */
-.notif-tray-card-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-/* Clean Context Badge Variants */
-.notif-tray-tag {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-}
-
-.notif-tag-status { color: #d97706; background: #fef3c7; }
-.notif-tag-applied { color: #059669; background: #d1fae5; }
-.notif-tag-interview { color: #7c3aed; background: #f3e8ff; }
-.notif-tag-default { color: #475569; background: #f1f5f9; }
-
-.notif-tray-time {
-  font-size: 11px;
-  color: #94a3b8;
-}
-
-/* Inner Text Elements Formatting Core */
-.notif-tray-item-title {
-  margin: 0;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #1e293b;
-}
-
-.notif-tray-item-msg {
-  margin: 4px 0 0 0;
-  font-size: 12.5px;
-  color: #475569;
-  line-height: 1.4;
-}
-
-/* Card Bottom Footer Modules */
-.notif-tray-card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 2px;
-  font-size: 10.5px;
-  color: #94a3b8;
-}
-
-/* Live Alert Unread Status Pulse Points */
-.notif-pulse-dot {
-  width: 6px;
-  height: 6px;
-  background-color: #4f46e5;
-  border-radius: 50%;
-  display: inline-block;
-  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
-}
-
-/* Empty View Layouts */
-.notif-empty-dropdown {
-  padding: 48px 24px;
-  text-align: center;
-  background: #ffffff;
-}
-
-.notif-empty-icon-tray {
-  width: 48px;
-  height: 48px;
-  background: #f1f5f9;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 16px auto;
-  font-size: 20px;
-}
-
-.notif-empty-title-tray {
-  font-size: 15px;
-  font-weight: 700;
-  color: #0f172a;
-  margin: 0;
-}
-
-.notif-empty-desc-tray {
-  font-size: 12px;
-  color: #64748b;
-  margin: 6px 0 0 0;
-  line-height: 1.4;
-}
-
-/* Infinite Rotation Loading State Engine Animation */
-.notif-spinner-stack {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.notif-spinner-ring {
-  width: 24px;
-  height: 24px;
-  border: 2px solid #e2e8f0;
-  border-top-color: #4f46e5;
-  border-radius: 50%;
-  animation: notifTraySpinEngine 0.6s linear infinite;
-}
-
-.notif-loading-text {
-  font-size: 12px;
-  color: #64748b;
-  margin: 0;
-}
-
-/* Error Dropdown Containers Components */
-.notif-error-card-dropdown {
-  padding: 24px;
-  background: #fff1f2;
-  border: 1px solid #ffe4e6;
-  border-radius: 12px;
-  margin: 12px;
-}
-
-.notif-error-header-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.notif-error-title-dropdown {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 700;
-  color: #9f1239;
-}
-
-.notif-error-desc-dropdown {
-  margin: 8px 0 0 0;
-  font-size: 12px;
-  color: #b91c1c;
-  line-height: 1.5;
-}
-
-/* Custom Scrollbars System Settings */
-.notif-dropdown-scroll-stack::-webkit-scrollbar {
-  width: 5px;
-}
-.notif-dropdown-scroll-stack::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 99px;
-}
-
-@keyframes notifTraySpinEngine {
-  to { transform: rotate(360deg); }
+/* Local Animation Keyframes */
+@keyframes notif-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

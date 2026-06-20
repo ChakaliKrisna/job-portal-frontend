@@ -58,26 +58,33 @@ export default function NotificationDashboard() {
         }
     };
 
-    // Helper function to safely format ISO strings with trailing microseconds
+    // Robust function to parse and format dates safely across all browsers
     const formatNotificationTime = (dateString) => {
+        if (!dateString) return 'Just now';
+
         try {
-            if (!dateString) return 'Just now';
-            
-            // 1. Append UTC designator 'Z' if missing from backend string
-            let normalizedString = dateString;
-            if (!normalizedString.endsWith('Z') && !normalizedString.includes('+')) {
-                normalizedString = normalizedString + 'Z';
+            // Replace spaces with 'T' (handles formats like "YYYY-MM-DD HH:mm:ss")
+            let normalized = dateString.replace(' ', 'T');
+
+            // Ensure UTC indicator if timezone details are entirely missing
+            if (!normalized.includes('Z') && !normalized.includes('+') && !normalized.includes('-')) {
+                normalized += 'Z';
             }
 
-            let dateObj = new Date(normalizedString);
-            
-            // 2. Fallback: If browser engine rejects long microsecond decimals, truncate them
+            let dateObj = new Date(normalized);
+
+            // Fallback: If parsing fails due to microsecond precision overflow
             if (isNaN(dateObj.getTime())) {
-                const truncatedString = dateString.split('.')[0] + 'Z';
-                dateObj = new Date(truncatedString);
+                // Strips microsecond decimals safely before appending Z
+                const match = dateString.match(/^([^.]+)/);
+                if (match) {
+                    let cleaned = match[1].replace(' ', 'T');
+                    normalized = cleaned.endsWith('Z') ? cleaned : cleaned + 'Z';
+                    dateObj = new Date(normalized);
+                }
             }
 
-            // 3. Final structural validation check
+            // Final fallback check
             if (isNaN(dateObj.getTime())) {
                 return 'Recent';
             }
@@ -146,9 +153,10 @@ export default function NotificationDashboard() {
                 </div>
             ) : (
                 <div className="notif-dropdown-scroll-stack">
-                    {notifications.map((notif) => {
+                    {notifications.map((notif, index) => {
                         const typeAttr = getTypeAttributes(notif.type);
-                        const stableKey = notif.id ? String(notif.id) : Math.random().toString();
+                        // Fixed: Fallback to mapped list index prevents UI jitter over polling refreshes
+                        const stableKey = notif.id ? String(notif.id) : `fallback-key-${index}`;
                         
                         return (
                             <div
@@ -172,7 +180,7 @@ export default function NotificationDashboard() {
                                 </div>
 
                                 <div className="notif-tray-card-footer">
-                                    <span className="notif-log-ref">Ref: #{notif.id}</span>
+                                    <span className="notif-log-ref">Ref: #{notif.id || 'N/A'}</span>
                                     {!notif.isRead && <span className="notif-pulse-dot"></span>}
                                 </div>
                             </div>
