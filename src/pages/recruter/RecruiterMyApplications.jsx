@@ -106,7 +106,7 @@ const RecruiterMyApplications = () => {
 
     const handleFetchMissingSkills = async (applicationId) => {
         try {
-            const res = await axios.get(`${BASE_URL}/applications/${applicationId}/missing-skills`, getAuthHeaders());
+            const res = await axios.get(`${BASE_URL}/applications/${jobPublicId}/missing-skills`, getAuthHeaders());
             setMissingSkills(prev => ({ 
                 ...prev, 
                 [applicationId]: res.data || [] 
