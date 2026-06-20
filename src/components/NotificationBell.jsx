@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './notifications.css';
+import '../components/notifications.css';
+// src\components\notifications.css
 
 export default function NotificationDashboard() {
     const [notifications, setNotifications] = useState([]);

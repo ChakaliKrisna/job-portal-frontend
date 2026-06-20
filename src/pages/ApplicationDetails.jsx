@@ -70,7 +70,14 @@ const ApplicationDetails = () => {
               
               <div className="meta-info">
                 <span><FaClock /> Applied on {new Date(data.appliedAt).toLocaleDateString()}</span>
-                <span><FaChartLine /> Match Score: <strong>{data.matchScore?.toFixed(1)}%</strong></span>
+             <span>
+  <FaChartLine /> Match Score:{" "}
+  <strong>
+    {data.matchScore > 0
+      ? `${data.matchScore.toFixed(1)}%`
+      : "Under Evaluation"}
+  </strong>
+</span>
               </div>
             </header>
 
