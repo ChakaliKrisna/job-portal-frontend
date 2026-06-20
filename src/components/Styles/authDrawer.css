@@ -1,5 +1,5 @@
 /* ==========================================================================
-   AUTHENTICATION DRAWER GLASSMORPHIC STYLESHEET
+   AUTHENTICATION DRAWER GLASSMORPHIC STYLESHEET (CORRECTED)
    ========================================================================== */
 
 :root {
@@ -21,15 +21,18 @@
   height: 100vh;
   background: rgba(4, 7, 13, 0.75);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   z-index: 999;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  visibility: hidden; /* 👈 Fixes the blur bug: Forces the overlay to stay fully hidden by default */
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s ease;
 }
 
 .premium-overlay.active {
   opacity: 1;
   pointer-events: auto;
+  visibility: visible; /* 👈 Restores overlay visibility when active state is triggered */
 }
 
 /* Glassmorphic Sliding Drawer Canvas */
@@ -50,12 +53,14 @@
   flex-direction: column;
   padding: 40px 32px;
   overflow-y: auto;
-  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  visibility: hidden; /* 👈 Prevents screen reader or focus bugs when drawer is offscreen */
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.45s ease;
   color: var(--text-main); /* Forces children layout to render white text */
 }
 
 .premium-drawer.active {
   transform: translateX(-480px);
+  visibility: visible; /* 👈 Brings the drawer canvas into focus when open */
 }
 
 /* Panel Dismissal/Close Trigger */
@@ -492,8 +497,10 @@
 }
 
 /* Specific Individual Network Color Rules on Hover Actions */
-.social-btn.google:hover { border-color: #ea4335; svg { color: #ea4335; } }
-.social-btn.linkedin:hover { border-color: #0a66c2; svg { color: #0a66c2; } }
+.social-btn.google:hover { border-color: #ea4335; }
+.social-btn.google:hover svg { color: #ea4335; }
+.social-btn.linkedin:hover { border-color: #0a66c2; }
+.social-btn.linkedin:hover svg { color: #0a66c2; }
 .social-btn.github:hover { border-color: #ffffff; }
 
 /* Status Notification Banners and Messaging Alert Modules */

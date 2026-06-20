@@ -1,119 +1,488 @@
 /* ==========================================================================
-   THEME: MIDNIGHT CHARCOAL & ELECTRIC AMBER
+   DESIGN SYSTEM & VARIABLES (UPDATED FOR ELECTRIC INDIGO & CYAN)
    ========================================================================== */
 :root {
-  --bg-canvas: #0f172a;        /* Deep Midnight */
-  --bg-card: #1e293b;         /* Slate/Charcoal */
-  --text-main: #f8fafc;        /* Off-White */
-  --text-muted: #94a3b8;       /* Muted Gray */
-  --accent: #f59e0b;          /* Electric Amber */
-  --accent-hover: #d97706;
-  --border: #a4b3c9;          /* Subtle Border */
-  --radius: 12px;
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --bg-primary: #0f172a;       /* Deep slate background */
+  --bg-secondary: #1e293b;     /* Lighter slate for cards/sections */
+  --bg-accent: #334155;        /* Subtle border/hover slate */
+  --text-main: #f8fafc;        /* Off-white primary text */
+  --text-muted: #94a3b8;       /* Cool gray secondary text */
+  
+  /* Upgraded Modern Gradients */
+  --gradient-primary: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); /* Electric Indigo to Purple */
+  --gradient-text: linear-gradient(135deg, #22d3ee 0%, #818cf8 100%);    /* Neon Cyan to Indigo */
+  --gradient-card-hover: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(34, 211, 232, 0.03) 100%);
+  
+  /* UI Accents */
+  --accent-cyan: #22d3ee;      /* Electric Cyan */
+  --accent-success: #10b981;   /* Emerald Green */
+  --radius-sm: 12px;           /* Slightly softened corners */
+  --radius-md: 20px;
+  --radius-lg: 28px;
+  --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* Faster-to-stop premium ease */
+  --shadow-glow: 0 10px 30px -10px rgba(99, 102, 241, 0.4);
+}
+/* Restores the clean light mode canvas background across your app wrapper */
+.home-wrapper, body {
+  background-color: #f4f6f9 !important; /* The precise light layout from your screenshot */
+  color: #0f172a !important;            /* Default text color shifted back to slate */
 }
 
-* { box-sizing: border-box; }
-
-body { 
-  margin: 0; 
-  background-color: var(--bg-canvas); 
-  color: var(--text-main); 
-  font-family: var(--font-sans);
+/* ==========================================================================
+   GLOBAL STRUCTURE & UTILITIES
+   ========================================================================== */
+.home-wrapper {
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: radial-gradient(circle at 10% 15%, rgba(99, 102, 241, 0.05) 0%, transparent 40%),
+              radial-gradient(circle at 85% 75%, rgba(34, 211, 232, 0.03) 0%, transparent 50%);
 }
 
-.home-wrapper { width: 100%; overflow-x: hidden; }
-
-/* --- 1. Hero & Dashboard --- */
-.recruiter-hero-dashboard { 
-  background: radial-gradient(circle at top right, #374151, #0f172a); 
-  padding: 6rem 2rem; 
-  text-align: center; 
-  border-bottom: 1px solid var(--border);
-}
-.text-gradient { 
-  background: linear-gradient(to right, #fbbf24, #f59e0b); 
-  -webkit-background-clip: text; 
-  -webkit-text-fill-color: transparent; 
-}
-.dashboard-btn { 
-  background: var(--accent); 
-  color: #000; 
-  border: none; 
-  padding: 0.8rem 1.8rem; 
-  border-radius: var(--radius); 
-  font-weight: 700; 
-  cursor: pointer; 
-  display: inline-flex; 
-  align-items: center; 
-  gap: 0.5rem;
+.home-main {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 24px;
 }
 
-/* --- 2. Workflow & Features Grid --- */
-.home-section { max-width: 1200px; margin: 0 auto; padding: 4rem 1.5rem; }
-.section-title-area { margin-bottom: 3rem; text-align: center; }
-.section-title-area h2 { font-size: 2.2rem; margin: 0; }
-.section-title-area p { color: var(--text-muted); margin-top: 0.5rem; }
-
-/* Bento Grids */
-.workflow-bento-grid, .platform-features-bento-grid { 
-  display: grid; 
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-  gap: 1.5rem; 
+.home-section {
+  padding: 80px 0;
 }
 
-.workflow-step, .feature-bento-item-card { 
-  background: var(--bg-card); 
-  padding: 2rem; 
-  border: 1px solid var(--border); 
-  border-radius: var(--radius);
-  transition: transform 0.2s ease;
-}
-.workflow-step:hover, .feature-bento-item-card:hover { border-color: var(--accent); }
-
-.step-num { font-size: 2.5rem; font-weight: 900; color: #374151; margin-bottom: 1rem; }
-.feat-ico { color: var(--accent); font-size: 1.8rem; margin-bottom: 1rem; }
-.feat-header-row h4 { margin: 0 0 0.5rem 0; }
-.feat-check-badge { 
-  margin-top: 1.5rem; font-size: 0.85rem; color: var(--accent); 
-  display: flex; align-items: center; gap: 0.5rem; font-weight: 600;
+.trending-jobs-bg {
+  background: linear-gradient(180deg, var(--bg-primary) 0%, #161e31 50%, var(--bg-primary) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  border-radius: var(--radius-lg);
+  padding: 50px 30px;
 }
 
-/* --- 3. Featured Sections --- */
-.trending-jobs-bg { background: #111827; }
-.padding-box { padding: 4rem 0; }
-
-/* --- 4. CTA & Newsletter --- */
-.global-cta-banner-wrapper { 
-  background: var(--bg-card); 
-  border: 1px solid var(--border); 
-  text-align: center; 
-  padding: 4rem; 
-  border-radius: var(--radius); 
-}
-.cta-action-button-group { display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; }
-.cta-primary-btn { 
-  background: #0b0f19; color: #c9bbbb; border: none; padding: 0.8rem 1.5rem; 
-  border-radius: var(--radius); font-weight: 600; cursor: pointer;
-}
-.cta-secondary-btn { 
-  background: transparent; color: var(--text-main); border: 1px solid var(--border); 
-  padding: 0.8rem 1.5rem; border-radius: var(--radius); cursor: pointer;
+.text-gradient {
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
 }
 
-.modern-newsletter { background: #0b0f19; color: #c6bebe; padding: 4rem; text-align: center; }
-.news-form { display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem; }
-.news-form input { 
-  padding: 0.8rem 1rem; border-radius: var(--radius); border: none; 
-  width: 300px; background: rgba(255,255,255,0.9);
+.section-title-area {
+  text-align: center;
+  margin-bottom: 56px;
 }
-.news-form button { background: #000; color: #fff; border: none; padding: 0.8rem 1.5rem; border-radius: var(--radius); }
 
-/* --- 5. Loader --- */
-.section-loader { text-align: center; padding: 3rem; color: var(--text-muted); }
-.spinner { 
-  width: 40px; height: 40px; border: 4px solid var(--border); 
-  border-top: 4px solid var(--accent); border-radius: 50%; 
-  animation: spin 1s linear infinite; margin: 0 auto 1rem; 
+.section-title-area h2 {
+  font-size: 2.75rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 14px;
 }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+.section-title-area p {
+  color: var(--text-muted);
+  font-size: 1.15rem;
+  font-weight: 400;
+}
+
+/* ==========================================================================
+   SECTION 1: RECRUITER HERO HERO 
+   ========================================================================== */
+.recruiter-hero-dashboard {
+  background: radial-gradient(circle at top right, rgba(168, 85, 247, 0.12), transparent 50%),
+              radial-gradient(circle at bottom left, rgba(34, 211, 232, 0.12), transparent 50%),
+              var(--bg-secondary);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 90px 40px;
+  margin-top: 40px;
+  text-align: center;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+}
+
+.recruiter-hero-content h1 {
+  font-size: 3.75rem;
+  font-weight: 800;
+  margin-bottom: 18px;
+  letter-spacing: -0.02em;
+}
+
+.recruiter-hero-content p {
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  max-width: 650px;
+  margin: 0 auto 36px auto;
+  line-height: 1.6;
+}
+
+/* Modern Dashboard Button */
+.dashboard-btn, .cta-primary-btn {
+  background: var(--gradient-primary);
+  color: #fff;
+  border: none;
+  padding: 16px 32px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  transition: var(--transition-smooth);
+  box-shadow: var(--shadow-glow);
+}
+
+.dashboard-btn:hover, .cta-primary-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 40px -10px rgba(168, 85, 247, 0.5);
+  filter: brightness(1.15);
+}
+
+.dashboard-btn svg, .cta-primary-btn svg {
+  transition: transform 0.3s ease;
+}
+
+.dashboard-btn:hover svg, .cta-primary-btn:hover svg {
+  transform: translateX(4px);
+}
+
+/* ==========================================================================
+   SECTION 2 & 6: BENTO GRIDS (Workflow & Features)
+   ========================================================================== */
+.workflow-bento-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 28px;
+}
+
+.workflow-step {
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-accent);
+  border-radius: var(--radius-md);
+  padding: 36px;
+  position: relative;
+  transition: var(--transition-smooth);
+}
+
+.workflow-step:hover {
+  transform: translateY(-6px);
+  border-color: var(--accent-cyan);
+  background: var(--gradient-card-hover);
+  box-shadow: 0 15px 35px -15px rgba(34, 211, 232, 0.2);
+}
+
+.step-num {
+  font-size: 2.75rem;
+  font-weight: 900;
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0.4;
+  margin-bottom: 20px;
+}
+
+.workflow-step h4 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.workflow-step p {
+  color: var(--text-muted);
+  line-height: 1.6;
+  font-size: 0.98rem;
+}
+
+/* Features Bento Grid */
+.platform-features-bento-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 28px;
+}
+
+.feature-bento-item-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-accent);
+  border-radius: var(--radius-md);
+  padding: 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: var(--transition-smooth);
+}
+
+.feature-bento-item-card:hover {
+  border-color: rgba(168, 85, 247, 0.5);
+  background: var(--gradient-card-hover);
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 20px 40px -20px rgba(168, 85, 247, 0.3);
+}
+
+.feat-header-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.feat-ico {
+  font-size: 1.85rem;
+  color: var(--accent-cyan);
+  filter: drop-shadow(0 2px 8px rgba(34, 211, 232, 0.3));
+}
+
+.feature-bento-item-card h4 {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.feature-bento-item-card p {
+  color: var(--text-muted);
+  font-size: 0.98rem;
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+.feat-check-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent-success);
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  padding: 6px 14px;
+  border-radius: 30px;
+  align-self: flex-start;
+}
+
+/* ==========================================================================
+   SECTION 3 & 4: LOADERS & UTILITIES
+   ========================================================================== */
+.section-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 0;
+  gap: 20px;
+}
+
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid var(--bg-accent);
+  border-top-color: var(--accent-cyan);
+  border-radius: 50%;
+  animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-dots {
+  font-size: 2.25rem;
+  color: var(--text-muted);
+  letter-spacing: 6px;
+  animation: pulse 1.5s infinite;
+  text-align: center;
+}
+
+@keyframes pulse {
+  50% { opacity: 0.3; transform: scale(0.98); }
+}
+
+/* ==========================================================================
+   SECTION 7: GLOBAL CTA BANNER
+   ========================================================================== */
+.global-cta-banner-wrapper {
+  background: radial-gradient(circle at top left, rgba(34, 211, 232, 0.08), transparent 40%),
+              radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.08), transparent 45%),
+              var(--bg-secondary);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: var(--radius-lg);
+  padding: 70px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 30px 60px -25px rgba(0, 0, 0, 0.4);
+}
+
+.cta-banner-inner-content h2 {
+  font-size: 2.75rem;
+  font-weight: 800;
+  margin-bottom: 14px;
+  letter-spacing: -0.02em;
+}
+
+.cta-banner-inner-content p {
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  margin-bottom: 36px;
+}
+
+.cta-action-button-group {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.cta-secondary-btn {
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-main);
+  border: 1px solid var(--bg-accent);
+  padding: 16px 32px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.cta-secondary-btn:hover {
+  background: var(--bg-accent);
+  border-color: rgba(34, 211, 232, 0.4);
+  transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   SECTION 8: MODERN NEWSLETTER / ALERTS STREAM
+   ========================================================================== */
+.modern-newsletter {
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-accent);
+  border-radius: var(--radius-lg);
+  padding: 48px;
+  margin-bottom: 60px;
+  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.3);
+}
+
+.newsletter-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.news-text {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0 24px;
+  max-width: 600px;
+}
+
+.bell-icon {
+  grid-row: span 2;
+  font-size: 2.75rem;
+  color: #f59e0b; /* Bright radiant amber */
+  animation: swing 3.5s ease-in-out infinite;
+  filter: drop-shadow(0 2px 10px rgba(245, 158, 11, 0.2));
+}
+
+@keyframes swing {
+  0%, 100% { transform: rotate(0); }
+  6% { transform: rotate(12deg); }
+  12% { transform: rotate(-10deg); }
+  18% { transform: rotate(6deg); }
+  24% { transform: rotate(-4deg); }
+  30% { transform: rotate(0); }
+}
+
+.news-text h3 {
+  font-size: 1.65rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.news-text p {
+  color: var(--text-muted);
+  margin-top: 6px;
+  font-size: 0.98rem;
+  line-height: 1.5;
+}
+
+/* Sleek Email Form Input Field */
+.news-form {
+  display: flex;
+  gap: 14px;
+  flex-grow: 1;
+  max-width: 500px;
+}
+
+.news-form input[type="email"] {
+  background: var(--bg-primary);
+  border: 1px solid var(--bg-accent);
+  color: var(--text-main);
+  padding: 16px 24px;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  width: 100%;
+  transition: var(--transition-smooth);
+}
+
+.news-form input[type="email"]:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px rgba(34, 211, 232, 0.15);
+}
+
+.news-form button {
+  background: var(--text-main);
+  color: var(--bg-primary);
+  border: none;
+  padding: 16px 28px;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition-smooth);
+}
+
+.news-form button:hover {
+  background: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -5px rgba(255, 255, 255, 0.1);
+}
+
+/* ==========================================================================
+   RESPONSIVE MEDIA QUERIES
+   ========================================================================== */
+@media (max-width: 992px) {
+  .newsletter-inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 32px;
+  }
+  .news-form {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .home-section {
+    padding: 60px 0;
+  }
+  .section-title-area h2 {
+    font-size: 2.25rem;
+  }
+  .recruiter-hero-content h1 {
+    font-size: 2.75rem;
+  }
+  .recruiter-hero-dashboard {
+    padding: 50px 24px;
+  }
+  .news-form {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .news-form button {
+    width: 100%;
+  }
+}
